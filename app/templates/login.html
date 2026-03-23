@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Connexion</h2>
+{% if error %}
+<p>{{ error }}</p>
+{% endif %}
+<form method="POST">
+    <p> Email: </p>
+    <input type="email" name="Votre email" placeholder="exemple@gmail.com"required>
+    <p> Mot de passe : </p>
+    <input type="password" name="mot secret" placeholder="Votre mot secret" required>
+    <br><br>
+    <button type="submit">Se connecter </button>
+</form>
+<p>
+    Pas encore de compte ?
+    <a href="/register">Inscrivez-vous</a>
+</p>
+{% endblock %}
+

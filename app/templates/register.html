@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Inscription</h2>
+{% if error %}
+<p>{{ error }}</p>
+{% endif %}
+
+<form method="POST">
+    <p>Nom:</p>
+    <input type="text" name="nom" placeholder="Votre nom" required>
+    <p>Prénom:</p>
+    <input type="text" name="prenom" placeholder="Votre prénom" required>
+    <p>Email:</p>
+    <input type="text" name="email" placeholder="exemple@gmail.com" required>
+    <p>Mot de passe :</p>
+    <input type="password" name="password" placeholder="Mot secret" required>
+    <p>Confirmer votre mot de passe</p>
+    <input type="password" name="confirmation_mot_secret" placeholder="Confirmez votre mot secret"required>
+    <br><br>
+    <button type="submit">Inscrivez-vous</button>
+</form>
+<p>
+    Avez-vous déjà un compte ?
+    <a href="/login">Connectez-vous</a>
+</p>
+{% endblock %}

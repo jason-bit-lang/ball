@@ -49,7 +49,9 @@ cvboost/
 │   │   ├── login.html
 │   │   ├── upload.html
 │   │   ├── history.html
-│   │   └── result.html
+│   │   └──
+
+.html
 │   │
 │   ├── static/
 │   │   ├── css/

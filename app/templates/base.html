@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8">
+    <title>CVBoost</title>
+</head>
+<body>
+<nav>
+     <h1>CVBoost.</h1>
+    {% if current_user.is_aunthenticated %}
+        <a href="/upload">Envoi de CV</a>
+        <a href="/history">Votre historique</a>
+    {% else %}
+        <a href="/login">Connexion</a>
+        <a href="/register">Inscription</a>
+    {% endif %}
+</nav>
+
+{% block content %}
+{% endblock %}
+<footer>
+    <p>Jaaason.<p>
+</footer>
+
+</body>
+</html>
