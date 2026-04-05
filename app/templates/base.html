@@ -3,21 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <title>CVBoost</title>
+   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 <nav>
-     <h1>CVBoost.</h1>
-    {% if current_user.is_aunthenticated %}
-        <a href="/upload">Envoi de CV</a>
-        <a href="/history">Votre historique</a>
-    {% else %}
-        <a href="/login">Connexion</a>
-        <a href="/register">Inscription</a>
-    {% endif %}
+     <div class="nav-container">
+        <strong>CVBoost</strong>
+         <div class="menu">
+             <a href="/index">Accueil</a>
+             {% if current_user.is_authenticated %}
+                <a href="/upload">Envoi de CV</a>
+                <a href="/history">Votre historique</a>
+                <a href="/logout" class="logout-btn">Deconnexion</a>
+            {% else %}
+                <a href="/login">Connexion</a>
+                <a href="/register">Inscription</a>
+            {% endif %}
+        </div>
+     </div>
 </nav>
+
+<div class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category,message in messages %}
+                <div class="flash {{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
 
 {% block content %}
 {% endblock %}
+</div>
 <footer>
     <p>Jaaason.<p>
 </footer>

@@ -1,10 +1,15 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends "base.html" %}
+{% block content %}
+<div class="history-container">
+<h2>Mon historique</h2>
 
-</body>
-</html>
+{% for doc in documents %}
+<p>
+    <strong>{{doc.original_filename}}</strong> - {{ doc.upload_date }} - {{ doc.status }}
+    <a href="/result">
+        <button type="button">Voir</button>
+    </a>
+</p>
+</div>
+{% endfor %}
+{% endblock %}

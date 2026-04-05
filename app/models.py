@@ -1,17 +1,22 @@
-import os
-import sqlite3 as sql
+from datetime import datetime
+from flask_login import UserMixin
+from . import db
 
-parrent_dir = os.path.abspath(os.path.dirname(__file__))
-base_dir = os.path.abspath(os.path.join(parrent_dir, '..'))
-db = os.path.join(base_dir,'instance', 'cvboost.db')
 
-conn = sql.connect(db)
-cur = conn.cursor()
+class User(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    nom = db.Column(db.String(100), nullable=False)
+    prenom = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(150), unique=True, nullable=False)
+    password_hash = db.Column(db.String(256), nullable=False)
 
-cur.execute('''
-CREATE TABLE IF NOT EXISTS users (
-id INTEGER PRIMARY KEY AUTOINCREMENT,
-nom varchar(255),
-email varchar(255),
-password varchar(255))
-''')
+    documents = db.relationship('Document', backref='owner', lazy=True)
+
+class Document(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    original_filename = db.Column(db.String(255), nullable=False)
+    stored_filename = db.Column(db.String(255), nullable=False)
+    upload_date = db.Column(db.DateTime, default=datetime.utcnow)
+    status = db.Column(db.String(50), default="En attente d'analyse")
+
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)

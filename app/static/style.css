@@ -1,0 +1,133 @@
+/* Couleurs Variables */
+:root {
+    --bg-dark: #121212;
+    --card-dark: #1e1e1e;
+    --text-main: #e0e0e0;
+    --accent: #3498db; /* Un bleu élégant */
+    --accent-hover: #2980b9;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    margin: 0;
+    padding: 0;
+}
+
+/* Navigation (Inspiré de ta vidéo) */
+nav {
+    background-color: #000;
+    padding: 1rem 0;
+    border-bottom: 1px solid #333;
+}
+
+.nav-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1000px; /* Selon ton tuto */
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.nav-container strong {
+    font-size: 1.5rem;
+    color: var(--accent);
+    letter-spacing: 1px;
+}
+
+.menu a {
+    color: var(--text-main);
+    text-decoration: none;
+    margin-left: 20px;
+    font-weight: 500;
+    transition: color 0.3s;
+}
+
+.menu a:hover {
+    color: var(--accent);
+}
+
+/* Bouton spécial déconnexion */
+.logout-btn {
+    border: 1px solid #e74c3c;
+    padding: 5px 12px;
+    border-radius: 5px;
+    color: #e74c3c !important;
+}
+
+.logout-btn:hover {
+    background-color: #e74c3c;
+    color: white !important;
+}
+
+/* Style des formulaires (Sombre) */
+form {
+    background-color: var(--card-dark);
+    padding: 2rem;
+    border-radius: 10px;
+    max-width: 400px;
+    margin: 50px auto;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+input[type="text"], input[type="email"], input[type="password"], input[type="file"] {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0 20px 0;
+    background: #2c2c2c;
+    border: 1px solid #444;
+    color: white;
+    border-radius: 5px;
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    background-color: var(--accent);
+    border: none;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+button:hover {
+    background-color: var(--accent-hover);
+}
+/* Styles spécifiques aux résultats et messages */
+.result-container, .form-container {
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 20px;
+}
+
+.ia-card {
+    background-color: #252525;
+    border-left: 4px solid var(--accent);
+    padding: 20px;
+    margin: 20px 0;
+    border-radius: 5px;
+}
+
+.badge {
+    background-color: var(--accent);
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+}
+
+.form-footer, .file-limits {
+    text-align: center;
+    margin-top: 15px;
+    font-size: 0.9rem;
+    color: #888;
+}
+
+.btn-secondary {
+    color: var(--text-main);
+    text-decoration: none;
+    display: inline-block;
+    margin-top: 20px;
+}

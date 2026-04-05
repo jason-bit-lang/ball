@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="form-container">
+
+<h2>Upload CV</h2>
+<form method="POST" enctype="multipart/form-data">
+    <input type="file" name="cv" required>
+    <button type="submit">Soumettre</button>
+</form>
+<p>Formats acceptés: PDF,DOCX (max 5mb)</p>
+</div>
+{% endblock %}

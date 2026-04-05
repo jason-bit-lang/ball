@@ -1,10 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-
-</body>
-</html>
+{% extends "base.html" %}
+{% block content %}
+<div class="result-container">
+    <h2>Mes résultats.</h2>
+     <div class="doc-info">
+          <p><strong>Document :</strong> {{ document.original_filename }}</p>
+     </div>
+<div class="ia-card">
+    <h3><i class="fas fa-robot"></i> Analyse IA bientôt disponible</h3>
+    <div class="progress-bar-placeholder"></div>
+</div>
+<a href="/historique">Retour vers l'historique</a>
+</div>
+{% endblock %}
