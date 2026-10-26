@@ -88,7 +88,9 @@ Source : mediacongo.net. Verifier d'abord son `robots.txt` et ses conditions ; s
 bloque ou interdit, proposer une source alternative.
 Regle pour toute source d'offres : seules les offres accessibles a la population congolaise sont
 gardees (postes bases en RDC, ouverts aux candidats nationaux). Pas d'offres internationales,
-de teletravail pour l'etranger ou de postes reserves aux expatries. Le scraping tourne a part (script ou tache
+de teletravail pour l'etranger ou de postes reserves aux expatries.
+Source unique retenue : mediacongo.net (annonces scannees lues par OCR, scraping quotidien via
+GitHub Actions). ReliefWeb (API soumise a un nom d'application approuve) est mis de cote. Le scraping tourne a part (script ou tache
 planifiee) et ne doit jamais ralentir le site. Les offres collectees servent aux parties suivantes.
 Un premier travail existe : l'adapter a ces instructions.
 
