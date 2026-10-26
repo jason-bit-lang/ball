@@ -140,8 +140,8 @@ Hebergement gratuit sur Render (offre Free : environ 512 Mo de RAM, mise en veil
 - Pas de PyTorch en ligne : ni Coqui TTS ni modele LoRA charges sur Render.
 - Un seul service Render qui fait tourner Flask et FastAPI ensemble. En local, docker-compose
   separe les services web, API et base de donnees.
-- Base de donnees : Postgres gratuit chez Neon (n'expire pas), adresse lue depuis la variable
-  `DATABASE_URL`. SQLite reste utilise en local.
+- Base de donnees : Postgres gratuit de Render (expire apres 30 jours, suffisant pour le
+  projet), adresse lue depuis la variable `DATABASE_URL`. SQLite reste utilise en local.
 - Les CV sont enregistres dans la base de donnees (5 Mo maximum), pas sur le disque.
 - Une route `/health` est appelee toutes les 10 minutes par UptimeRobot ou cron-job.org pour
   garder le site eveille et respecter la limite des 10 secondes.
