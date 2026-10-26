@@ -85,7 +85,10 @@ Cette partie existe deja mais contient des erreurs. A faire :
   encodage des competences pour rendre le dataset utilisable par l'IA.
 
 Source : mediacongo.net. Verifier d'abord son `robots.txt` et ses conditions ; si le scraping est
-bloque ou interdit, proposer une source alternative. Le scraping tourne a part (script ou tache
+bloque ou interdit, proposer une source alternative.
+Regle pour toute source d'offres : seules les offres accessibles a la population congolaise sont
+gardees (postes bases en RDC, ouverts aux candidats nationaux). Pas d'offres internationales,
+de teletravail pour l'etranger ou de postes reserves aux expatries. Le scraping tourne a part (script ou tache
 planifiee) et ne doit jamais ralentir le site. Les offres collectees servent aux parties suivantes.
 Un premier travail existe : l'adapter a ces instructions.
 
