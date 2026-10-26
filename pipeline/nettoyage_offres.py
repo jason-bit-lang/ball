@@ -99,6 +99,27 @@ def convertir_salaire(texte):
     return round(min(nombres) * taux, 1), round(max(nombres) * taux, 1)
 
 
+# Annonces qui ne sont pas des offres : resultats d'un recrutement deja termine
+RESULTATS_REGEX = re.compile(r'publication (?:provisoire |definitive )?des resultats|liste restreinte'
+                             r'|intention d.?attribution|avis d.?attribution|attribution du marche')
+
+# Qualite d'un texte (surtout utile pour l'OCR) : part des mots bien formes
+MOT_REGEX = re.compile(r'[^\W\d_]{2,}|\d+')
+QUALITE_MIN = 0.75
+
+
+def est_annonce_de_resultats(titre, description):
+    debut = normaliser(titre) + ' ' + normaliser(description)[:600]  # le sujet est annonce au debut
+    return bool(RESULTATS_REGEX.search(debut))
+
+
+def qualite_texte(texte):
+    """Entre 0 et 1. Un texte mal lu par l'OCR contient beaucoup de melanges comme 'a9', 'Arr0s' ou '|=;'."""
+    mots = [m.strip('.,;:!?()[]«»"\'’-') for m in str(texte).split()]
+    mots = [m for m in mots if m]
+    return sum(bool(MOT_REGEX.fullmatch(m)) for m in mots) / len(mots) if mots else 0
+
+
 MENTIONS_MIN = 2  # une seule mention dans une longue annonce est souvent une formule standard
 
 
@@ -125,6 +146,17 @@ def nettoyer(df):
     df = df.dropna(subset=['titre', 'description'])
     resume['sans_titre_ou_description'] = avant - len(df)
     df[['entreprise', 'lieu']] = df[['entreprise', 'lieu']].fillna('Non precise')
+
+    # 2 bis. Resultats de recrutements termines (personne ne peut plus y postuler)
+    resultats = [est_annonce_de_resultats(t, d) for t, d in zip(df['titre'], df['description'])]
+    df = df[[not r for r in resultats]]
+    resume['annonces_de_resultats'] = sum(resultats)
+
+    # 2 ter. Textes trop abimes (annonce scannee floue mal lue par l'OCR)
+    df['qualite_texte'] = df['description'].map(qualite_texte).round(2)
+    avant = len(df)
+    df = df[df['qualite_texte'] >= QUALITE_MIN]
+    resume['texte_illisible'] = avant - len(df)
 
     # 3. Doublons : meme lien, ou meme titre + entreprise + description (sans tenir compte des accents)
     avant = len(df)
