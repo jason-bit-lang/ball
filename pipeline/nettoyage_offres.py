@@ -12,32 +12,49 @@ from .config import OFFRES_BRUTES, OFFRES_PROPRES, TAUX_CDF_USD
 COLONNES = ['titre', 'entreprise', 'lieu', 'description', 'salaire', 'date_publication', 'url',
             'statut', 'source_description', 'lien_candidature']
 
-# Competences recherchees dans le titre et la description (ecrites sans accents, en minuscules).
+# Competences recherchees dans le titre et la description (ecrites sans accents, en minuscules,
+# en francais et en anglais car beaucoup d'annonces sont en anglais).
 # Cle = nom de la colonne creee, valeur = mots qui signalent cette competence.
+# Les mots trop generaux sont evites : "recrutement", "formation", "conduite" (code de conduite),
+# "site web" (postulez sur notre site web), "droit", "budget"... apparaissent dans presque toutes
+# les annonces et donneraient de fausses competences.
 COMPETENCES = {
     'python': ['python', 'django', 'flask'],
     'javascript': ['javascript', 'react', 'node.js', 'nodejs', 'vue.js', 'angular'],
     'php': ['php', 'laravel', 'symfony'],
-    'java': ['java', 'spring'],
-    'web': ['html', 'css', 'developpeur web', 'site web', 'wordpress'],
-    'sql': ['sql', 'mysql', 'postgresql', 'base de donnees', 'bases de donnees'],
-    'reseaux': ['reseau', 'reseaux', 'cisco', 'administrateur systeme', 'linux', 'windows server'],
-    'donnees': ['analyse de donnees', 'data', 'statistique', 'statistiques', 'power bi', 'stata', 'spss'],
-    'bureautique': ['excel', 'word', 'powerpoint', 'microsoft office', 'pack office', 'bureautique'],
-    'comptabilite': ['comptable', 'comptabilite', 'sage', 'ohada', 'fiscalite', 'tresorerie'],
-    'finance': ['finance', 'financier', 'financiere', 'budget', 'audit', 'controle de gestion'],
-    'gestion_projet': ['gestion de projet', 'chef de projet', 'coordination', 'coordinateur', 'coordonnateur'],
-    'suivi_evaluation': ['suivi et evaluation', 'suivi-evaluation', 'suivi evaluation', 'monitoring', 'meal'],
-    'rh': ['ressources humaines', 'recrutement', 'paie', 'gestion du personnel'],
-    'logistique': ['logistique', 'approvisionnement', 'achats', 'supply chain', 'gestion de stock', 'magasinier'],
-    'commercial': ['commercial', 'commerciale', 'vente', 'ventes', 'business development', 'prospection'],
-    'marketing': ['marketing', 'communication', 'reseaux sociaux', 'community manager'],
-    'juridique': ['juriste', 'juridique', 'droit', 'avocat', 'conformite'],
-    'sante': ['medecin', 'infirmier', 'infirmiere', 'sante', 'pharmacien', 'nutrition'],
-    'enseignement': ['enseignant', 'professeur', 'formateur', 'formation', 'education'],
-    'ingenierie': ['ingenieur', 'genie civil', 'electricite', 'electricien', 'mecanique', 'btp'],
-    'securite': ['securite', 'surete', 'gardiennage'],
-    'chauffeur': ['chauffeur', 'permis de conduire', 'conduite'],
+    'java': ['java', 'spring boot'],
+    'web': ['html', 'css', 'developpeur web', 'web developer', 'full stack', 'fullstack', 'wordpress'],
+    'sql': ['sql', 'mysql', 'postgresql', 'base de donnees', 'bases de donnees', 'database'],
+    'reseaux': ['administrateur reseau', 'reseaux informatiques', 'network administrator', 'cisco', 'linux',
+                'windows server'],
+    'donnees': ['analyse de donnees', 'data analysis', 'data officer', 'data manager', 'power bi', 'stata',
+                'spss', 'dhis2', 'kobo', 'odk'],
+    'bureautique': ['excel', 'powerpoint', 'microsoft office', 'ms office', 'pack office', 'bureautique'],
+    'comptabilite': ['comptable', 'comptabilite', 'accountant', 'accounting', 'sage', 'ohada', 'fiscalite',
+                     'tresorerie'],
+    'finance': ['finance', 'financier', 'financiere', 'financial', 'audit', 'controle de gestion', 'grants'],
+    'gestion_projet': ['gestion de projet', 'gestion des projets', 'chef de projet', 'project manager',
+                       'project management', 'coordonnateur', 'coordinateur', 'coordinator'],
+    'suivi_evaluation': ['suivi et evaluation', 'suivi-evaluation', 'suivi evaluation',
+                         'monitoring and evaluation', 'm&e', 'meal'],
+    'rh': ['ressources humaines', 'human resources', 'paie', 'payroll', 'gestion du personnel'],
+    'logistique': ['logistique', 'logistics', 'approvisionnement', 'procurement', 'supply chain',
+                   'gestion de stock', 'magasinier', 'passation des marches'],
+    'commercial': ['commercial', 'commerciale', 'business development', 'prospection', 'sales'],
+    'marketing': ['marketing', 'community manager', 'communication digitale', 'charge de communication',
+                  'communication officer'],
+    'juridique': ['juriste', 'juridique', 'avocat', 'lawyer', 'legal officer'],
+    'sante': ['medecin', 'infirmier', 'infirmiere', 'nurse', 'pharmacien', 'sante publique', 'public health',
+              'nutrition', 'epidemiologie'],
+    'enseignement': ['enseignant', 'professeur', 'formateur', 'teacher', 'renforcement des capacites'],
+    'ingenierie': ['ingenieur', 'engineer', 'genie civil', 'electricien', 'electrician', 'mecanicien',
+                   'mechanic', 'btp'],
+    'environnement': ['environnemental', 'environnementale', 'environnementaux', 'environmental',
+                      'changement climatique', 'climate change'],
+    'agriculture': ['agriculture', 'agricole', 'agricultural', 'agronome', 'agronomie', 'elevage'],
+    'qualite_laboratoire': ['assurance qualite', 'quality assurance', 'laboratoire', 'laboratory', 'smq'],
+    'securite': ['agent de securite', 'security officer', 'gardiennage', 'surete'],
+    'chauffeur': ['chauffeur', 'driver', 'permis de conduire'],
     'anglais': ['anglais', 'english', 'bilingue'],
     'langues_locales': ['swahili', 'lingala', 'tshiluba', 'kikongo'],
 }
@@ -82,9 +99,15 @@ def convertir_salaire(texte):
     return round(min(nombres) * taux, 1), round(max(nombres) * taux, 1)
 
 
-def trouver_competences(texte):
-    texte = normaliser(texte)
-    return [nom for nom, regex in COMPETENCES_REGEX.items() if regex.search(texte)]
+MENTIONS_MIN = 2  # une seule mention dans une longue annonce est souvent une formule standard
+
+
+def trouver_competences(titre, description=''):
+    """Une competence est retenue si elle est dans le titre, ou citee au moins MENTIONS_MIN fois
+    dans la description."""
+    titre, description = normaliser(titre), normaliser(description)
+    return [nom for nom, regex in COMPETENCES_REGEX.items()
+            if regex.search(titre) or len(regex.findall(description)) >= MENTIONS_MIN]
 
 
 def nettoyer(df):
@@ -123,7 +146,8 @@ def nettoyer(df):
                                             format='mixed').dt.date
 
     # 6. Competences : une liste lisible + une colonne 0/1 par competence (encodage "one-hot")
-    listes = (df['titre'] + ' ' + df['description']).map(trouver_competences)
+    listes = pd.Series([trouver_competences(t, d) for t, d in zip(df['titre'], df['description'])],
+                       index=df.index)
     df['competences'] = listes.map(', '.join)
     for nom in COMPETENCES:
         df[f'comp_{nom}'] = listes.map(lambda liste: int(nom in liste))
