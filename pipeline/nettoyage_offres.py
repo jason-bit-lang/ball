@@ -1,7 +1,6 @@
 """Etape 4 : nettoie les offres scrapees pour les rendre utilisables par l'IA ("IA-Ready").
 
-Entree  : data/offres_brutes.csv  (colonnes : titre, entreprise, lieu, description, salaire,
-          date_publication, url)
+Entree  : data/offres_brutes.csv  (cree par pipeline/scraper.py)
 Sortie  : data/offres_propres.csv
 Lancement : python -m pipeline.nettoyage_offres
 """
@@ -10,7 +9,8 @@ import unicodedata
 import pandas as pd
 from .config import OFFRES_BRUTES, OFFRES_PROPRES, TAUX_CDF_USD
 
-COLONNES = ['titre', 'entreprise', 'lieu', 'description', 'salaire', 'date_publication', 'url']
+COLONNES = ['titre', 'entreprise', 'lieu', 'description', 'salaire', 'date_publication', 'url',
+            'statut', 'source_description', 'lien_candidature']
 
 # Competences recherchees dans le titre et la description (ecrites sans accents, en minuscules).
 # Cle = nom de la colonne creee, valeur = mots qui signalent cette competence.
