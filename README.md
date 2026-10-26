@@ -27,8 +27,16 @@ Le detail des objectifs et des etapes du projet se trouve dans `CLAUDE.md`.
 │   ├── __init__.py      configuration Flask, base de donnees, Flask-Login
 │   ├── models.py        tables User et Document
 │   ├── routes.py        pages et logique
+│   ├── journal.py       journal des connexions et des envois de CV
 │   ├── static/          style.css, style.js
 │   └── templates/       base, index, register, login, upload, history, result
+├── pipeline/            pipeline de donnees (partie 2)
+│   ├── config.py        chemins et reglages communs
+│   ├── audit_logs.py    lecture du journal, detection des fraudes, chargement dans analytics.db
+│   ├── kpi.py           statistiques d'usage en SQL (GROUP BY, HAVING)
+│   └── nettoyage_offres.py  nettoyage Pandas des offres d'emploi
+├── data/                analytics.db et fichiers d'offres
+├── logs/                journal du site (non versionne)
 ├── instance/            base SQLite (creee automatiquement, non versionnee)
 ├── uploads/             CV televerses (non versionnes)
 ├── .env.example         modele du fichier .env
@@ -47,3 +55,11 @@ python run.py
 ```
 
 L'application est ensuite disponible sur http://127.0.0.1:5000.
+
+## Pipeline de donnees
+
+```bash
+python -m pipeline.audit_logs        # lit logs/evenements.log, detecte les fraudes, remplit data/analytics.db
+python -m pipeline.kpi               # affiche les statistiques d'usage
+python -m pipeline.nettoyage_offres  # data/offres_brutes.csv -> data/offres_propres.csv
+```

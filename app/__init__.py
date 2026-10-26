@@ -4,11 +4,15 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_wtf.csrf import CSRFProtect
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 # Charge les variables du fichier .env (SECRET_KEY, OPENAI_API_KEY...)
 load_dotenv()
 
 app = Flask(__name__, instance_relative_config=True)
+
+# Sur Render, le site est derriere un proxy : on lit la vraie adresse IP du visiteur
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1)
 
 # La cle secrete protege les sessions : elle ne doit jamais etre ecrite dans le code
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
@@ -40,4 +44,5 @@ def load_user(user_id):
     return db.session.get(User, int(user_id))
 
 
-from . import routes
+# Importe les pages a la fin : routes.py a besoin de `app` et `db` definis plus haut
+from . import routes  # noqa: F401

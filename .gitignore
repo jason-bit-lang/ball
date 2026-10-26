@@ -21,6 +21,9 @@ instance/*
 uploads/*
 !uploads/.gitkeep
 
+# Journal du site (contient des adresses IP et des emails)
+logs/
+
 # Fichiers d'editeur et du systeme
 .vscode/
 .idea/

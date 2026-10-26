@@ -5,6 +5,7 @@ from flask import render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user, login_user, logout_user
 from werkzeug.utils import secure_filename
 from . import app, db
+from .journal import log_event
 from .models import Document, User
 
 # Extensions acceptees et premiers octets attendus pour chacune
@@ -31,14 +32,22 @@ def file_extension(filename):
     return filename.rsplit('.', 1)[-1].lower() if '.' in filename else ''
 
 
-def is_valid_cv(file):
-    """Verifie l'extension ET le vrai contenu du fichier."""
+def cv_error(file):
+    """Verifie l'extension ET le vrai contenu du fichier. Renvoie la raison du refus, ou None si tout va bien."""
     signature = SIGNATURES.get(file_extension(file.filename))
     if signature is None:
-        return False
+        return 'bad_extension'
     debut = file.stream.read(len(signature))
     file.stream.seek(0)  # remet la lecture au debut pour pouvoir enregistrer le fichier
-    return debut == signature
+    return None if debut == signature else 'bad_signature'
+
+
+def reject_upload(reason, message, filename=''):
+    """Refus d'un envoi : on le note dans le journal puis on previent l'utilisateur."""
+    log_event('UPLOAD_REJECTED', reason=reason, file=filename,
+              ext=file_extension(filename), size=request.content_length or 0)
+    flash(message, 'danger')
+    return redirect(url_for('upload'))
 
 
 @app.route('/')
@@ -99,10 +108,12 @@ def login():
         # Meme message si l'email ou le mot de passe est faux :
         # on ne revele pas quels emails existent
         if user is None or not user.check_password(password):
+            log_event('LOGIN_FAIL', email=email)
             flash('Email ou mot de passe incorrect.', 'danger')
             return render_template('login.html', email=email)
 
         login_user(user)
+        log_event('LOGIN_OK', email=email)
         flash(f'Bienvenue {user.prenom}.', 'success')
         return redirect(safe_next_page())
 
@@ -123,17 +134,20 @@ def upload():
     if request.method == 'POST':
         file = request.files.get('cv')
         if not file or file.filename == '':
-            flash('Aucun fichier sélectionné.', 'danger')
-            return redirect(url_for('upload'))
-        if not is_valid_cv(file):
-            flash('Fichier invalide : seuls les vrais fichiers PDF ou DOCX sont acceptés.', 'danger')
-            return redirect(url_for('upload'))
+            return reject_upload('empty', 'Aucun fichier sélectionné.')
+        original_filename = secure_filename(file.filename)
+        error = cv_error(file)
+        if error:
+            return reject_upload(error, 'Fichier invalide : seuls les vrais fichiers PDF ou DOCX sont acceptés.',
+                                 original_filename)
 
         # Le fichier est renomme avec un identifiant unique (UUID) :
         # deux CV portant le meme nom ne s'ecrasent jamais
-        original_filename = secure_filename(file.filename)
         stored_filename = f'{uuid.uuid4()}.{file_extension(original_filename)}'
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], stored_filename))
+        path = os.path.join(app.config['UPLOAD_FOLDER'], stored_filename)
+        file.save(path)
+        log_event('UPLOAD_OK', file=original_filename, ext=file_extension(original_filename),
+                  size=os.path.getsize(path), stored=stored_filename)
 
         document = Document(original_filename=original_filename,
                             stored_filename=stored_filename,
@@ -148,8 +162,8 @@ def upload():
 
 @app.errorhandler(413)
 def file_too_large(error):
-    flash('Fichier trop volumineux : 5 Mo maximum.', 'danger')
-    return redirect(url_for('upload'))
+    # Le fichier est refuse avant d'etre lu : son nom est inconnu, seule la taille est notee
+    return reject_upload('too_large', 'Fichier trop volumineux : 5 Mo maximum.')
 
 
 @app.route('/history')
