@@ -122,9 +122,12 @@ Aucun emoji ni emoticone. Beau et sobre, sans exces.
 
 - Orchestrateur FastAPI (`/speak-smart`) :
   1. Reformulation du CV brut en discours fluide via un prompt strict envoye a OpenAI.
-  2. Envoi du texte a un modele vocal qui genere une presentation audio. En ligne : `edge-tts`
-     (gratuit, sortie mp3). Coqui TTS / VITS est garde pour la demonstration en local ou sur
-     Colab et pour mesurer WER, CER et MOS.
+  2. Envoi du texte a un modele vocal qui genere une presentation audio. En ligne : OpenAI
+     `tts-1` (environ 3 s, quelques centimes). En cas d'erreur, de delai depasse ou de credit
+     epuise, bascule automatique sur `edge-tts` (gratuit, environ 2 s, sortie mp3).
+     `gpt-4o-mini-tts` est ecarte : environ 7 s, trop proche de la limite des 10 s.
+     Coqui TTS / VITS est garde pour la demonstration en local ou sur Colab et pour mesurer
+     WER, CER et MOS.
 - Connexion entre l'application Flask et FastAPI : une route Flask appelle FastAPI pour recuperer
   les echanges ; FastAPI lit les CV references dans la base de donnees. L'application Flask est
   reliee a tout : l'assistante DRH, le resume et la synthese vocale.
