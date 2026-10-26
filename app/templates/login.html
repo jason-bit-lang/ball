@@ -1,23 +1,20 @@
 {% extends "base.html" %}
+{% block title %}Connexion - CVBoost{% endblock %}
 {% block content %}
 <div class="form-container">
 <h2>Connexion</h2>
-{% if error %}
-<p>{{ error }}</p>
-{% endif %}
+
 <form method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <label>Email</label>
-    <input type="email" name="email" placeholder="exemple@gmail.com"required>
+    <input type="email" name="email" value="{{ email }}" placeholder="exemple@gmail.com" required>
     <label>Mot de passe</label>
-    <input type="password" name="password" placeholder="Votre mot secret" required>
-    <br><br>
-    <button type="submit">Se connecter </button>
+    <input type="password" name="password" placeholder="Votre mot de passe" required>
+    <button type="submit">Se connecter</button>
 </form>
 <p class="form-footer">
     Pas encore de compte ?
-    <a href="/register">Inscrivez-vous</a>
+    <a href="{{ url_for('register') }}">Inscrivez-vous</a>
 </p>
 </div>
 {% endblock %}
-
-

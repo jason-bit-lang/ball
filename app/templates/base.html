@@ -1,43 +1,41 @@
 <!DOCTYPE html>
-<html lang="fr" xmlns="http://www.w3.org/1999/html">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>CVBoost</title>
-   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}CVBoost{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 <nav>
-     <div class="nav-container">
+    <div class="nav-container">
         <strong>CVBoost</strong>
-         <div class="menu">
-             <a href="/index">Accueil</a>
-             {% if current_user.is_authenticated %}
-                <a href="/upload">Envoi de CV</a>
-                <a href="/history">Votre historique</a>
-                <a href="/logout" class="logout-btn">Deconnexion</a>
+        <div class="menu">
+            <a href="{{ url_for('index') }}">Accueil</a>
+            {# Le menu change selon que l'utilisateur est connecte ou non #}
+            {% if current_user.is_authenticated %}
+                <a href="{{ url_for('upload') }}">Envoi de CV</a>
+                <a href="{{ url_for('history') }}">Votre historique</a>
+                <a href="{{ url_for('logout') }}" class="logout-btn">Déconnexion</a>
             {% else %}
-                <a href="/login">Connexion</a>
-                <a href="/register">Inscription</a>
+                <a href="{{ url_for('login') }}">Connexion</a>
+                <a href="{{ url_for('register') }}">Inscription</a>
             {% endif %}
         </div>
-     </div>
+    </div>
 </nav>
 
 <div class="container">
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category,message in messages %}
-                <div class="flash {{ category }}">{{ message }}</div>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
+    {# Messages de succes ou d'erreur envoyes par flash() dans routes.py #}
+    {% for category, message in get_flashed_messages(with_categories=true) %}
+        <div class="flash {{ category }}">{{ message }}</div>
+    {% endfor %}
 
-{% block content %}
-{% endblock %}
+    {% block content %}{% endblock %}
 </div>
-<footer>
-    <p>Jaaason.<p>
-</footer>
 
+<footer>
+    <p>CVBoost - Projet capstone Kadea Academy</p>
+</footer>
 </body>
 </html>

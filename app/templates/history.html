@@ -1,15 +1,17 @@
 {% extends "base.html" %}
+{% block title %}Historique - CVBoost{% endblock %}
 {% block content %}
 <div class="history-container">
 <h2>Mon historique</h2>
 
 {% for doc in documents %}
 <p>
-    <strong>{{doc.original_filename}}</strong> - {{ doc.upload_date }} - {{ doc.status }}
-    <a href="/result">
-        <button type="button">Voir</button>
-    </a>
+    <strong>{{ doc.original_filename }}</strong>
+    - {{ doc.upload_date.strftime('%d/%m/%Y %H:%M') }} - {{ doc.status }}
+    <a href="{{ url_for('result', id=doc.id) }}" class="btn-secondary">Voir</a>
 </p>
-</div>
+{% else %}
+<p>Vous n'avez encore envoyé aucun CV. <a href="{{ url_for('upload') }}">Envoyer mon CV</a></p>
 {% endfor %}
+</div>
 {% endblock %}

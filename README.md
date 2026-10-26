@@ -27,7 +27,6 @@ Le detail des objectifs et des etapes du projet se trouve dans `CLAUDE.md`.
 │   ├── __init__.py      configuration Flask, base de donnees, Flask-Login
 │   ├── models.py        tables User et Document
 │   ├── routes.py        pages et logique
-│   ├── forms.py
 │   ├── static/          style.css, style.js
 │   └── templates/       base, index, register, login, upload, history, result
 ├── instance/            base SQLite (creee automatiquement, non versionnee)
@@ -43,7 +42,7 @@ Le detail des objectifs et des etapes du projet se trouve dans `CLAUDE.md`.
 python -m venv venv
 # Windows : venv\Scripts\activate    Linux/Mac : source venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env    # puis remplir les valeurs
+cp .env.example .env    # puis remplir SECRET_KEY (python -c "import secrets; print(secrets.token_hex(32))")
 python run.py
 ```
 
