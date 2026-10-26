@@ -98,6 +98,11 @@ Un premier travail existe : l'adapter a ces instructions.
   avec Seq2SeqTrainer et SacreBLEU et tenir dans le delai. L'entrainement se fait sur GPU
   (Google Colab) ; seul l'adaptateur LoRA est ajoute au projet.
 - Evaluation : score SacreBLEU sur le jeu de test via Seq2SeqTrainer.
+- Utilisation du modele LoRA sans surcharger Render : le modele tourne sur Colab en traitement
+  par lot sur les offres scrapees (par exemple : description -> intitule et competences cles).
+  Les resultats sont enregistres dans la base et le site les lit directement. En ligne, le
+  matching CV/offres utilise ces donnees avec TF-IDF (scikit-learn), sans PyTorch.
+  Option si le temps le permet : version ONNX quantifiee du modele chargee en ligne.
 - Assistante DRH (module `ia.py`) :
   - Bouton "Simulation d'entretien" sur l'interface.
   - Extraction propre du texte du CV televerse (pypdf) depuis `uploads/`.
@@ -117,7 +122,9 @@ Aucun emoji ni emoticone. Beau et sobre, sans exces.
 
 - Orchestrateur FastAPI (`/speak-smart`) :
   1. Reformulation du CV brut en discours fluide via un prompt strict envoye a OpenAI.
-  2. Envoi du texte a un modele vocal (Coqui TTS / VITS) qui genere une presentation `.wav`.
+  2. Envoi du texte a un modele vocal qui genere une presentation audio. En ligne : `edge-tts`
+     (gratuit, sortie mp3). Coqui TTS / VITS est garde pour la demonstration en local ou sur
+     Colab et pour mesurer WER, CER et MOS.
 - Connexion entre l'application Flask et FastAPI : une route Flask appelle FastAPI pour recuperer
   les echanges ; FastAPI lit les CV references dans la base de donnees. L'application Flask est
   reliee a tout : l'assistante DRH, le resume et la synthese vocale.
@@ -128,9 +135,16 @@ Aucun emoji ni emoticone. Beau et sobre, sans exces.
 - MLOps : route de sante, journalisation des erreurs, documentation des metriques audio
   (WER, CER, MOS).
 
-Attention : l'offre gratuite de Render (512 Mo de RAM) ne suffit pas pour Coqui TTS. Prevoir un
-plan payant ou une solution de synthese vocale plus legere en secours, pour respecter la limite
-des 10 secondes.
+Hebergement gratuit sur Render (offre Free : environ 512 Mo de RAM, mise en veille apres
+15 minutes, disque efface au redemarrage, 750 heures par mois) :
+- Pas de PyTorch en ligne : ni Coqui TTS ni modele LoRA charges sur Render.
+- Un seul service Render qui fait tourner Flask et FastAPI ensemble. En local, docker-compose
+  separe les services web, API et base de donnees.
+- Base de donnees : Postgres gratuit chez Neon (n'expire pas), adresse lue depuis la variable
+  `DATABASE_URL`. SQLite reste utilise en local.
+- Les CV sont enregistres dans la base de donnees (5 Mo maximum), pas sur le disque.
+- Une route `/health` est appelee toutes les 10 minutes par UptimeRobot ou cron-job.org pour
+  garder le site eveille et respecter la limite des 10 secondes.
 
 Rien n'existe encore pour cette partie.
 
