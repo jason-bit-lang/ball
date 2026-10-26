@@ -61,5 +61,13 @@ L'application est ensuite disponible sur http://127.0.0.1:5000.
 ```bash
 python -m pipeline.audit_logs        # lit logs/evenements.log, detecte les fraudes, remplit data/analytics.db
 python -m pipeline.kpi               # affiche les statistiques d'usage
+python -m pipeline.scraper 5        # 5 pages d'offres de mediacongo.net -> data/offres_brutes.csv
 python -m pipeline.nettoyage_offres  # data/offres_brutes.csv -> data/offres_propres.csv
 ```
+
+Les annonces scannees sont lues par OCR avec Tesseract (optionnel en local) :
+- Windows : installer depuis https://github.com/UB-Mannheim/tesseract/wiki en cochant la langue francaise
+- Linux : `sudo apt install tesseract-ocr tesseract-ocr-fra`
+
+Le scraping tourne aussi tout seul chaque jour sur GitHub Actions
+(`.github/workflows/scraping-quotidien.yml`, actif une fois le code fusionne dans `main`).

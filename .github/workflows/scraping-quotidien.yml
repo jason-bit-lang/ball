@@ -1,0 +1,45 @@
+# Recupere chaque jour les nouvelles offres de mediacongo.net, les nettoie et les enregistre dans le depot.
+# GitHub ne lance les taches planifiees que sur la branche principale (main) :
+# ce fichier sera actif une fois la branche fusionnee dans main.
+name: Scraping quotidien des offres
+
+on:
+  schedule:
+    - cron: '17 5 * * *'   # tous les jours a 5h17 UTC, soit 6h17 a Kinshasa
+  workflow_dispatch:       # bouton "Run workflow" pour le lancer a la main
+
+permissions:
+  contents: write          # autorise le robot a enregistrer les nouvelles offres
+
+concurrency: scraping      # jamais deux scrapings en meme temps
+
+jobs:
+  scraper:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Installer Tesseract (OCR des annonces scannees)
+        run: sudo apt-get update && sudo apt-get install -y tesseract-ocr tesseract-ocr-fra
+
+      - name: Installer les dependances
+        run: pip install -r requirements.txt
+
+      - name: Recuperer les nouvelles offres
+        run: python -m pipeline.scraper 5
+
+      - name: Nettoyer les offres
+        run: python -m pipeline.nettoyage_offres
+
+      - name: Enregistrer les offres dans le depot
+        run: |
+          git config user.name "cvboost-bot"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/offres_brutes.csv data/offres_propres.csv
+          git diff --cached --quiet || (git commit -m "Donnees : offres du $(date +%d/%m/%Y)" && git push)
