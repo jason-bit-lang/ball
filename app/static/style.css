@@ -193,3 +193,5 @@ button:hover {
 
 #entretien button { margin-top: 10px; }
 .boutons { display: flex; gap: 10px; }
+/* L'attribut hidden (utilise par entretien.js) doit toujours masquer, meme avec un display: flex */
+[hidden] { display: none !important; }

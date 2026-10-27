@@ -19,8 +19,8 @@ EMAIL_REGEX = r'[^@\s]+@[^@\s]+\.[^@\s]+'
 PASSWORD_MIN_LENGTH = 8
 STATUT_ANALYSE = 'CV analysé'
 STATUT_ILLISIBLE = 'CV illisible (scanné ou abîmé)'
-# Assistante DRH codee mais masquee pour le moment : passer a True pour l'afficher
-ASSISTANTE_ACTIVE = False
+# Assistante DRH : passer a False pour la masquer (par exemple si le credit OpenAI est epuise)
+ASSISTANTE_ACTIVE = True
 ENTRETIENS_PAR_JOUR = 5   # chaque entretien vocal est payant : limite par utilisateur sur 24 h
 SDP_MAX = 20000           # taille maximale de l'offre WebRTC envoyee par le navigateur
 ROLES = {'recruteur', 'candidat'}

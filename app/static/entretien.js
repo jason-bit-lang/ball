@@ -5,9 +5,11 @@ const statut = document.getElementById('statut');
 const DELAI_MAX = 12000;      // millisecondes : au-dela, on previent l'utilisateur
 const DUREE_MAX = 10 * 60;    // secondes : l'entretien s'arrete tout seul (il est paye a la minute)
 const SILENCE = 1500;         // millisecondes sans parole de la recruteuse : c'est au candidat de parler
+const CONNEXION_MAX = 7000;   // millisecondes pour etablir la liaison audio (total sous 10 s)
+const ERREUR_AUDIO = "La liaison audio n'a pas pu s'établir (réseau ou pare-feu). Réessayez sur une autre connexion.";
 
 const direct = {connexion: null, canal: null, micro: null, son: null, messages: [], debut: 0,
-                minuteur: null, dernierePhrase: 0, accueil: '', fini: false};
+                minuteur: null, dernierePhrase: 0, accueil: '', fini: false, attente: null};
 
 const $ = id => document.getElementById(id);
 
@@ -75,12 +77,17 @@ $('demarrer').addEventListener('click', async event => {
         direct.connexion.addTrack(direct.micro.getAudioTracks()[0], direct.micro);
         direct.canal = direct.connexion.createDataChannel('oai-events');
         direct.canal.addEventListener('message', e => recevoir(JSON.parse(e.data)));
+        direct.connexion.addEventListener('connectionstatechange', () => {
+            if (direct.connexion.connectionState === 'failed') echecAudio();
+        });
 
         const offre = await direct.connexion.createOffer();
         await direct.connexion.setLocalDescription(offre);
         const session = await appeler('vocal', {sdp: offre.sdp});
         direct.accueil = session.accueil;
         await direct.connexion.setRemoteDescription({type: 'answer', sdp: session.sdp});
+        // Sans session.started dans le delai, la liaison audio est consideree comme bloquee
+        direct.attente = setTimeout(echecAudio, CONNEXION_MAX);
         event.target.hidden = true;
         $('direct').hidden = false;
         statut.textContent = '';
@@ -98,6 +105,7 @@ function envoyer(evenement) {
 // Evenements envoyes par OpenAI sur le canal de donnees
 function recevoir(evenement) {
     if (evenement.type === 'session.started') {
+        clearTimeout(direct.attente);
         // C'est la recruteuse qui ouvre l'entretien
         envoyer({type: 'session.commentary.append', delegation_id: null, content: direct.accueil});
         direct.debut = Date.now();
@@ -144,8 +152,19 @@ $('micro').addEventListener('click', event => {
     event.target.textContent = piste.enabled ? 'Couper le micro' : 'Réactiver le micro';
 });
 
+// Liaison audio impossible avant le debut de l'entretien : on previent et on permet de reessayer
+function echecAudio() {
+    if (direct.debut) return terminer();  // coupure en cours d'entretien : on evalue ce qui a ete dit
+    fermerConnexion();
+    $('direct').hidden = true;
+    $('demarrer').hidden = false;
+    $('demarrer').disabled = false;
+    statut.textContent = ERREUR_AUDIO;
+}
+
 function fermerConnexion() {
     clearInterval(direct.minuteur);
+    clearTimeout(direct.attente);
     if (direct.canal) direct.canal.close();
     if (direct.connexion) direct.connexion.close();
     if (direct.micro) direct.micro.getTracks().forEach(piste => piste.stop());

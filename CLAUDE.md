@@ -129,8 +129,11 @@ Choix faits pendant la partie 3 :
 - Le notebook produit `data/offres_ia.csv` (titre_ia, competences_ia) et l'adaptateur
   `modele/lora_cvboost/`, que l'apprenant ajoute au depot.
 - Table `Offre` dans la base du site, remplie au demarrage par `app/offres.py` (cle = url).
-- Ordre choisi par l'apprenant : d'abord le matching et la table des offres. L'assistante DRH est
-  codee mais masquee (`ASSISTANTE_ACTIVE = False` dans `app/routes.py`) jusqu'a son feu vert.
+- Assistante DRH reactivee (`ASSISTANTE_ACTIVE = True` dans `app/routes.py`) apres un test avec la
+  vraie API le 27/10 : analyse 6,4 s, creation de la session vocale 1 a 2 s, premier mot de la
+  recruteuse 0,7 s apres le demarrage, evaluation 3,4 a 4,5 s. Le son WebRTC n'a pas pu etre teste
+  depuis le conteneur cloud (pas d'UDP) : a valider dans un vrai navigateur (PC ou Render).
+  Si la liaison audio echoue, un message clair s'affiche apres 7 s et l'utilisateur peut reessayer.
 - Prompts de l'assistante inspires du projet IA_DRH (fourni par l'apprenant) : le recruteur prend
   l'initiative, pose une seule question a la fois, rebondit, demande role / methode / resultat,
   n'evalue pas pendant l'entretien ; a la fin, evaluation chiffree (note globale /100,
