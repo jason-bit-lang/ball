@@ -13,4 +13,4 @@ pypdf==5.1.0
 pytesseract==0.3.13
 Pillow==11.0.0
 scikit-learn==1.6.1
-openai==1.82.0
+openai==3.36.1

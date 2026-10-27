@@ -19,10 +19,13 @@
 
     {# Assistante DRH : le contenu est rempli par static/entretien.js (masquee si ASSISTANTE_ACTIVE = False) #}
     {% if assistante %}
-    <aside id="entretien" class="ia-card" data-url="{{ url_for('entretien', offre_id=offre.id, id=document.id) }}">
+    <aside id="entretien" class="ia-card" data-url="{{ url_for('entretien', offre_id=offre.id, id=document.id, etape='analyse') }}">
         <h3>Assistante DRH</h3>
-        <p>Entraînez-vous : l'assistante analyse votre CV pour ce poste puis vous pose 5 questions.</p>
-        <button type="button" id="demarrer">Simulation d'entretien</button>
+        <p>Entraînez-vous : l'assistante analyse votre CV pour ce poste, puis vous fait passer un entretien
+           <strong>à voix haute</strong>, comme une vraie recruteuse.</p>
+        <p class="discret">Votre CV et vos réponses sont envoyés à OpenAI pendant l'analyse et l'entretien.</p>
+
+        <button type="button" id="analyser">Analyser ma candidature</button>
         <div id="analyse" hidden>
             <p class="compatibilite">Compatibilité : <strong id="score"></strong> %</p>
             <p id="resume"></p>
@@ -31,8 +34,17 @@
             <h4>Compétences manquantes</h4><ul id="manquantes"></ul>
             <h4>Conseils pour votre CV</h4><ul id="recommandations"></ul>
         </div>
-        <div id="conversation"></div>
-        <p id="statut" class="discret" aria-live="polite"></p>
+
+        <button type="button" id="demarrer">Démarrer l'entretien vocal</button>
+        <div id="direct" hidden>
+            <p><span id="etat">Connexion...</span> - <span id="minuteur">00:00</span></p>
+            <div id="conversation"></div>
+            <div class="boutons">
+                <button type="button" id="micro">Couper le micro</button>
+                <button type="button" id="terminer">Terminer l'entretien</button>
+            </div>
+        </div>
+
         <div id="evaluation" hidden>
             <h4>Évaluation de l'entretien</h4>
             <p class="compatibilite">Note globale : <strong id="note"></strong> / 100</p>
@@ -44,11 +56,7 @@
             <h4>Axes d'amélioration</h4><ul id="eval-axes"></ul>
             <h4>Réponses à retravailler</h4><ul id="conseils"></ul>
         </div>
-        <form id="formulaire-reponse" class="reponse" hidden>
-            <label for="reponse">Votre réponse</label>
-            <textarea id="reponse" rows="4" maxlength="1500" required></textarea>
-            <button type="submit">Envoyer ma réponse</button>
-        </form>
+        <p id="statut" class="discret" aria-live="polite"></p>
     </aside>
     {% endif %}
 </div>

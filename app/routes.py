@@ -1,14 +1,16 @@
 import os
 import re
 import uuid
+from datetime import timedelta
 from flask import render_template, request, redirect, url_for, flash, jsonify
 from flask_login import login_required, current_user, login_user, logout_user
 from werkzeug.utils import secure_filename
 from . import app, db
-from .ia import TEXTE_MIN, IAIndisponible, analyser_candidature, extraire_texte, question_suivante
+from .ia import (TEXTE_MIN, IAIndisponible, analyser_candidature, creer_entretien_vocal, evaluer_entretien,
+                 extraire_texte)
 from .journal import log_event
 from .matching import rechercher
-from .models import Document, Offre, User
+from .models import Document, EntretienVocal, Offre, User, now_utc
 
 # Extensions acceptees et premiers octets attendus pour chacune
 # (un PDF commence par %PDF, un DOCX est une archive zip qui commence par PK)
@@ -19,6 +21,9 @@ STATUT_ANALYSE = 'CV analysé'
 STATUT_ILLISIBLE = 'CV illisible (scanné ou abîmé)'
 # Assistante DRH codee mais masquee pour le moment : passer a True pour l'afficher
 ASSISTANTE_ACTIVE = False
+ENTRETIENS_PAR_JOUR = 5   # chaque entretien vocal est payant : limite par utilisateur sur 24 h
+SDP_MAX = 20000           # taille maximale de l'offre WebRTC envoyee par le navigateur
+ROLES = {'recruteur', 'candidat'}
 
 
 def form_value(name):
@@ -228,27 +233,53 @@ def offre(offre_id, id):
                            assistante=ASSISTANTE_ACTIVE)
 
 
-@app.route('/entretien/<int:offre_id>/cv/<int:id>', methods=['POST'])
+def entretiens_du_jour():
+    hier = now_utc() - timedelta(days=1)
+    return EntretienVocal.query.filter(EntretienVocal.user_id == current_user.id, EntretienVocal.date > hier).count()
+
+
+def transcription_valide(transcription):
+    """Liste de messages {'role': 'recruteur' ou 'candidat', 'texte': '...'} avec au moins une reponse."""
+    return (isinstance(transcription, list)
+            and all(isinstance(m, dict) and m.get('role') in ROLES and isinstance(m.get('texte'), str)
+                    for m in transcription)
+            and any(m['role'] == 'candidat' and m['texte'].strip() for m in transcription))
+
+
+@app.route('/entretien/<int:offre_id>/cv/<int:id>/<etape>', methods=['POST'])
 @login_required
-def entretien(offre_id, id):
-    """Simulation d'entretien. Le navigateur envoie la conversation deja ecoulee (questions et reponses) :
-    vide -> analyse du CV et premiere question ; sinon -> commentaire et question suivante."""
-    if not ASSISTANTE_ACTIVE:
-        return jsonify(erreur="L'assistante DRH n'est pas encore disponible."), 404
+def entretien(offre_id, id, etape):
+    """Assistante DRH en trois etapes, appelees par static/entretien.js :
+    analyse -> analyse ecrite du CV pour cette offre
+    vocal -> cree la session vocale (le navigateur envoie son offre WebRTC "sdp")
+    evaluation -> note l'entretien a partir de sa transcription"""
+    if not ASSISTANTE_ACTIVE or etape not in ('analyse', 'vocal', 'evaluation'):
+        return jsonify(erreur="L'assistante DRH n'est pas disponible."), 404
     offre = db.get_or_404(Offre, offre_id)
     texte = texte_du_cv(document_du_user(id))
-    historique = (request.get_json(silent=True) or {}).get('historique', [])
     if not texte:
         return jsonify(erreur='Le texte de ce CV est illisible : envoyez une autre version.'), 400
-    if not isinstance(historique, list) or not all(isinstance(m, str) for m in historique):
-        return jsonify(erreur='Conversation invalide.'), 400
+    donnees = request.get_json(silent=True) or {}
+
     try:
-        if historique:
-            reponse = question_suivante(texte, offre, historique)
-        else:
+        if etape == 'analyse':
             reponse = analyser_candidature(texte, offre)
+        elif etape == 'vocal':
+            sdp = donnees.get('sdp')
+            if not isinstance(sdp, str) or not sdp.startswith('v=0') or len(sdp) > SDP_MAX:
+                return jsonify(erreur='Connexion audio invalide.'), 400
+            if entretiens_du_jour() >= ENTRETIENS_PAR_JOUR:
+                return jsonify(erreur=f'Limite atteinte : {ENTRETIENS_PAR_JOUR} entretiens vocaux par jour.'), 429
+            reponse = creer_entretien_vocal(texte, offre, sdp)
+            db.session.add(EntretienVocal(user_id=current_user.id, offre_id=offre.id))
+            db.session.commit()
+        else:
+            transcription = donnees.get('transcription')
+            if not transcription_valide(transcription):
+                return jsonify(erreur="Aucune réponse enregistrée : l'entretien ne peut pas être évalué."), 400
+            reponse = evaluer_entretien(texte, offre, transcription)
     except IAIndisponible as erreur:
-        log_event('IA_ERREUR', cv=id, offre=offre_id, cause=repr(erreur.__cause__))
+        log_event('IA_ERREUR', cv=id, offre=offre_id, etape=etape, cause=repr(erreur.__cause__))
         return jsonify(erreur=str(erreur)), 503
-    log_event('ENTRETIEN', cv=id, offre=offre_id, etape=len(historique) // 2)
+    log_event('ENTRETIEN', cv=id, offre=offre_id, etape=etape)
     return jsonify(reponse)

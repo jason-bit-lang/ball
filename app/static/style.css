@@ -190,19 +190,6 @@ button:hover {
 .bulle { padding: 10px 12px; border-radius: 8px; margin: 8px 0; }
 .bulle.assistante { background-color: #1a3a52; }
 .bulle.candidat { background-color: #2c2c2c; margin-left: 30px; }
-.bulle.fin { font-weight: bold; }
 
-/* Le formulaire de reponse est dans le panneau : on annule le style general des formulaires */
-form.reponse { margin: 10px 0 0; padding: 0; max-width: none; box-shadow: none; background: none; }
-
-textarea {
-    width: 100%;
-    box-sizing: border-box;
-    margin: 8px 0;
-    padding: 10px;
-    background: #2c2c2c;
-    border: 1px solid #444;
-    color: white;
-    border-radius: 5px;
-    font-family: inherit;
-}
+#entretien button { margin-top: 10px; }
+.boutons { display: flex; gap: 10px; }

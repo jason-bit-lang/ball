@@ -136,13 +136,15 @@ Choix faits pendant la partie 3 :
   n'evalue pas pendant l'entretien ; a la fin, evaluation chiffree (note globale /100,
   communication, competences techniques et motivation /10, conseils par reponse, verdict).
   L'analyse ajoute les competences manquantes et des conseils pour ameliorer le CV.
-- Option vocale reprise d'IA_DRH : entretien en direct avec l'API Live d'OpenAI (`gpt-live-1`,
-  WebRTC, environ 0,05 $ la minute hors modele de raisonnement, non disponible en offre gratuite).
+- Choix de l'apprenant : entretien VOCAL EN DIRECT avec l'API Live d'OpenAI (`gpt-live-1`, WebRTC,
+  environ 0,05 $ la minute hors modele de raisonnement, compte OpenAI payant ; l'apprenant paie).
   Le serveur cree seulement la session (le son passe directement entre le navigateur et OpenAI,
-  Render n'est pas charge) et limite les evenements autorises au navigateur. Voix a choisir par
-  l'apprenant.
-- Assistante DRH : 5 questions, delai OpenAI de 8 s sans relance, reponses JSON, l'historique de
-  l'entretien est garde par le navigateur (aucune table supplementaire).
+  Render n'est pas charge) ; le navigateur ne peut envoyer que l'accueil et le raccrochage.
+  Limites : 5 entretiens vocaux par utilisateur sur 24 h (table `EntretienVocal`), 10 minutes
+  par entretien. Voix : `marin` par defaut (VOIX dans `app/ia.py`), l'apprenant hesite entre
+  sage, cedar et marin (extraits a generer quand une cle valide sera disponible).
+- Deroulement : analyse ecrite du CV (gpt-4o-mini), entretien vocal, puis evaluation de la
+  transcription (gpt-4o-mini). Paquet `openai==3.36.1` (version qui contient l'API Live).
 
 ### Partie 4 : Design
 

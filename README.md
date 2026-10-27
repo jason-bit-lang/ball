@@ -77,8 +77,9 @@ python -m pipeline.dataset_ia        # data/offres_propres.csv -> data/ia/*.json
   puis ajouter au depot les deux fichiers telecharges : `data/offres_ia.csv` et `modele/lora_cvboost/`.
 - **Matching** : au demarrage, `run.py` copie les offres de `data/` dans la base. Le bouton
   "Rechercher des offres" compare le CV aux offres avec TF-IDF (scikit-learn), sans PyTorch.
-- **Assistante DRH** : sur la page d'une offre, "Simulation d'entretien" envoie le CV et l'offre a
-  OpenAI (gpt-4o-mini). La cle `OPENAI_API_KEY` doit etre dans `.env`.
+- **Assistante DRH** (masquee tant que `ASSISTANTE_ACTIVE = False` dans `app/routes.py`) : sur la page
+  d'une offre, analyse du CV (gpt-4o-mini), entretien vocal en direct (gpt-live-1, micro necessaire)
+  puis evaluation. La cle `OPENAI_API_KEY` doit etre dans `.env`.
 
 Les annonces scannees sont lues par OCR avec Tesseract (optionnel en local) :
 - Windows : installer depuis https://github.com/UB-Mannheim/tesseract/wiki en cochant la langue francaise

@@ -48,3 +48,11 @@ class Offre(db.Model):
     competences = db.Column(db.String(500))      # trouvees par le nettoyage Pandas
     titre_ia = db.Column(db.String(300))         # trouves par le modele LoRA (traitement par lot sur Colab)
     competences_ia = db.Column(db.String(500))
+
+
+class EntretienVocal(db.Model):
+    """Une ligne par entretien vocal lance : sert a limiter le nombre d'entretiens payants par jour."""
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    offre_id = db.Column(db.Integer, db.ForeignKey('offre.id'), nullable=False)
+    date = db.Column(db.DateTime, default=now_utc)
