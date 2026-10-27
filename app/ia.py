@@ -140,16 +140,20 @@ def nombre(valeur, maximum):
 
 
 def textes(valeur, taille=3):
-    """Liste d'au plus `taille` textes."""
-    return [str(element) for element in valeur][:taille] if isinstance(valeur, list) else []
+    """Liste d'au plus `taille` textes (liste vide si le modele a renvoye autre chose qu'une liste)."""
+    if not isinstance(valeur, list):
+        return []
+    return [str(element) for element in valeur[:taille]]
 
 
 def analyser_candidature(texte_cv, offre):
     resultat = demander(texte_cv, offre, DEMANDE_ANALYSE)
-    analyse = {cle: textes(resultat.get(cle)) for cle in
-               ['points_forts', 'points_a_ameliorer', 'competences_manquantes', 'recommandations']}
-    return {**analyse, 'resume': str(resultat.get('resume', '')),
-            'compatibilite': nombre(resultat.get('compatibilite'), 100)}
+    return {'resume': str(resultat.get('resume', '')),
+            'compatibilite': nombre(resultat.get('compatibilite'), 100),
+            'points_forts': textes(resultat.get('points_forts')),
+            'points_a_ameliorer': textes(resultat.get('points_a_ameliorer')),
+            'competences_manquantes': textes(resultat.get('competences_manquantes')),
+            'recommandations': textes(resultat.get('recommandations'))}
 
 
 def creer_entretien_vocal(texte_cv, offre, sdp):
@@ -174,11 +178,14 @@ def evaluer_entretien(texte_cv, offre, transcription):
     dialogue = '\n'.join(f"{m['role']} : {m['texte']}" for m in transcription)[-TRANSCRIPTION_MAX:]
     # Simple ajout (pas de .format) : les accolades du modele JSON ci-dessus ne doivent pas etre interpretees
     resultat = demander(texte_cv, offre, f'{DEMANDE_EVALUATION}\n\nTRANSCRIPTION :\n<<<{dialogue}>>>')
-    conseils = [c for c in resultat.get('conseils', []) if isinstance(c, dict)][:3] \
-        if isinstance(resultat.get('conseils'), list) else []
+    conseils = resultat.get('conseils')
+    conseils = conseils[:3] if isinstance(conseils, list) else []
     return {'note_globale': nombre(resultat.get('note_globale'), 100),
-            **{cle: nombre(resultat.get(cle), 10) for cle in ['communication', 'competences_techniques', 'motivation']},
+            'communication': nombre(resultat.get('communication'), 10),
+            'competences_techniques': nombre(resultat.get('competences_techniques'), 10),
+            'motivation': nombre(resultat.get('motivation'), 10),
             'points_forts': textes(resultat.get('points_forts')),
             'axes_amelioration': textes(resultat.get('axes_amelioration')),
-            'conseils': [{'question': str(c.get('question', '')), 'conseil': str(c.get('conseil', ''))} for c in conseils],
+            'conseils': [{'question': str(c.get('question', '')), 'conseil': str(c.get('conseil', ''))}
+                         for c in conseils if isinstance(c, dict)],
             'verdict': str(resultat.get('verdict', ''))}

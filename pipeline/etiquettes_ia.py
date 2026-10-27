@@ -13,7 +13,7 @@ import pandas as pd
 from dotenv import load_dotenv
 from openai import OpenAI, OpenAIError
 from .config import COMPETENCES_GPT, OFFRES_PROPRES
-from .nettoyage_offres import COMPETENCES
+from .nettoyage_offres import COMPETENCES, competences_connues
 
 MODELE = 'gpt-4o-mini'
 DESCRIPTION_MAX = 4000   # caracteres envoyes par offre
@@ -40,8 +40,7 @@ def etiqueter(client, titre, description):
         messages=[{'role': 'system', 'content': CONSIGNE},
                   {'role': 'user', 'content': f'TITRE : {titre}\n\nDESCRIPTION :\n{description[:DESCRIPTION_MAX]}'}])
     choisies = json.loads(reponse.choices[0].message.content).get('competences', [])
-    connues = [c for c in choisies if isinstance(c, str) and c in COMPETENCES]
-    return ', '.join(dict.fromkeys(connues))
+    return competences_connues([str(nom) for nom in choisies])
 
 
 def main():

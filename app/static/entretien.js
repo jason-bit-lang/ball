@@ -53,8 +53,10 @@ $('analyser').addEventListener('click', async event => {
         const analyse = await appeler('analyse');
         $('score').textContent = analyse.compatibilite;
         $('resume').textContent = analyse.resume;
-        ['points_forts', 'points_a_ameliorer', 'competences_manquantes', 'recommandations'].forEach((cle, i) =>
-            remplirListe(['forts', 'faibles', 'manquantes', 'recommandations'][i], analyse[cle]));
+        remplirListe('forts', analyse.points_forts);
+        remplirListe('faibles', analyse.points_a_ameliorer);
+        remplirListe('manquantes', analyse.competences_manquantes);
+        remplirListe('recommandations', analyse.recommandations);
         $('analyse').hidden = false;
         event.target.hidden = true;
         statut.textContent = '';

@@ -24,7 +24,7 @@ from transformers import (AutoModelForSeq2SeqLM, AutoTokenizer, DataCollatorForS
                           Seq2SeqTrainingArguments, set_seed)
 from .config import ADAPTATEUR_DIR, DATASET_DIR, OFFRES_IA, OFFRES_PROPRES
 from .dataset_ia import ENTREE_MAX as DESCRIPTION_MAX, PARTS, PREFIXE
-from .nettoyage_offres import COMPETENCES
+from .nettoyage_offres import competences_connues
 
 MODELE = 'google/flan-t5-small'
 ENTREE_TOKENS, SORTIE_TOKENS = 512, 64  # longueurs maximales en tokens
@@ -115,16 +115,17 @@ def lire_sortie(sortie):
     Seules les competences connues sont gardees, sans doublon : un petit modele invente parfois
     des mots ("sant", "luz") ou repete une competence."""
     poste, _, competences = sortie.partition('| Competences :')
-    connues = [c.strip() for c in competences.split(',') if c.strip() in COMPETENCES]
-    return poste.replace('Poste :', '').strip(), ', '.join(dict.fromkeys(connues))
+    return poste.replace('Poste :', '').strip(), competences_connues(competences.split(','))
 
 
 def traiter_offres(modele, tokenizer):
     """Traitement par lot : le modele lit toutes les offres. Le site lira ensuite data/offres_ia.csv."""
     offres = pd.read_csv(OFFRES_PROPRES).dropna(subset=['url', 'description'])
     sorties = generer(modele, tokenizer, [PREFIXE + d[:DESCRIPTION_MAX] for d in offres['description']])
-    offres_ia = pd.DataFrame({'url': offres['url']})
-    offres_ia['titre_ia'], offres_ia['competences_ia'] = zip(*map(lire_sortie, sorties))
+    resultats = [lire_sortie(sortie) for sortie in sorties]
+    offres_ia = pd.DataFrame({'url': offres['url'],
+                              'titre_ia': [titre for titre, _ in resultats],
+                              'competences_ia': [competences for _, competences in resultats]})
     offres_ia.to_csv(OFFRES_IA, index=False)
     return len(offres_ia)
 
@@ -157,8 +158,10 @@ def main(epoques=EPOQUES):
 
     modele.save_pretrained(ADAPTATEUR_DIR)  # enregistre uniquement l'adaptateur LoRA (quelques Mo)
     tokenizer.save_pretrained(ADAPTATEUR_DIR)
-    scores = {'modele': MODELE, 'epoques': epoques, 'sacrebleu_base': round(score_base, 2),
-              'sacrebleu_lora': round(score_lora, 2), **{f'exemples_{nom}': len(jeux[nom]) for nom in jeux}}
+    scores = {'modele': MODELE, 'epoques': epoques,
+              'sacrebleu_base': round(score_base, 2), 'sacrebleu_lora': round(score_lora, 2),
+              'exemples_train': len(jeux['train']), 'exemples_validation': len(jeux['validation']),
+              'exemples_test': len(jeux['test'])}
     with open(os.path.join(ADAPTATEUR_DIR, 'scores.json'), 'w') as fichier:
         json.dump(scores, fichier, indent=2)
     print(f'Adaptateur enregistre dans : {ADAPTATEUR_DIR}')

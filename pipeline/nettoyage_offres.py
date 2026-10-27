@@ -120,6 +120,16 @@ def qualite_texte(texte):
     return sum(bool(MOT_REGEX.fullmatch(m)) for m in mots) / len(mots) if mots else 0
 
 
+def competences_connues(noms):
+    """Garde seulement les noms de competences connus, sans doublon : ['sante', 'luz', 'sante'] -> 'sante'."""
+    gardees = []
+    for nom in noms:
+        nom = nom.strip()
+        if nom in COMPETENCES and nom not in gardees:
+            gardees.append(nom)
+    return ', '.join(gardees)
+
+
 MENTIONS_MIN = 2  # une seule mention dans une longue annonce est souvent une formule standard
 
 
