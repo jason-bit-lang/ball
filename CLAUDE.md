@@ -173,3 +173,9 @@ Rien n'existe encore pour cette partie.
   les secrets GitHub et les variables d'environnement Render.
 - OpenAI : cle placee par l'apprenant dans `.env` (local) et dans les variables Render.
   Ne jamais la copier dans un fichier versionne ni dans un message.
+
+## Rappels a inclure dans le prochain rapport (partie 3)
+
+- Base locale deplacee de `instance/` vers `database/` (commit 6ce5acd). Sur le PC de l'apprenant :
+  `git pull`, puis deplacer `instance/cvboost.db` dans `database/` et supprimer `instance/`.
+  Sinon le site demarre avec une base vide et les anciens comptes ne sont plus visibles.
