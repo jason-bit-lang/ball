@@ -6,4 +6,5 @@ Ordre des etapes :
 3. python -m pipeline.scraper           recupere les offres d'emploi (data/offres_brutes.csv)
 4. python -m pipeline.nettoyage_offres  nettoie les offres pour l'IA (data/offres_propres.csv)
 5. python -m pipeline.dataset_ia        jeux train / validation / test sans fuite (data/ia/)
+6. python -m pipeline.finetuning_lora   fine-tuning LoRA, SacreBLEU, traitement par lot (GPU : Colab)
 """

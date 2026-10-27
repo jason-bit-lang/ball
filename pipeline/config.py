@@ -13,6 +13,7 @@ OFFRES_BRUTES = os.path.join(DATA_DIR, 'offres_brutes.csv')
 OFFRES_PROPRES = os.path.join(DATA_DIR, 'offres_propres.csv')
 DATASET_DIR = os.path.join(DATA_DIR, 'ia')                 # train / validation / test pour le fine-tuning
 OFFRES_IA = os.path.join(DATA_DIR, 'offres_ia.csv')        # resultats du modele LoRA (crees sur Colab)
+ADAPTATEUR_DIR = os.path.join(BASE_DIR, 'modele', 'lora_cvboost')  # adaptateur LoRA entraine
 
 # Taux de change approximatif pour convertir les salaires en francs congolais (a mettre a jour)
 TAUX_CDF_USD = 2800

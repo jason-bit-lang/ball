@@ -125,7 +125,11 @@ Choix faits pendant la partie 3 :
   Jeu de donnees cree par `python -m pipeline.dataset_ia` (doublons exacts par SHA-256 et
   quasi-doublons retires, separation 80/10/10 par ordre d'empreinte, assertions anti-fuite).
 - Dans flan-t5-small, les matrices `q_proj` et `v_proj` s'appellent `q` et `v` : ce sont elles qui
-  sont ciblees par LoRA (`notebooks/finetuning_lora.ipynb`, versions des bibliotheques fixees).
+  sont ciblees par LoRA. Modele facebook/nllb-200 (depot module 3) ecarte : fait pour traduire,
+  8 fois plus gros.
+- Code du fine-tuning dans un vrai fichier Python, `pipeline/finetuning_lora.py` (choix de
+  l'apprenant) ; le notebook Colab ne fait que l'installer et le lancer. Bibliotheques dans
+  `requirements-ia.txt`, separees de `requirements.txt` (le site n'utilise jamais PyTorch).
 - Le notebook produit `data/offres_ia.csv` (titre_ia, competences_ia) et l'adaptateur
   `modele/lora_cvboost/`, que l'apprenant ajoute au depot.
 - Table `Offre` dans la base du site, remplie au demarrage par `app/offres.py` (cle = url).

@@ -38,8 +38,10 @@ Le detail des objectifs et des etapes du projet se trouve dans `CLAUDE.md`.
 │   ├── audit_logs.py    lecture du journal, detection des fraudes, chargement dans analytics.db
 │   ├── kpi.py           statistiques d'usage en SQL (GROUP BY, HAVING)
 │   ├── nettoyage_offres.py  nettoyage Pandas des offres d'emploi
-│   └── dataset_ia.py    jeu de donnees anti-fuite pour le fine-tuning (partie 3)
-├── notebooks/           finetuning_lora.ipynb (a ouvrir dans Google Colab)
+│   ├── dataset_ia.py    jeu de donnees anti-fuite pour le fine-tuning (partie 3)
+│   └── finetuning_lora.py   fine-tuning LoRA, score SacreBLEU, traitement par lot des offres
+├── notebooks/           finetuning_lora.ipynb : lance finetuning_lora.py sur Google Colab (GPU)
+├── modele/              adaptateur LoRA entraine (lora_cvboost/)
 ├── data/                analytics.db, fichiers d'offres, data/ia/ (train, validation, test)
 ├── logs/                journal du site (non versionne)
 ├── database/            base SQLite (creee automatiquement, non versionnee)
@@ -73,8 +75,10 @@ python -m pipeline.dataset_ia        # data/offres_propres.csv -> data/ia/*.json
 
 ## IA (partie 3)
 
-- **Fine-tuning LoRA** : ouvrir `notebooks/finetuning_lora.ipynb` dans Google Colab (GPU T4), tout executer,
-  puis ajouter au depot les deux fichiers telecharges : `data/offres_ia.csv` et `modele/lora_cvboost/`.
+- **Fine-tuning LoRA** : le code est dans `pipeline/finetuning_lora.py`. Sur Google Colab (GPU T4) : ouvrir
+  `notebooks/finetuning_lora.ipynb` et tout executer, puis ajouter au depot `data/offres_ia.csv` et
+  `modele/lora_cvboost/`. En local : `pip install torch -r requirements-ia.txt` puis
+  `python -m pipeline.finetuning_lora` (plus lent sans GPU). Ces bibliotheques ne sont pas utiles au site.
 - **Matching** : au demarrage, `run.py` copie les offres de `data/` dans la base. Le bouton
   "Rechercher des offres" compare le CV aux offres avec TF-IDF (scikit-learn), sans PyTorch.
 - **Assistante DRH** (masquee tant que `ASSISTANTE_ACTIVE = False` dans `app/routes.py`) : sur la page
