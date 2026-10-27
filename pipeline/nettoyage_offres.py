@@ -101,7 +101,8 @@ def convertir_salaire(texte):
 
 # Annonces qui ne sont pas des offres : resultats d'un recrutement deja termine
 RESULTATS_REGEX = re.compile(r'publication (?:provisoire |definitive )?des resultats|liste restreinte'
-                             r'|intention d.?attribution|avis d.?attribution|attribution du marche')
+                             r'|intention d.?attribution|avis d.?attribution|attribution du marche'
+                             r'|avis d.?infructuosite|declare infructueux')
 
 # Qualite d'un texte (surtout utile pour l'OCR) : part des mots bien formes
 MOT_REGEX = re.compile(r'[^\W\d_]{2,}|\d+')

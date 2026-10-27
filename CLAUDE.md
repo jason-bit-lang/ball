@@ -135,6 +135,11 @@ Choix faits pendant la partie 3 :
   `data/offres_ia.csv` (titre_ia, competences_ia, 116 offres) et `modele/lora_cvboost/` sont dans
   le depot. Les competences produites par le modele sont filtrees (seulement les noms connus, sans
   doublon). Le matching donne le meme classement avec ou sans ces colonnes.
+- Second entrainement (27/10, version en place) : competences cibles relues par gpt-4o-mini
+  (`pipeline/etiquettes_ia.py`, `data/competences_gpt.csv`), 118 offres (83/10/11). SacreBLEU test
+  2,6 -> 35,3. Justesse des competences sur le test (F1 contre gpt-4o-mini) : 0,24 -> 0,35 ; les
+  mots-cles du nettoyage restent a 0,49. mediacongo n'a pas d'archives (6 pages d'offres ouvertes).
+  Un "avis d'infructuosite" est ensuite ajoute au filtre des annonces de resultats (117 offres).
 - Table `Offre` dans la base du site, remplie au demarrage par `app/offres.py` (cle = url).
 - Assistante DRH reactivee (`ASSISTANTE_ACTIVE = True` dans `app/routes.py`) apres un test avec la
   vraie API le 27/10 : analyse 6,4 s, creation de la session vocale 1 a 2 s, premier mot de la
