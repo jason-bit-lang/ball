@@ -12,6 +12,7 @@ ANALYTICS_DB = os.path.join(DATA_DIR, 'analytics.db')     # base des statistique
 OFFRES_BRUTES = os.path.join(DATA_DIR, 'offres_brutes.csv')
 OFFRES_PROPRES = os.path.join(DATA_DIR, 'offres_propres.csv')
 DATASET_DIR = os.path.join(DATA_DIR, 'ia')                 # train / validation / test pour le fine-tuning
+COMPETENCES_GPT = os.path.join(DATA_DIR, 'competences_gpt.csv')  # competences relues par gpt-4o-mini
 OFFRES_IA = os.path.join(DATA_DIR, 'offres_ia.csv')        # resultats du modele LoRA (crees sur Colab)
 ADAPTATEUR_DIR = os.path.join(BASE_DIR, 'modele', 'lora_cvboost')  # adaptateur LoRA entraine
 

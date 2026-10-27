@@ -11,14 +11,15 @@ Anti-fuite :
 3. Separation 80 / 10 / 10 selon l'empreinte : une offre tombe toujours dans le meme jeu.
 4. Des assertions verifient automatiquement qu'aucune offre n'est dans deux jeux a la fois.
 
-Entree  : data/offres_propres.csv
+Entree  : data/offres_propres.csv (+ data/competences_gpt.csv s'il existe : competences relues par
+          gpt-4o-mini, plus justes que celles des mots-cles ; voir pipeline/etiquettes_ia.py)
 Sorties : data/ia/train.jsonl, data/ia/validation.jsonl, data/ia/test.jsonl
 Lancement : python -m pipeline.dataset_ia
 """
 import hashlib
 import os
 import pandas as pd
-from .config import DATASET_DIR, OFFRES_PROPRES
+from .config import COMPETENCES_GPT, DATASET_DIR, OFFRES_PROPRES
 from .nettoyage_offres import normaliser
 
 PREFIXE = 'Extraire le poste et les competences : '
@@ -91,6 +92,12 @@ def verifier(jeux, total):
 def preparer(offres):
     """Renvoie les trois jeux et un resume chiffre."""
     resume = {'offres': len(offres)}
+    if os.path.exists(COMPETENCES_GPT):
+        # Competences relues par gpt-4o-mini quand elles existent, sinon celles des mots-cles
+        gpt = pd.read_csv(COMPETENCES_GPT).dropna(subset=['competences_gpt'])
+        offres = offres.merge(gpt, on='url', how='left')
+        offres['competences'] = offres['competences_gpt'].fillna(offres['competences'])
+        resume['competences_gpt'] = int(offres['competences_gpt'].notna().sum())
     df = offres[['titre', 'competences', 'description']].dropna(subset=['titre', 'description']).copy()
     df['hash'] = df['description'].map(empreinte)
 
