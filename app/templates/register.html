@@ -1,28 +1,27 @@
 {% extends "base.html" %}
+{% block title %}Inscription - CVBoost{% endblock %}
 {% block content %}
 <div class="form-container">
 <h2>Inscription</h2>
-{% if error %}
-<p>{{ error }}</p>
-{% endif %}
 
+{# Les champs gardent leur valeur si le formulaire contient une erreur (sauf les mots de passe) #}
 <form method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <label>Nom</label>
-    <input type="text" name="nom" placeholder="Votre nom" required>
+    <input type="text" name="nom" value="{{ form.get('nom', '') }}" placeholder="Votre nom" required>
     <label>Prénom</label>
-    <input type="text" name="prenom" placeholder="Votre prénom" required>
+    <input type="text" name="prenom" value="{{ form.get('prenom', '') }}" placeholder="Votre prénom" required>
     <label>Email</label>
-    <input type="text" name="email" placeholder="exemple@gmail.com" required>
-    <label>Mot de passe</label>
-    <input type="password" name="password" placeholder="Mot secret" required>
+    <input type="email" name="email" value="{{ form.get('email', '') }}" placeholder="exemple@gmail.com" required>
+    <label>Mot de passe (8 caractères minimum)</label>
+    <input type="password" name="password" placeholder="Mot de passe" minlength="8" required>
     <label>Confirmer le mot de passe</label>
-    <input type="password" name="confirmation_mot_secret" placeholder="Confirmez votre mot secret"required>
-    <br><br>
-    <button type="submit">Inscrivez-vous</button>
+    <input type="password" name="confirmation_mot_secret" placeholder="Confirmez le mot de passe" minlength="8" required>
+    <button type="submit">S'inscrire</button>
 </form>
-<p>
-    Avez-vous déjà un compte ?
-    <a class="form-footer" href="/login">Connectez-vous</a>
+<p class="form-footer">
+    Vous avez déjà un compte ?
+    <a href="{{ url_for('login') }}">Connectez-vous</a>
 </p>
 </div>
 {% endblock %}

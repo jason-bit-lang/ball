@@ -1,0 +1,9 @@
+{
+  "modele": "google/flan-t5-small",
+  "epoques": 20,
+  "sacrebleu_base": 2.62,
+  "sacrebleu_lora": 35.3,
+  "exemples_train": 83,
+  "exemples_validation": 10,
+  "exemples_test": 11
+}

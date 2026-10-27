@@ -1,0 +1,8 @@
+# Bibliotheques du fine-tuning LoRA (pipeline/finetuning_lora.py), en plus de requirements.txt.
+# Inutiles pour le site : ne pas les installer sur Render. PyTorch est deja installe sur Colab ;
+# en local : pip install torch
+transformers==4.46.3
+peft==0.13.2
+datasets==3.1.0
+accelerate==1.1.1
+sacrebleu==2.4.3

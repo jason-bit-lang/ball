@@ -1,0 +1,31 @@
+# Environnements virtuels Python (chacun recree le sien avec requirements.txt)
+venv/
+env/
+.venv/
+
+# Fichiers compiles par Python
+__pycache__/
+*.pyc
+
+# Secrets : la cle OpenAI et les mots de passe restent sur la machine
+.env
+.env.*
+!.env.example
+
+# Base de donnees locale (recreee au demarrage par run.py)
+database/*
+!database/.gitkeep
+*.db
+
+# CV televerses par les utilisateurs (donnees personnelles)
+uploads/*
+!uploads/.gitkeep
+
+# Journal du site (contient des adresses IP et des emails)
+logs/
+
+# Fichiers d'editeur et du systeme
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

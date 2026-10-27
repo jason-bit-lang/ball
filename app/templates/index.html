@@ -1,12 +1,17 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="hero-section">
-<h2>Bienvenue sur CVBoost.</h2>
-<p> Vous avez l'opportunité de changer votre carrière grâce à l'intelligence artificielle.
-    CVBoost étudie votre CV et vous permet d'augmenter vos chances de trouver des opportunités professionelles.
+<h2>Bienvenue sur CVBoost</h2>
+<p>Vous avez l'opportunité de changer votre carrière grâce à l'intelligence artificielle.
+    CVBoost étudie votre CV et vous permet d'augmenter vos chances de trouver des opportunités professionnelles.
 </p>
 <p>
-    <a href="/register" class="btn-primary">Commencer maintenant.</a>
+    {# Le bouton mene a l'etape suivante selon que l'utilisateur est connecte ou non #}
+    {% if current_user.is_authenticated %}
+        <a href="{{ url_for('upload') }}" class="btn-primary">Envoyer mon CV</a>
+    {% else %}
+        <a href="{{ url_for('register') }}" class="btn-primary">Commencer maintenant</a>
+    {% endif %}
 </p>
 </div>
 {% endblock %}

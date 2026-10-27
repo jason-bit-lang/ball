@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}{{ offre.titre }} - CVBoost{% endblock %}
+{% block content %}
+<div class="page-large{% if assistante %} deux-colonnes{% endif %}">
+    <article>
+        <h2>{{ offre.titre }}</h2>
+        <p><strong>{{ offre.entreprise }}</strong> - {{ offre.lieu }}
+           {% if offre.date_publication %}- publiée le {{ offre.date_publication }}{% endif %}</p>
+        {% if offre.competences %}<p class="discret">Compétences : {{ offre.competences }}</p>{% endif %}
+        <p>
+            <a href="{{ offre.url }}" target="_blank" rel="noopener">Voir l'annonce d'origine</a>
+            {% if offre.lien_candidature %}
+            - <a href="{{ offre.lien_candidature }}" target="_blank" rel="noopener">Postuler</a>
+            {% endif %}
+        </p>
+        <div class="description">{{ offre.description }}</div>
+        <a href="{{ url_for('recherche', id=document.id) }}" class="btn-secondary">Retour aux offres</a>
+    </article>
+
+    {# Assistante DRH : le contenu est rempli par static/entretien.js (masquee si ASSISTANTE_ACTIVE = False) #}
+    {% if assistante %}
+    <aside id="entretien" class="ia-card" data-url="{{ url_for('entretien', offre_id=offre.id, id=document.id, etape='analyse') }}">
+        <h3>Assistante DRH</h3>
+        <p>Entraînez-vous : l'assistante analyse votre CV pour ce poste, puis vous fait passer un entretien
+           <strong>à voix haute</strong>, comme une vraie recruteuse.</p>
+        <p class="discret">Votre CV et vos réponses sont envoyés à OpenAI pendant l'analyse et l'entretien.</p>
+
+        <button type="button" id="analyser">Analyser ma candidature</button>
+        <div id="analyse" hidden>
+            <p class="compatibilite">Compatibilité : <strong id="score"></strong> %</p>
+            <p id="resume"></p>
+            <h4>Points forts</h4><ul id="forts"></ul>
+            <h4>Points à améliorer</h4><ul id="faibles"></ul>
+            <h4>Compétences manquantes</h4><ul id="manquantes"></ul>
+            <h4>Conseils pour votre CV</h4><ul id="recommandations"></ul>
+        </div>
+
+        <button type="button" id="demarrer">Démarrer l'entretien vocal</button>
+        <div id="direct" hidden>
+            <p><span id="etat">Connexion...</span> - <span id="minuteur">00:00</span></p>
+            <div id="conversation"></div>
+            <div class="boutons">
+                <button type="button" id="micro">Couper le micro</button>
+                <button type="button" id="terminer">Terminer l'entretien</button>
+            </div>
+        </div>
+
+        <div id="evaluation" hidden>
+            <h4>Évaluation de l'entretien</h4>
+            <p class="compatibilite">Note globale : <strong id="note"></strong> / 100</p>
+            <p>Communication : <span id="communication"></span> / 10 -
+               Compétences techniques : <span id="competences"></span> / 10 -
+               Motivation : <span id="motivation"></span> / 10</p>
+            <p id="verdict"></p>
+            <h4>Points forts</h4><ul id="eval-forts"></ul>
+            <h4>Axes d'amélioration</h4><ul id="eval-axes"></ul>
+            <h4>Réponses à retravailler</h4><ul id="conseils"></ul>
+        </div>
+        <p id="statut" class="discret" aria-live="polite"></p>
+    </aside>
+    {% endif %}
+</div>
+{% if assistante %}<script src="{{ url_for('static', filename='entretien.js') }}"></script>{% endif %}
+{% endblock %}

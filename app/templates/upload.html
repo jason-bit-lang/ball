@@ -1,12 +1,14 @@
 {% extends "base.html" %}
+{% block title %}Envoi de CV - CVBoost{% endblock %}
 {% block content %}
 <div class="form-container">
+<h2>Envoyer mon CV</h2>
 
-<h2>Upload CV</h2>
 <form method="POST" enctype="multipart/form-data">
-    <input type="file" name="cv" required>
-    <button type="submit">Soumettre</button>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="file" name="cv" accept=".pdf,.docx" required>
+    <button type="submit">Envoyer</button>
 </form>
-<p>Formats acceptés: PDF,DOCX (max 5mb)</p>
+<p class="file-limits">Formats acceptés : PDF, DOCX (5 Mo maximum)</p>
 </div>
 {% endblock %}
