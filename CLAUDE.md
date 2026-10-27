@@ -130,8 +130,11 @@ Choix faits pendant la partie 3 :
 - Code du fine-tuning dans un vrai fichier Python, `pipeline/finetuning_lora.py` (choix de
   l'apprenant) ; le notebook Colab ne fait que l'installer et le lancer. Bibliotheques dans
   `requirements-ia.txt`, separees de `requirements.txt` (le site n'utilise jamais PyTorch).
-- Le notebook produit `data/offres_ia.csv` (titre_ia, competences_ia) et l'adaptateur
-  `modele/lora_cvboost/`, que l'apprenant ajoute au depot.
+- Resultats LoRA (essai complet du 27/10 sur processeur, 20 epoques, 24 min ; ~5 min sur GPU Colab) :
+  SacreBLEU test 3,0 sans LoRA -> 30,9 avec LoRA, 0,45 % des parametres entraines, adaptateur 1,4 Mo.
+  `data/offres_ia.csv` (titre_ia, competences_ia, 116 offres) et `modele/lora_cvboost/` sont dans
+  le depot. Les competences produites par le modele sont filtrees (seulement les noms connus, sans
+  doublon). Le matching donne le meme classement avec ou sans ces colonnes.
 - Table `Offre` dans la base du site, remplie au demarrage par `app/offres.py` (cle = url).
 - Assistante DRH reactivee (`ASSISTANTE_ACTIVE = True` dans `app/routes.py`) apres un test avec la
   vraie API le 27/10 : analyse 6,4 s, creation de la session vocale 1 a 2 s, premier mot de la
@@ -216,4 +219,4 @@ l'envoi (`BackgroundTasks` de FastAPI).
 - Cle OpenAI dans `.env` et credit sur le compte OpenAI.
 - Entretien vocal dans un vrai navigateur (Chrome ou Edge) : entendre la recruteuse, etre compris,
   evaluation affichee en moins de 10 s.
-- Notebook LoRA sur Colab : renvoyer le score SacreBLEU, `offres_ia.csv` et `lora_cvboost.zip`.
+- Notebook LoRA sur Colab : facultatif (l'essai complet est deja fait), utile pour la demonstration.

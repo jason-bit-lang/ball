@@ -24,6 +24,7 @@ from transformers import (AutoModelForSeq2SeqLM, AutoTokenizer, DataCollatorForS
                           Seq2SeqTrainingArguments, set_seed)
 from .config import ADAPTATEUR_DIR, DATASET_DIR, OFFRES_IA, OFFRES_PROPRES
 from .dataset_ia import ENTREE_MAX as DESCRIPTION_MAX, PARTS, PREFIXE
+from .nettoyage_offres import COMPETENCES
 
 MODELE = 'google/flan-t5-small'
 ENTREE_TOKENS, SORTIE_TOKENS = 512, 64  # longueurs maximales en tokens
@@ -110,9 +111,12 @@ def generer(modele, tokenizer, textes):
 
 
 def lire_sortie(sortie):
-    """'Poste : X | Competences : a, b' -> ('X', 'a, b')"""
+    """'Poste : X | Competences : a, b' -> ('X', 'a, b').
+    Seules les competences connues sont gardees, sans doublon : un petit modele invente parfois
+    des mots ("sant", "luz") ou repete une competence."""
     poste, _, competences = sortie.partition('| Competences :')
-    return poste.replace('Poste :', '').strip(), competences.strip()
+    connues = [c.strip() for c in competences.split(',') if c.strip() in COMPETENCES]
+    return poste.replace('Poste :', '').strip(), ', '.join(dict.fromkeys(connues))
 
 
 def traiter_offres(modele, tokenizer):
