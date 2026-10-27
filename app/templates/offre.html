@@ -28,9 +28,22 @@
             <p id="resume"></p>
             <h4>Points forts</h4><ul id="forts"></ul>
             <h4>Points à améliorer</h4><ul id="faibles"></ul>
+            <h4>Compétences manquantes</h4><ul id="manquantes"></ul>
+            <h4>Conseils pour votre CV</h4><ul id="recommandations"></ul>
         </div>
         <div id="conversation"></div>
         <p id="statut" class="discret" aria-live="polite"></p>
+        <div id="evaluation" hidden>
+            <h4>Évaluation de l'entretien</h4>
+            <p class="compatibilite">Note globale : <strong id="note"></strong> / 100</p>
+            <p>Communication : <span id="communication"></span> / 10 -
+               Compétences techniques : <span id="competences"></span> / 10 -
+               Motivation : <span id="motivation"></span> / 10</p>
+            <p id="verdict"></p>
+            <h4>Points forts</h4><ul id="eval-forts"></ul>
+            <h4>Axes d'amélioration</h4><ul id="eval-axes"></ul>
+            <h4>Réponses à retravailler</h4><ul id="conseils"></ul>
+        </div>
         <form id="formulaire-reponse" class="reponse" hidden>
             <label for="reponse">Votre réponse</label>
             <textarea id="reponse" rows="4" maxlength="1500" required></textarea>

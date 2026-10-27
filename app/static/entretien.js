@@ -48,12 +48,21 @@ async function envoyer() {
     }
 }
 
-// Affiche la question suivante, ou termine l'entretien s'il n'y en a plus
+// Affiche l'evaluation de fin d'entretien
+function afficherEvaluation(evaluation) {
+    document.getElementById('note').textContent = evaluation.note_globale;
+    document.getElementById('communication').textContent = evaluation.communication;
+    document.getElementById('competences').textContent = evaluation.competences_techniques;
+    document.getElementById('motivation').textContent = evaluation.motivation;
+    document.getElementById('verdict').textContent = evaluation.verdict;
+    remplirListe('eval-forts', evaluation.points_forts);
+    remplirListe('eval-axes', evaluation.axes_amelioration);
+    remplirListe('conseils', evaluation.conseils.map(c => c.question + ' : ' + c.conseil));
+    document.getElementById('evaluation').hidden = false;
+}
+
+// Affiche la question suivante
 function poserQuestion(question) {
-    if (!question) {
-        ajouterMessage("Fin de l'entretien. Bonne chance pour votre candidature.", 'fin');
-        return;
-    }
     historique.push(question);
     ajouterMessage(question, 'assistante');
     formulaire.hidden = false;
@@ -72,6 +81,8 @@ document.getElementById('demarrer').addEventListener('click', async event => {
     document.getElementById('resume').textContent = analyse.resume;
     remplirListe('forts', analyse.points_forts);
     remplirListe('faibles', analyse.points_a_ameliorer);
+    remplirListe('manquantes', analyse.competences_manquantes);
+    remplirListe('recommandations', analyse.recommandations);
     document.getElementById('analyse').hidden = false;
     poserQuestion(analyse.question);
 });
@@ -91,6 +102,10 @@ formulaire.addEventListener('submit', async event => {
         formulaire.hidden = false;
         return;
     }
-    ajouterMessage(suite.commentaire, 'commentaire');
-    poserQuestion(suite.question);
+    if (suite.question) {
+        poserQuestion(suite.question);
+    } else {
+        ajouterMessage(suite.conclusion, 'fin');  // fin de l'entretien : remerciement puis evaluation
+        afficherEvaluation(suite.evaluation);
+    }
 });

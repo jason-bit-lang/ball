@@ -131,6 +131,16 @@ Choix faits pendant la partie 3 :
 - Table `Offre` dans la base du site, remplie au demarrage par `app/offres.py` (cle = url).
 - Ordre choisi par l'apprenant : d'abord le matching et la table des offres. L'assistante DRH est
   codee mais masquee (`ASSISTANTE_ACTIVE = False` dans `app/routes.py`) jusqu'a son feu vert.
+- Prompts de l'assistante inspires du projet IA_DRH (fourni par l'apprenant) : le recruteur prend
+  l'initiative, pose une seule question a la fois, rebondit, demande role / methode / resultat,
+  n'evalue pas pendant l'entretien ; a la fin, evaluation chiffree (note globale /100,
+  communication, competences techniques et motivation /10, conseils par reponse, verdict).
+  L'analyse ajoute les competences manquantes et des conseils pour ameliorer le CV.
+- Option vocale reprise d'IA_DRH : entretien en direct avec l'API Live d'OpenAI (`gpt-live-1`,
+  WebRTC, environ 0,05 $ la minute hors modele de raisonnement, non disponible en offre gratuite).
+  Le serveur cree seulement la session (le son passe directement entre le navigateur et OpenAI,
+  Render n'est pas charge) et limite les evenements autorises au navigateur. Voix a choisir par
+  l'apprenant.
 - Assistante DRH : 5 questions, delai OpenAI de 8 s sans relance, reponses JSON, l'historique de
   l'entretien est garde par le navigateur (aucune table supplementaire).
 
@@ -171,7 +181,10 @@ Hebergement gratuit sur Render (offre Free : environ 512 Mo de RAM, mise en veil
 - Une route `/health` est appelee toutes les 10 minutes par UptimeRobot ou cron-job.org pour
   garder le site eveille et respecter la limite des 10 secondes.
 
-Rien n'existe encore pour cette partie.
+Rien n'existe encore pour cette partie. A reprendre du depot module 3 (tin-mzl) : le prompt du pitch
+(coach professionnel, texte continu a la premiere personne, sans puces ni symboles, phrases courtes
+pour la voix ; ramener a environ 60 mots) et la suppression du fichier audio temporaire apres
+l'envoi (`BackgroundTasks` de FastAPI).
 
 ### Partie 6 : Tests, bugs et documentation
 
