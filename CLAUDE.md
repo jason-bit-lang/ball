@@ -205,3 +205,11 @@ l'envoi (`BackgroundTasks` de FastAPI).
   les secrets GitHub et les variables d'environnement Render.
 - OpenAI : cle placee par l'apprenant dans `.env` (local) et dans les variables Render.
   Ne jamais la copier dans un fichier versionne ni dans un message.
+
+## Verifications en attente cote apprenant (rappelees dans le rapport de la partie 3)
+
+- Deplacer `instance/cvboost.db` vers `database/`, puis `pip install -r requirements.txt`.
+- Cle OpenAI dans `.env` et credit sur le compte OpenAI.
+- Entretien vocal dans un vrai navigateur (Chrome ou Edge) : entendre la recruteuse, etre compris,
+  evaluation affichee en moins de 10 s.
+- Notebook LoRA sur Colab : renvoyer le score SacreBLEU, `offres_ia.csv` et `lora_cvboost.zip`.
