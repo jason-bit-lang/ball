@@ -58,6 +58,14 @@ Le projet se fait en 6 parties. Pour chaque partie : analyser, comprendre, agir,
 tout fonctionne sans bug. A la fin de chaque partie, Claude livre un rapport PDF : ce qui a ete
 fait, ce qui fonctionne, ce qui ne fonctionne pas encore. Delai total : 3 jours.
 
+Attentes de l'apprenant (a respecter dans toutes les parties) :
+- Avancer partie par partie, sans se presser ; expliquer simplement, en francais.
+- Code court et peu abondant : l'apprenant doit le comprendre et le maitriser entierement.
+  Pas d'ecritures "astucieuses" (`**{...}`, `zip(*map(...))`, index croises...) : ecrire en clair.
+- Chaque rapport PDF contient une section "Problemes rencontres et solutions" (probleme, cause,
+  solution) et un rappel des verifications a faire cote apprenant.
+- Prevenir l'apprenant a la fin des taches longues (scraping, entrainement, tests).
+
 ### Partie 1 : Utilisateurs et interfaces
 
 - Application Flask et authentification : inscription, connexion securisee (hashage Werkzeug,
@@ -225,3 +233,24 @@ l'envoi (`BackgroundTasks` de FastAPI).
 - Entretien vocal dans un vrai navigateur (Chrome ou Edge) : entendre la recruteuse, etre compris,
   evaluation affichee en moins de 10 s.
 - Notebook LoRA sur Colab : facultatif (l'essai complet est deja fait), utile pour la demonstration.
+
+## Etat du projet et environnement de travail (mis a jour le 27/10)
+
+- Parties 1, 2 et 3 terminees, rapports PDF livres (partie 2 : section 7 problemes/solutions ;
+  partie 3 : sections 2 bis resultats LoRA, 3 assistante DRH, 4 bis problemes, 4 ter taille du code).
+  Prochaine etape : partie 4 (design : proposer 2 ou 3 themes, l'apprenant choisit), puis 5 et 6.
+  A corriger en partie 4 : description des offres en un seul bloc, dates au format 2026-10-07,
+  scores TF-IDF peu parlants (afficher un niveau), phrase sur l'envoi des donnees a OpenAI.
+- Les rapports (HTML sources + PDF) et les tests (test_partie1_v2.py, test_partie2_*.py,
+  test_partie3.py, navigateur *.js) sont dans le dossier scratchpad de la session, pas dans le
+  depot. PDF generes depuis le HTML avec Playwright (page.pdf). Les tests de la partie 3 remplacent
+  OpenAI par un faux client ; activer l'assistante a l'execution (rt.ASSISTANTE_ACTIVE = True).
+- Environnement cloud : cle OpenAI dans la variable `OPENAI_API_KEY` (visible seulement dans les
+  sessions demarrees apres son ajout). Domaines autorises ajoutes par l'apprenant : mediacongo.net,
+  api.openai.com, huggingface.co, cdn-lfs.huggingface.co, cas-bridge.xethub.hf.co,
+  cas-server.xethub.hf.co, us.aws.cdn.hf.co, download.pytorch.org, download-r2.pytorch.org.
+- Entrainement LoRA sur processeur : venv Python 3.12, `pip install torch --index-url
+  https://download.pytorch.org/whl/cpu` (PyTorch de PyPI impose 2,5 Go de bibliotheques NVIDIA),
+  puis `pip install -r requirements-ia.txt pandas==2.2.3`. Environ 25 min pour 20 epoques.
+- Le workflow de scraping quotidien n'est actif qu'une fois la branche fusionnee dans `main`
+  (pas de pull request sans demande de l'apprenant).
