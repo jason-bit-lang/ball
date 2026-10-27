@@ -129,6 +129,8 @@ Choix faits pendant la partie 3 :
 - Le notebook produit `data/offres_ia.csv` (titre_ia, competences_ia) et l'adaptateur
   `modele/lora_cvboost/`, que l'apprenant ajoute au depot.
 - Table `Offre` dans la base du site, remplie au demarrage par `app/offres.py` (cle = url).
+- Ordre choisi par l'apprenant : d'abord le matching et la table des offres. L'assistante DRH est
+  codee mais masquee (`ASSISTANTE_ACTIVE = False` dans `app/routes.py`) jusqu'a son feu vert.
 - Assistante DRH : 5 questions, delai OpenAI de 8 s sans relance, reponses JSON, l'historique de
   l'entretien est garde par le navigateur (aucune table supplementaire).
 

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}{{ offre.titre }} - CVBoost{% endblock %}
 {% block content %}
-<div class="page-large deux-colonnes">
+<div class="page-large{% if assistante %} deux-colonnes{% endif %}">
     <article>
         <h2>{{ offre.titre }}</h2>
         <p><strong>{{ offre.entreprise }}</strong> - {{ offre.lieu }}
@@ -17,7 +17,8 @@
         <a href="{{ url_for('recherche', id=document.id) }}" class="btn-secondary">Retour aux offres</a>
     </article>
 
-    {# Assistante DRH : le contenu est rempli par static/entretien.js #}
+    {# Assistante DRH : le contenu est rempli par static/entretien.js (masquee si ASSISTANTE_ACTIVE = False) #}
+    {% if assistante %}
     <aside id="entretien" class="ia-card" data-url="{{ url_for('entretien', offre_id=offre.id, id=document.id) }}">
         <h3>Assistante DRH</h3>
         <p>Entraînez-vous : l'assistante analyse votre CV pour ce poste puis vous pose 5 questions.</p>
@@ -36,6 +37,7 @@
             <button type="submit">Envoyer ma réponse</button>
         </form>
     </aside>
+    {% endif %}
 </div>
-<script src="{{ url_for('static', filename='entretien.js') }}"></script>
+{% if assistante %}<script src="{{ url_for('static', filename='entretien.js') }}"></script>{% endif %}
 {% endblock %}

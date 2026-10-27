@@ -17,6 +17,8 @@ EMAIL_REGEX = r'[^@\s]+@[^@\s]+\.[^@\s]+'
 PASSWORD_MIN_LENGTH = 8
 STATUT_ANALYSE = 'CV analysé'
 STATUT_ILLISIBLE = 'CV illisible (scanné ou abîmé)'
+# Assistante DRH codee mais masquee pour le moment : passer a True pour l'afficher
+ASSISTANTE_ACTIVE = False
 
 
 def form_value(name):
@@ -222,7 +224,8 @@ def recherche(id):
 @login_required
 def offre(offre_id, id):
     """Detail d'une offre, avec l'assistante DRH a cote."""
-    return render_template('offre.html', offre=db.get_or_404(Offre, offre_id), document=document_du_user(id))
+    return render_template('offre.html', offre=db.get_or_404(Offre, offre_id), document=document_du_user(id),
+                           assistante=ASSISTANTE_ACTIVE)
 
 
 @app.route('/entretien/<int:offre_id>/cv/<int:id>', methods=['POST'])
@@ -230,6 +233,8 @@ def offre(offre_id, id):
 def entretien(offre_id, id):
     """Simulation d'entretien. Le navigateur envoie la conversation deja ecoulee (questions et reponses) :
     vide -> analyse du CV et premiere question ; sinon -> commentaire et question suivante."""
+    if not ASSISTANTE_ACTIVE:
+        return jsonify(erreur="L'assistante DRH n'est pas encore disponible."), 404
     offre = db.get_or_404(Offre, offre_id)
     texte = texte_du_cv(document_du_user(id))
     historique = (request.get_json(silent=True) or {}).get('historique', [])
