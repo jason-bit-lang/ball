@@ -37,7 +37,7 @@ Le detail des objectifs et des etapes du projet se trouve dans `CLAUDE.md`.
 │   └── nettoyage_offres.py  nettoyage Pandas des offres d'emploi
 ├── data/                analytics.db et fichiers d'offres
 ├── logs/                journal du site (non versionne)
-├── instance/            base SQLite (creee automatiquement, non versionnee)
+├── database/            base SQLite (creee automatiquement, non versionnee)
 ├── uploads/             CV televerses (non versionnes)
 ├── .env.example         modele du fichier .env
 ├── requirements.txt

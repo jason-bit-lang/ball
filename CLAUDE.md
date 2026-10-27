@@ -23,7 +23,9 @@ et peut lui faire passer un entretien sur ce poste.
 - Aucun secret dans le depot : la cle OpenAI, la SECRET_KEY et les acces sont lus depuis `.env`
   (python-dotenv) en local et depuis les variables d'environnement sur Render. `.env` est dans
   `.gitignore` ; seul `.env.example` (sans vraies valeurs) est versionne.
-- Ne jamais pousser `venv/`, `env/`, `__pycache__/`, la base `instance/*.db` ni le contenu de `uploads/`.
+- Ne jamais pousser `venv/`, `env/`, `__pycache__/`, la base `database/*.db` ni le contenu de `uploads/`.
+- La base SQLite locale est rangee dans le dossier `database/` (fichier `database/cvboost.db`),
+  jamais dans `instance/` : ne pas utiliser le nom `instance` pour ce dossier.
 - Toute fonctionnalite doit repondre en moins de 10 secondes, meme avec une connexion lente :
   prevoir des timeouts et un message d'erreur clair cote utilisateur.
 
