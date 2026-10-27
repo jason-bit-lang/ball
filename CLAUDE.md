@@ -141,8 +141,8 @@ Choix faits pendant la partie 3 :
   Le serveur cree seulement la session (le son passe directement entre le navigateur et OpenAI,
   Render n'est pas charge) ; le navigateur ne peut envoyer que l'accueil et le raccrochage.
   Limites : 5 entretiens vocaux par utilisateur sur 24 h (table `EntretienVocal`), 10 minutes
-  par entretien. Voix : `marin` par defaut (VOIX dans `app/ia.py`), l'apprenant hesite entre
-  sage, cedar et marin (extraits a generer quand une cle valide sera disponible).
+  par entretien. Voix : `sage` (VOIX dans `app/ia.py`), choisie par l'apprenant apres ecoute
+  d'extraits gpt-4o-mini-tts de sage, cedar et marin.
 - Deroulement : analyse ecrite du CV (gpt-4o-mini), entretien vocal, puis evaluation de la
   transcription (gpt-4o-mini). Paquet `openai==3.36.1` (version qui contient l'API Live).
 

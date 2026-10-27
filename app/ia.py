@@ -18,7 +18,7 @@ from pypdf import PdfReader
 
 MODELE = 'gpt-4o-mini'    # analyse et evaluation (texte)
 MODELE_VOCAL = 'gpt-live-1'
-VOIX = 'marin'            # voix de la recruteuse (au choix : marin, sage, cedar...)
+VOIX = 'sage'             # voix de la recruteuse, choisie par l'apprenant parmi sage, cedar et marin
 DELAI = 8                 # secondes : la page doit repondre en moins de 10 s
 TEXTE_MIN = 200           # en dessous, le CV est sans doute une image scannee
 PAGES_MAX = 5             # un CV depasse rarement 5 pages
