@@ -120,6 +120,18 @@ Un premier travail existe : l'adapter a ces instructions.
 
 Un premier travail existe mais doit etre revu et adapte.
 
+Choix faits pendant la partie 3 :
+- Tache du modele LoRA : description d'une offre -> "Poste : ... | Competences : ...".
+  Jeu de donnees cree par `python -m pipeline.dataset_ia` (doublons exacts par SHA-256 et
+  quasi-doublons retires, separation 80/10/10 par ordre d'empreinte, assertions anti-fuite).
+- Dans flan-t5-small, les matrices `q_proj` et `v_proj` s'appellent `q` et `v` : ce sont elles qui
+  sont ciblees par LoRA (`notebooks/finetuning_lora.ipynb`, versions des bibliotheques fixees).
+- Le notebook produit `data/offres_ia.csv` (titre_ia, competences_ia) et l'adaptateur
+  `modele/lora_cvboost/`, que l'apprenant ajoute au depot.
+- Table `Offre` dans la base du site, remplie au demarrage par `app/offres.py` (cle = url).
+- Assistante DRH : 5 questions, delai OpenAI de 8 s sans relance, reponses JSON, l'historique de
+  l'entretien est garde par le navigateur (aucune table supplementaire).
+
 ### Partie 4 : Design
 
 Claude propose plusieurs themes fluides et dynamiques ; l'apprenant choisit ou propose le sien.

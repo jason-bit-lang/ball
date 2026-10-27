@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}{{ offre.titre }} - CVBoost{% endblock %}
+{% block content %}
+<div class="page-large deux-colonnes">
+    <article>
+        <h2>{{ offre.titre }}</h2>
+        <p><strong>{{ offre.entreprise }}</strong> - {{ offre.lieu }}
+           {% if offre.date_publication %}- publiée le {{ offre.date_publication }}{% endif %}</p>
+        {% if offre.competences %}<p class="discret">Compétences : {{ offre.competences }}</p>{% endif %}
+        <p>
+            <a href="{{ offre.url }}" target="_blank" rel="noopener">Voir l'annonce d'origine</a>
+            {% if offre.lien_candidature %}
+            - <a href="{{ offre.lien_candidature }}" target="_blank" rel="noopener">Postuler</a>
+            {% endif %}
+        </p>
+        <div class="description">{{ offre.description }}</div>
+        <a href="{{ url_for('recherche', id=document.id) }}" class="btn-secondary">Retour aux offres</a>
+    </article>
+
+    {# Assistante DRH : le contenu est rempli par static/entretien.js #}
+    <aside id="entretien" class="ia-card" data-url="{{ url_for('entretien', offre_id=offre.id, id=document.id) }}">
+        <h3>Assistante DRH</h3>
+        <p>Entraînez-vous : l'assistante analyse votre CV pour ce poste puis vous pose 5 questions.</p>
+        <button type="button" id="demarrer">Simulation d'entretien</button>
+        <div id="analyse" hidden>
+            <p class="compatibilite">Compatibilité : <strong id="score"></strong> %</p>
+            <p id="resume"></p>
+            <h4>Points forts</h4><ul id="forts"></ul>
+            <h4>Points à améliorer</h4><ul id="faibles"></ul>
+        </div>
+        <div id="conversation"></div>
+        <p id="statut" class="discret" aria-live="polite"></p>
+        <form id="formulaire-reponse" class="reponse" hidden>
+            <label for="reponse">Votre réponse</label>
+            <textarea id="reponse" rows="4" maxlength="1500" required></textarea>
+            <button type="submit">Envoyer ma réponse</button>
+        </form>
+    </aside>
+</div>
+<script src="{{ url_for('static', filename='entretien.js') }}"></script>
+{% endblock %}

@@ -1,18 +1,22 @@
 import os
 import re
 import uuid
-from flask import render_template, request, redirect, url_for, flash
+from flask import render_template, request, redirect, url_for, flash, jsonify
 from flask_login import login_required, current_user, login_user, logout_user
 from werkzeug.utils import secure_filename
 from . import app, db
+from .ia import TEXTE_MIN, IAIndisponible, analyser_candidature, extraire_texte, question_suivante
 from .journal import log_event
-from .models import Document, User
+from .matching import rechercher
+from .models import Document, Offre, User
 
 # Extensions acceptees et premiers octets attendus pour chacune
 # (un PDF commence par %PDF, un DOCX est une archive zip qui commence par PK)
 SIGNATURES = {'pdf': b'%PDF', 'docx': b'PK\x03\x04'}
 EMAIL_REGEX = r'[^@\s]+@[^@\s]+\.[^@\s]+'
 PASSWORD_MIN_LENGTH = 8
+STATUT_ANALYSE = 'CV analysé'
+STATUT_ILLISIBLE = 'CV illisible (scanné ou abîmé)'
 
 
 def form_value(name):
@@ -40,6 +44,22 @@ def cv_error(file):
     debut = file.stream.read(len(signature))
     file.stream.seek(0)  # remet la lecture au debut pour pouvoir enregistrer le fichier
     return None if debut == signature else 'bad_signature'
+
+
+def document_du_user(id):
+    """Un utilisateur ne peut ouvrir que ses propres documents (sinon erreur 404)."""
+    return Document.query.filter_by(id=id, user_id=current_user.id).first_or_404()
+
+
+def texte_du_cv(document):
+    """Lit le texte du CV et met a jour son statut. Les deux IA (matching et assistante DRH) l'utilisent.
+    Renvoie une chaine vide si le CV est illisible."""
+    texte = extraire_texte(os.path.join(app.config['UPLOAD_FOLDER'], document.stored_filename))
+    statut = STATUT_ANALYSE if len(texte) >= TEXTE_MIN else STATUT_ILLISIBLE
+    if document.status != statut:
+        document.status = statut
+        db.session.commit()
+    return texte if statut == STATUT_ANALYSE else ''
 
 
 def reject_upload(reason, message, filename=''):
@@ -154,8 +174,13 @@ def upload():
                             user_id=current_user.id)
         db.session.add(document)
         db.session.commit()
-        flash('CV envoyé avec succès.', 'success')
-        return redirect(url_for('history'))
+        # Le CV est lu tout de suite : l'utilisateur sait immediatement s'il est exploitable
+        if texte_du_cv(document):
+            flash('CV envoyé et analysé avec succès.', 'success')
+        else:
+            flash("CV envoyé, mais son texte est illisible (CV scanné ?). Envoyez une version PDF ou DOCX "
+                  "créée avec un traitement de texte.", 'danger')
+        return redirect(url_for('result', id=document.id))
 
     return render_template('upload.html')
 
@@ -177,6 +202,48 @@ def history():
 @app.route('/result/<int:id>')
 @login_required
 def result(id):
-    # Un utilisateur ne peut ouvrir que ses propres documents
-    document = Document.query.filter_by(id=id, user_id=current_user.id).first_or_404()
-    return render_template('result.html', document=document)
+    document = document_du_user(id)
+    texte_du_cv(document)
+    return render_template('result.html', document=document, analyse=STATUT_ANALYSE)
+
+
+@app.route('/recherche/<int:id>')
+@login_required
+def recherche(id):
+    """Bouton "Rechercher" : offres les plus proches du CV (matching TF-IDF)."""
+    document = document_du_user(id)
+    texte = texte_du_cv(document)
+    resultats = rechercher(texte) if texte else []
+    log_event('RECHERCHE', cv=document.id, resultats=len(resultats))
+    return render_template('offres.html', document=document, resultats=resultats)
+
+
+@app.route('/offre/<int:offre_id>/cv/<int:id>')
+@login_required
+def offre(offre_id, id):
+    """Detail d'une offre, avec l'assistante DRH a cote."""
+    return render_template('offre.html', offre=db.get_or_404(Offre, offre_id), document=document_du_user(id))
+
+
+@app.route('/entretien/<int:offre_id>/cv/<int:id>', methods=['POST'])
+@login_required
+def entretien(offre_id, id):
+    """Simulation d'entretien. Le navigateur envoie la conversation deja ecoulee (questions et reponses) :
+    vide -> analyse du CV et premiere question ; sinon -> commentaire et question suivante."""
+    offre = db.get_or_404(Offre, offre_id)
+    texte = texte_du_cv(document_du_user(id))
+    historique = (request.get_json(silent=True) or {}).get('historique', [])
+    if not texte:
+        return jsonify(erreur='Le texte de ce CV est illisible : envoyez une autre version.'), 400
+    if not isinstance(historique, list) or not all(isinstance(m, str) for m in historique):
+        return jsonify(erreur='Conversation invalide.'), 400
+    try:
+        if historique:
+            reponse = question_suivante(texte, offre, historique)
+        else:
+            reponse = analyser_candidature(texte, offre)
+    except IAIndisponible as erreur:
+        log_event('IA_ERREUR', cv=id, offre=offre_id, cause=repr(erreur.__cause__))
+        return jsonify(erreur=str(erreur)), 503
+    log_event('ENTRETIEN', cv=id, offre=offre_id, etape=len(historique) // 2)
+    return jsonify(reponse)
