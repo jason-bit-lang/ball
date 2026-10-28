@@ -56,28 +56,21 @@
 .analyse { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; padding: 20px;
   background: rgba(243,245,249,.55); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); animation: fondu .3s; }
 @keyframes fondu { from { opacity: 0; } }
-.panneau { width: 100%; max-width: 420px; padding: 34px 30px; text-align: center; animation: arrive .4s ease-out; }
-.panneau h2 { font-size: 1.5rem; margin: 22px 0 4px; }
-/* Le CV et son faisceau de lumiere, comme sur l'accueil */
-.cv-scan { width: 120px; height: 150px; margin: 0 auto; padding: 14px; border-radius: 16px; background: #fff; box-shadow: var(--ombre);
-  position: relative; overflow: hidden; text-align: left; }
-.cv-scan .photo { width: 26px; height: 26px; border-radius: 50%; background: #dde3ec; margin-bottom: 8px; }
-.cv-scan i { display: block; height: 6px; border-radius: 3px; background: #e3e8f0; margin: 7px 0; }
-.cv-scan i:nth-child(odd) { width: 70%; }
-.faisceau { position: absolute; left: 0; right: 0; top: -40px; height: 40px; border-bottom: 2px solid var(--accent);
-  background: linear-gradient(180deg, transparent, rgba(10,108,255,.25), transparent); animation: balaye 1.6s ease-in-out infinite; }
-@keyframes balaye { to { top: 100%; } }
-/* Etapes : en attente (rond gris), en cours (rond qui tourne), terminee (coche bleue) */
-.etapes-analyse { list-style: none; padding: 0; margin: 22px 0; text-align: left; }
-.etapes-analyse li { display: flex; align-items: center; gap: 12px; padding: 7px 0; color: var(--doux); font-weight: 500; transition: color .3s; }
-.etapes-analyse li::before { content: ""; width: 20px; height: 20px; flex: none; border-radius: 50%; border: 2px solid #d5dbe5; box-sizing: border-box; }
-.etapes-analyse li.en-cours { color: var(--texte); font-weight: 600; }
-.etapes-analyse li.en-cours::before { border-color: rgba(10,108,255,.25); border-top-color: var(--accent); animation: tourne .8s linear infinite; }
-.etapes-analyse li.fait { color: var(--texte); }
-.etapes-analyse li.fait::before { border: none; background: var(--accent) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 12.5l4 4L18 8'/%3E%3C/svg%3E") center / 14px no-repeat; }
-.progression { height: 6px; border-radius: 6px; background: #e3e8f0; overflow: hidden; }
-.progression i { display: block; height: 100%; width: 0; border-radius: 6px; background: var(--accent); transition: width 6s cubic-bezier(.1,.7,.3,1); }
-.analyse.lance .progression i { width: 92%; }
+/* La bulle de verre se remplit d'eau pendant l'analyse : deux vagues tournent en montant */
+.bulle { width: 210px; height: 210px; border-radius: 50%; position: relative; overflow: hidden; display: grid; place-items: center;
+  background: rgba(255,255,255,.75); box-shadow: inset 0 0 0 2px rgba(10,108,255,.15), 0 20px 50px rgba(20,30,60,.15);
+  animation: arrive .4s ease-out; }
+.vague { position: absolute; left: 50%; top: 105%; width: 440px; height: 440px; margin-left: -220px; border-radius: 38%;
+  animation: tourne-vague 4s linear infinite, monte-niveau 6s ease-out forwards; }
+.vague.un { background: rgba(10,108,255,.55); }
+.vague.deux { background: rgba(122,92,255,.35); border-radius: 35%; animation-duration: 6s, 6s; }
+@keyframes tourne-vague { to { transform: rotate(360deg); } }
+@keyframes monte-niveau { to { top: 25%; } }   /* l'eau monte une fois, puis les vagues continuent de bouger */
+.doc { width: 52px; height: 66px; border-radius: 10px; background: #fff; box-shadow: var(--ombre); padding: 9px 8px; position: relative; z-index: 1; }
+.doc b { display: block; height: 5px; border-radius: 3px; background: #cfd7e3; margin: 6px 0; }
+.doc b:nth-child(odd) { width: 60%; }
+/* Texte lu seulement par les lecteurs d'ecran (personnes malvoyantes) : invisible a l'ecran */
+.lecteur-ecran { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 .securite { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 14px 0 0; font-size: .85rem; color: var(--doux); }
 </style></head>
 <body data-page="depot" data-connecte>
@@ -122,19 +115,12 @@
   </form>
 </main>
 
-<!-- Ecran d'analyse, affiche des que l'utilisateur lance l'analyse -->
+<!-- Ecran d'analyse, sans texte : la bulle se remplit pendant que le serveur travaille -->
 <div class="analyse" id="analyse" hidden>
-  <div class="panneau verre" role="status" aria-live="polite">
-    <div class="cv-scan"><div class="photo"></div><i></i><i></i><i></i><i></i><i></i><i></i><i></i><span class="faisceau"></span></div>
-    <h2>Analyse de votre CV</h2>
-    <p class="doux">Quelques secondes, nous préparons vos offres.</p>
-    <ol class="etapes-analyse" id="etapes-analyse">
-      <li>Envoi du fichier</li>
-      <li>Lecture de votre CV</li>
-      <li>Repérage de vos compétences</li>
-      <li>Comparaison avec les offres du jour</li>
-    </ol>
-    <div class="progression"><i></i></div>
+  <div class="bulle" role="status">
+    <div class="vague deux"></div><div class="vague un"></div>
+    <div class="doc"><b></b><b></b><b></b><b></b><b></b></div>
+    <span class="lecteur-ecran">Analyse de votre CV en cours</span>
   </div>
 </div>
 
@@ -196,23 +182,12 @@ zone.addEventListener('drop', evenement => {
   afficherFichier();
 });
 
-// Analyse : l'ecran d'analyse s'affiche et les etapes se cochent une a une.
-// Le formulaire part normalement : la page des resultats remplace cet ecran des que le serveur a fini.
+// Analyse : l'ecran d'analyse s'affiche. Le formulaire part normalement :
+// la page des resultats remplace cet ecran des que le serveur a fini.
 document.getElementById('formulaire').addEventListener('submit', evenement => {
   evenement.preventDefault();  // maquette uniquement : on simule la reponse du serveur
   bouton.disabled = true;
-  const ecran = document.getElementById('analyse');
-  const etapes = document.querySelectorAll('#etapes-analyse li');
-  ecran.hidden = false;
-  setTimeout(() => ecran.classList.add('lance'), 50);
-  let numero = 0;
-  etapes[0].className = 'en-cours';
-  const minuteur = setInterval(() => {
-    if (numero === etapes.length - 1) { clearInterval(minuteur); return; }  // la derniere etape tourne jusqu'a la reponse
-    etapes[numero].className = 'fait';
-    numero = numero + 1;
-    etapes[numero].className = 'en-cours';
-  }, 900);
+  document.getElementById('analyse').hidden = false;
   setTimeout(() => { location.href = 'resultats.html'; }, 4200);  // maquette : temps de reponse simule
 });
 

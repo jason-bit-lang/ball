@@ -223,8 +223,9 @@ Accueil, Propulser votre CV, Historique, Deconnexion (barre du bas : Accueil, Pr
 Quitter).
 Decisions de l'apprenant (28/10) : le lien du menu s'appelle "Propulser votre CV" (barre du bas :
 "Propulser") ; la page garde le titre "Deposez votre CV." Au clic sur "Analyser mon CV", un ecran
-d'analyse anime (CV et faisceau, 4 etapes cochees une a une, barre de progression) reste affiche
-pendant que le serveur travaille, puis l'utilisateur arrive directement sur une page dediee aux
+d'analyse SANS TEXTE (choix de l'apprenant parmi 6 essais : "le liquide", une bulle de verre qui se
+remplit d'eau avec deux vagues bleue et violette autour du CV ; essais dans maquettes/analyse_essai*.html)
+reste affiche pendant que le serveur travaille, puis l'utilisateur arrive directement sur une page dediee aux
 resultats (l'ancienne page intermediaire "Mon CV" disparait du parcours). CV illisible : retour sur
 la page d'envoi avec un message clair. Regle des 10 s maintenue : pas d'attente artificielle (la
 lecture du CV et le matching prennent environ 1 a 3 s).
