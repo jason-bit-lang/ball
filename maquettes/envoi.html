@@ -64,8 +64,6 @@
 .vague.deux { background: rgba(122,92,255,.4); border-radius: 35%; animation-duration: 4.5s, 6s; }
 @keyframes tourne-vague { to { transform: rotate(360deg); } }
 @keyframes monte-niveau { to { top: 20%; } }   /* l'eau monte une fois, puis les vagues continuent de bouger */
-/* Texte lu seulement par les lecteurs d'ecran (personnes malvoyantes) : invisible a l'ecran */
-.lecteur-ecran { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 .securite { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 14px 0 0; font-size: .85rem; color: var(--doux); }
 </style></head>
 <body data-page="depot" data-connecte>
@@ -105,12 +103,9 @@
       <button type="button" class="changer" id="changer">Changer</button>
     </div>
 
-    <div class="ligne-envoi">
+    <div class="ligne-envoi" aria-live="polite">
       <button type="submit" class="btn envoyer" id="envoyer" disabled>Analyser mon CV <svg class="icone fleche"><use href="#i-fleche"/></svg></button>
-      <div class="bulle" id="bulle" role="status" hidden>
-        <div class="vague deux"></div><div class="vague un"></div>
-        <span class="lecteur-ecran">Analyse de votre CV en cours</span>
-      </div>
+      <div class="bulle" id="bulle" hidden><div class="vague deux"></div><div class="vague un"></div></div>
     </div>
     <p class="securite"><svg class="icone"><use href="#i-bouclier"/></svg> Votre CV est traité en toute sécurité</p>
   </form>
@@ -174,11 +169,12 @@ zone.addEventListener('drop', evenement => {
   afficherFichier();
 });
 
-// Analyse : la bulle apparait a cote du bouton et se remplit. Le formulaire part normalement :
+// Analyse : le bouton affiche "Analyse en cours" et la bulle se remplit a cote. Le formulaire part normalement :
 // la page des resultats s'affiche des que le serveur a fini.
 document.getElementById('formulaire').addEventListener('submit', evenement => {
   evenement.preventDefault();  // maquette uniquement : on simule la reponse du serveur
   bouton.disabled = true;
+  bouton.textContent = 'Analyse en cours';
   document.getElementById('bulle').hidden = false;
   setTimeout(() => { location.href = 'resultats.html'; }, 4200);  // maquette : temps de reponse simule
 });

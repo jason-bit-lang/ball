@@ -225,7 +225,7 @@ Decisions de l'apprenant (28/10) : le lien du menu s'appelle "Propulser votre CV
 "Propulser") ; la page garde le titre "Deposez votre CV." Au clic sur "Analyser mon CV", un ecran
 d'analyse SANS TEXTE (choix de l'apprenant parmi 6 essais : "le liquide", une bulle de verre qui se
 remplit d'eau avec deux vagues bleue et violette ; essais dans maquettes/analyse_essai*.html). Pas
-d'ecran plein : la petite bulle apparait juste a cote du bouton "Analyser mon CV" et se remplit
+d'ecran plein : le bouton affiche "Analyse en cours" et la petite bulle apparait juste a cote et se remplit
 pendant que le serveur travaille ; la page ne bouge pas, l'utilisateur attend simplement, puis l'utilisateur arrive directement sur une page dediee aux
 resultats (l'ancienne page intermediaire "Mon CV" disparait du parcours). CV illisible : retour sur
 la page d'envoi avec un message clair. Regle des 10 s maintenue : pas d'attente artificielle (la
