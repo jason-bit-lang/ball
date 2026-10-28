@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Essai - animations d'analyse</title>
+<link rel="stylesheet" href="commun.css">
+<style>
+/* Page d'essai : deux idees d'animation d'analyse, sans texte, cote a cote */
+.essais { max-width: 1100px; margin: 0 auto; padding: 40px 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+@media (max-width: 800px) { .essais { grid-template-columns: 1fr; } }
+.essai { height: 420px; display: grid; place-items: center; position: relative; }
+.essai > span { position: absolute; top: 18px; left: 22px; font-weight: 700; color: var(--doux); }
+
+/* ===== Idee 1 : egaliseur, des barres qui montent et descendent ===== */
+.egaliseur { display: flex; align-items: center; gap: 6px; height: 160px; }
+.egaliseur i { width: 8px; border-radius: 8px; height: 30%;
+  background: linear-gradient(180deg, #7fb2ff, var(--accent) 60%, #7a5cff);
+  animation: barre var(--duree) ease-in-out infinite alternate; animation-delay: var(--retard); }
+@keyframes barre { from { height: 12%; } to { height: var(--haut); } }
+.ligne-progres { width: 280px; height: 4px; border-radius: 4px; background: #e3e8f0; margin: 30px auto 0; overflow: hidden; }
+.ligne-progres i { display: block; height: 100%; width: 0; background: var(--accent); border-radius: 4px; animation: avance 6s cubic-bezier(.1,.7,.3,1) forwards; }
+@keyframes avance { to { width: 92%; } }
+
+/* ===== Idee 2 : onde circulaire autour du CV, et un anneau de progression ===== */
+.cercle { width: 260px; height: 260px; position: relative; display: grid; place-items: center; }
+.cercle .rayon { position: absolute; left: 50%; top: 50%; width: 6px; height: 34px; margin: -17px 0 0 -3px; border-radius: 6px;
+  background: linear-gradient(var(--accent), #7a5cff); transform-origin: 50% 50%;
+  transform: rotate(var(--angle)) translateY(-92px) scaleY(.4);
+  animation: pulse var(--duree) ease-in-out infinite alternate; animation-delay: var(--retard); }
+@keyframes pulse { to { transform: rotate(var(--angle)) translateY(-92px) scaleY(1.25); } }
+.cercle svg { position: absolute; inset: 0; transform: rotate(-90deg); }
+.cercle circle { fill: none; stroke-width: 4; }
+.cercle .piste { stroke: #e3e8f0; }
+.cercle .valeur { stroke: var(--accent); stroke-linecap: round; stroke-dasharray: 785; stroke-dashoffset: 785;
+  animation: anneau 6s cubic-bezier(.1,.7,.3,1) forwards; }
+@keyframes anneau { to { stroke-dashoffset: 63; } }   /* 785 x 8 % : l'anneau se remplit a 92 % */
+.doc { width: 64px; height: 80px; border-radius: 12px; background: #fff; box-shadow: var(--ombre); position: relative; overflow: hidden; padding: 10px; }
+.doc b { display: block; height: 5px; border-radius: 3px; background: #dde3ec; margin: 6px 0; }
+.doc b:nth-child(odd) { width: 65%; }
+.doc .faisceau { position: absolute; left: 0; right: 0; top: -24px; height: 24px; border-bottom: 2px solid var(--accent);
+  background: linear-gradient(180deg, transparent, rgba(10,108,255,.25), transparent); animation: balaye 1.4s ease-in-out infinite; }
+@keyframes balaye { to { top: 100%; } }
+</style></head>
+<body data-page="essai" data-connecte>
+<main class="essais">
+  <div class="essai verre"><span>Idée 1 · Égaliseur</span>
+    <div><div class="egaliseur" id="egaliseur"></div><div class="ligne-progres"><i></i></div></div>
+  </div>
+  <div class="essai verre"><span>Idée 2 · Onde circulaire</span>
+    <div class="cercle" id="cercle">
+      <svg viewBox="0 0 260 260"><circle class="piste" cx="130" cy="130" r="125"/><circle class="valeur" cx="130" cy="130" r="125"/></svg>
+      <div class="doc"><b></b><b></b><b></b><b></b><b></b><b></b><span class="faisceau"></span></div>
+    </div>
+  </div>
+</main>
+<script src="commun.js"></script>
+<script>
+// Chaque barre recoit sa hauteur maximale, sa vitesse et son decalage : le mouvement parait vivant
+// (dans le vrai site, ces barres seraient ecrites par une boucle Jinja avec des valeurs fixes)
+function hasard(min, max) { return (min + Math.random() * (max - min)).toFixed(2); }
+
+let barres = '';
+for (let i = 0; i < 32; i++) {
+  barres += `<i style="--haut:${hasard(40, 100)}%; --duree:${hasard(0.5, 1.1)}s; --retard:-${hasard(0, 1)}s"></i>`;
+}
+document.getElementById('egaliseur').innerHTML = barres;
+
+let rayons = '';
+for (let i = 0; i < 40; i++) {
+  rayons += `<i class="rayon" style="--angle:${i * 9}deg; --duree:${hasard(0.5, 1.1)}s; --retard:-${hasard(0, 1)}s"></i>`;
+}
+document.getElementById('cercle').insertAdjacentHTML('afterbegin', rayons);
+</script>
+</body></html>
