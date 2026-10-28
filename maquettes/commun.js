@@ -21,6 +21,9 @@ const ICONES = `<svg width="0" height="0" style="position:absolute">
   <symbol id="i-lieu" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-12a7 7 0 0 1 14 0c0 5.8-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/></symbol>
   <symbol id="i-calendrier" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></symbol>
   <symbol id="i-coeur" viewBox="0 0 24 24"><path d="M12 20s-7.5-4.6-9.3-9.2C1.4 7.4 3.6 4.5 6.8 4.5c2.1 0 3.5 1.2 5.2 3.1 1.7-1.9 3.1-3.1 5.2-3.1 3.2 0 5.4 2.9 4.1 6.3C19.5 15.4 12 20 12 20z"/></symbol>
+  <symbol id="i-externe" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></symbol>
+  <symbol id="i-raccrocher" viewBox="0 0 24 24"><path d="M3 14.5c5-4.7 13-4.7 18 0l-2.3 2.6-3.6-1.5v-2.4a10 10 0 0 0-6.2 0v2.4l-3.6 1.5z"/></symbol>
+  <symbol id="i-micro-coupe" viewBox="0 0 24 24"><path d="M9 9V6a3 3 0 0 1 6 0v5M15 13.5A3 3 0 0 1 9 11M5 11a7 7 0 0 0 11.5 5.4M19 11c0 .9-.2 1.8-.5 2.6M12 18v3M4 4l16 16"/></symbol>
   <symbol id="i-coche" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
 </svg>`;
 document.body.insertAdjacentHTML('afterbegin', ICONES);

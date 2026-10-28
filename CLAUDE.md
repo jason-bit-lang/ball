@@ -188,7 +188,7 @@ Methode choisie : une maquette par page, captures et videos envoyees, puis integ
 site. L'apprenant valide TOUT en une fois, a la fin, apres avoir choisi le theme (couleurs).
 Maquettes enregistrees dans le depot, dossier `maquettes/` (a ouvrir dans un navigateur) :
 commun.css et commun.js (en-tete, pied de page, icones : ce que fera base.html), formulaire.js,
-accueil.html, connexion.html, inscription.html, envoi.html, resultats.html, historique.html. A supprimer une fois le design integre au site. Decisions pour l'accueil :
+accueil.html, connexion.html, inscription.html, envoi.html, resultats.html, historique.html, offre.html. A supprimer une fois le design integre au site. Decisions pour l'accueil :
 - Titre : "Votre prochaine opportunite prend vie ici." ; bouton "Deposer mon CV" et
   "Sans engagement · 2 minutes · PDF ou Word" (ne jamais ecrire "gratuit").
 - Demonstration animee en CSS (CV scanne -> competences -> offres avec niveau), sans compteur
@@ -257,6 +257,20 @@ lieu, "Cloture le ..." avec badge ("19 jours restants" vert, "Plus que 3 jours" 
 offre_id, date), route pour ajouter/retirer, et colonne date_limite extraite des descriptions dans le
 nettoyage (premier essai : 58 offres sur 117 avec une date lisible, "au plus tard le", "Date limite",
 "cloture"...). Les notes d'entretien viennent de l'evaluation (a enregistrer en base).
+Proposition pour la page d'une offre (maquettes/offre.html) : en-tete facon page d'artiste (titre
+centre, entreprise et lieu, pastilles niveau / publication / cloture, trois boutons ronds : Favori,
+grand bouton mauve "Entretien vocal", Postuler) ; "Vous et ce poste" (atouts, a renforcer) ; annonce
+decoupee en sections (titres numerotes en MAJUSCULES ou mots connus suivis de ":", puces "+ * >") et
+repliee avec "Lire toute l'annonce" (31 offres sur 117 ont au moins 3 sections ; sinon, paragraphes
+courts) ; assistante "Votre recruteuse" : analyse avec le bouton mauve et la bulle (comme l'envoi du
+CV), entretien en direct facon lecteur (En direct, minuteur /10:00, onde qui suit la voix : bleue pour
+la recruteuse, mauve pour le candidat, transcription en bulles, boutons Micro et Terminer rouge),
+evaluation (anneau de la note, barres /10, reponses a retravailler repliables). Coeur : bulle
+"Ajoutee a vos favoris - Voir l'historique". Offre close : pastille grise, Postuler grise, message
+"vous pouvez toujours vous entrainer". Constat : beaucoup d'offres en base sont deja closes (ex. les
+offres SODEICO du 20/10) : a l'integration, retirer les offres closes des resultats.
+Bug corrige dans les maquettes : la classe "rond" servait deux fois (cercle d'attente renomme
+"cercle-attente") ; .btn a maintenant border: none et font: inherit.
 
 ### Partie 5 : FastAPI, Docker et deploiement Render
 

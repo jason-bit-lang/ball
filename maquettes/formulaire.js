@@ -47,6 +47,6 @@ document.querySelectorAll('form').forEach(formulaire => {
     evenement.preventDefault();  // maquette uniquement : rien n'est envoye
     const bouton = formulaire.querySelector('.envoyer');
     bouton.disabled = true;
-    bouton.innerHTML = '<span class="rond"></span> ' + bouton.dataset.attente;
+    bouton.innerHTML = '<span class="cercle-attente"></span> ' + bouton.dataset.attente;
   });
 });

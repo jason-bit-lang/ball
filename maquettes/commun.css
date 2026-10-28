@@ -28,7 +28,7 @@ h2 { font-size: clamp(1.8rem, 4vw, 2.6rem); }
 .icone { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; vertical-align: -5px; }
 
 /* ===== Boutons ===== */
-.btn { display: inline-flex; align-items: center; gap: 8px; padding: 14px 28px; border-radius: 999px; font-weight: 600;
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 14px 28px; border: none; border-radius: 999px; font: inherit; font-weight: 600; cursor: pointer;
   text-decoration: none; background: var(--accent); color: #fff; box-shadow: 0 8px 24px rgba(10,108,255,.3);
   transition: transform .2s, box-shadow .2s; }
 .btn:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(10,108,255,.4); }
@@ -121,7 +121,7 @@ h2 { font-size: clamp(1.8rem, 4vw, 2.6rem); }
 
 .envoyer { width: 100%; justify-content: center; border: none; font: inherit; font-weight: 600; cursor: pointer; margin-top: 6px; }
 .envoyer:disabled { opacity: .75; cursor: wait; transform: none; }
-.rond { width: 18px; height: 18px; border: 2.5px solid rgba(255,255,255,.4); border-top-color: #fff; border-radius: 50%; animation: tourne .8s linear infinite; }
+.cercle-attente { width: 18px; height: 18px; border: 2.5px solid rgba(255,255,255,.4); border-top-color: #fff; border-radius: 50%; animation: tourne .8s linear infinite; }
 @keyframes tourne { to { transform: rotate(360deg); } }
 .bascule { text-align: center; margin: 20px 0 0; color: var(--doux); }
 .bascule a { color: var(--accent); font-weight: 600; text-decoration: none; }
