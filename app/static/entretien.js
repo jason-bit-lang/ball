@@ -190,8 +190,12 @@ function dessinerOnde() {
     }
     if (parle) direct.dernierSon[parle] = Date.now();
     $('onde').className = 'onde-vocale ' + (parle || '');
-    $('onde').querySelectorAll('i').forEach((barre, i) => {
-        const valeur = son ? son.valeurs[i % son.valeurs.length] : 0;
+    const barres = $('onde').querySelectorAll('i');
+    const milieu = (barres.length - 1) / 2;
+    barres.forEach((barre, i) => {
+        // Les sons graves (les plus forts) au centre, les aigus vers les bords : l'onde est symetrique
+        const frequence = Math.floor(Math.abs(i - milieu));
+        const valeur = son ? son.valeurs[frequence] : 0;
         barre.style.height = (8 + valeur / 255 * 92) + '%';
     });
     requestAnimationFrame(dessinerOnde);

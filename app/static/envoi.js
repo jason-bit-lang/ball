@@ -12,6 +12,7 @@ const bouton = document.getElementById('envoyer');
 const bulle = document.getElementById('bulle');
 const alerte = document.getElementById('alerte');
 const TEXTE_BOUTON = bouton.innerHTML;
+formulaire.noValidate = true;  // nos propres messages remplacent la bulle du navigateur
 
 function afficherErreur(message) {
     alerte.textContent = message;
@@ -93,7 +94,10 @@ async function envoyerCv() {
 
 formulaire.addEventListener('submit', async evenement => {
     evenement.preventDefault();
-    if (!champ.files[0]) return;
+    if (!champ.files[0]) {
+        afficherErreur("Choisissez d'abord votre CV (PDF ou Word).");
+        return;
+    }
     bouton.disabled = true;
     bouton.textContent = 'Analyse en cours';
     bouton.classList.add('en-cours');
