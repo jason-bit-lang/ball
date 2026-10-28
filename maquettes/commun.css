@@ -1,0 +1,132 @@
+/* Maquettes CVBoost : styles communs a toutes les pages (en-tete, pied de page, boutons...) */
+/* ===== Couleurs provisoires (palette a choisir) ===== */
+:root {
+  --fond: #f3f5f9; --texte: #14181f; --doux: #5e6573;
+  --accent: #0a6cff; --accent-2: #f2b705;
+  --verre: rgba(255,255,255,.62); --bord: rgba(255,255,255,.85);
+  --ombre: 0 12px 32px rgba(20,30,60,.10), inset 0 1px 0 #fff;
+  --rayon: 24px;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; font-family: Inter, 'Segoe UI', system-ui, -apple-system, sans-serif; color: var(--texte); background: var(--fond); line-height: 1.5; }
+/* Ondes de couleur floues qui bougent tres lentement derriere la page */
+body::before { content: ""; position: fixed; inset: -20%; z-index: -1;
+  background: radial-gradient(35% 30% at 15% 20%, #9cc7ff, transparent 70%),
+              radial-gradient(30% 30% at 85% 35%, #ffe7a3, transparent 70%),
+              radial-gradient(35% 30% at 50% 90%, #c9dcff, transparent 70%);
+  animation: ondes 24s ease-in-out infinite alternate; }
+@keyframes ondes { to { transform: translate(4%, -3%) rotate(6deg); } }
+a { color: inherit; }
+h1, h2 { letter-spacing: -0.03em; line-height: 1.08; margin: 0 0 14px; }
+h2 { font-size: clamp(1.8rem, 4vw, 2.6rem); }
+.doux { color: var(--doux); }
+.section { max-width: 1100px; margin: 0 auto; padding: 70px 20px; }
+.centre { text-align: center; }
+.verre { background: var(--verre); border: 1px solid var(--bord); border-radius: var(--rayon);
+  backdrop-filter: blur(20px) saturate(170%); -webkit-backdrop-filter: blur(20px) saturate(170%); box-shadow: var(--ombre); }
+.icone { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; vertical-align: -5px; }
+
+/* ===== Boutons ===== */
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 14px 28px; border-radius: 999px; font-weight: 600;
+  text-decoration: none; background: var(--accent); color: #fff; box-shadow: 0 8px 24px rgba(10,108,255,.3);
+  transition: transform .2s, box-shadow .2s; }
+.btn:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(10,108,255,.4); }
+.btn.clair { background: var(--verre); color: var(--texte); border: 1px solid var(--bord); box-shadow: var(--ombre); }
+.btn .fleche { transition: transform .25s; }
+.btn:hover .fleche { transform: translateX(5px); }
+.lien { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; color: var(--accent); text-decoration: none; margin-top: 14px; }
+
+/* ===== En-tete : barre flottante en verre ===== */
+.entete { position: sticky; top: 12px; z-index: 10; max-width: 1100px; margin: 12px auto 0; padding: 0 16px; }
+.entete .verre { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 8px 8px 8px 22px; border-radius: 999px; }
+.logo { display: inline-flex; align-items: center; gap: 8px; font-weight: 800; font-size: 1.25rem; letter-spacing: -0.02em; text-decoration: none; }
+.logo em { font-style: normal; color: var(--accent); }
+.liens, .menu { display: flex; gap: 4px; align-items: center; }
+.liens a { text-decoration: none; padding: 8px 16px; border-radius: 999px; font-weight: 500; color: var(--doux); transition: background .2s, color .2s; }
+.liens a:hover { color: var(--texte); }
+.liens a.actif { background: #fff; color: var(--accent); box-shadow: 0 2px 8px rgba(20,30,60,.08); }
+.menu a { text-decoration: none; padding: 9px 16px; border-radius: 999px; font-weight: 600; }
+.menu .btn { padding: 10px 20px; box-shadow: none; }
+
+/* Sur telephone : liens du centre remplaces par une barre flottante en bas, comme une application */
+.barre-bas { display: none; }
+@media (max-width: 700px) {
+  .liens, .menu .cache-mobile { display: none; }
+  .barre-bas { display: flex; position: fixed; z-index: 10; left: 12px; right: 12px; bottom: 12px; padding: 6px; border-radius: 999px; justify-content: space-around; }
+  .barre-bas a { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 0; border-radius: 999px; font-size: .7rem; font-weight: 600; text-decoration: none; color: var(--doux); }
+  .barre-bas a.actif { background: #fff; color: var(--accent); }
+  body { padding-bottom: 90px; }
+}
+
+/* ===== Pied de page ===== */
+.pied { max-width: 1100px; margin: 0 auto; padding: 0 16px 30px; }
+.pied-contenu { display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr; gap: 30px; padding: 34px; }
+.pied h4 { margin: 0 0 12px; font-size: .8rem; text-transform: uppercase; letter-spacing: .06em; color: var(--doux); }
+.pied-contenu a, .pied-contenu span { display: block; margin: 8px 0; text-decoration: none; font-weight: 500; }
+.pied-contenu a:hover { color: var(--accent); }
+.pied-contenu .logo { display: inline-flex; margin: 0; font-weight: 800; }
+.pied-marque p { margin: 12px 0 0; color: var(--doux); max-width: 18em; }
+.pied-bas { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; padding: 18px 10px 0; color: var(--doux); font-size: .85rem; }
+@media (max-width: 800px) {
+  .pied-contenu { grid-template-columns: 1fr 1fr; padding: 26px; }
+  .pied-marque { grid-column: 1 / -1; }
+}
+
+/* Apparition des blocs au defilement (classe ajoutee par le script) */
+.apparait { opacity: 0; transform: translateY(26px); transition: opacity .7s, transform .7s; }
+.apparait.visible { opacity: 1; transform: none; }
+
+/* L'attribut hidden doit toujours masquer, meme un bloc en display: grid */
+[hidden] { display: none !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, body::before { animation: none !important; transition: none !important; }
+  .apparait { opacity: 1; transform: none; }
+}
+
+
+/* ===== Mise en page des pages de compte (connexion, inscription) ===== */
+.compte { max-width: 1100px; margin: 0 auto; padding: 60px 20px 80px; display: grid; grid-template-columns: 1fr 440px; gap: 60px; align-items: center; }
+.compte h1 { font-size: clamp(2.2rem, 5vw, 3.4rem); }
+.compte .sous { font-size: 1.15rem; color: var(--doux); margin: 0; max-width: 24em; }
+@media (max-width: 860px) {
+  .compte { grid-template-columns: 1fr; gap: 26px; padding-top: 30px; text-align: center; }
+  .compte .sous { margin-inline: auto; }
+  .decor { display: none; }  /* sur telephone, on garde l'essentiel : le message et le formulaire */
+}
+
+/* ===== Formulaires ===== */
+.formulaire { padding: 32px; text-align: left; }
+.formulaire h2 { font-size: 1.5rem; margin-bottom: 22px; }
+.deux { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+/* Champ a etiquette flottante : l'etiquette est dans le champ et monte quand on ecrit */
+.champ { position: relative; margin-bottom: 14px; }
+.champ input { width: 100%; padding: 22px 16px 8px; font: inherit; color: var(--texte); background: rgba(255,255,255,.75);
+  border: 1.5px solid transparent; border-radius: 16px; outline: none; transition: border-color .2s, box-shadow .2s, background .2s; }
+.champ label { position: absolute; left: 17px; top: 15px; color: var(--doux); pointer-events: none; transition: all .2s; }
+.champ input:focus { border-color: var(--accent); background: #fff; box-shadow: 0 0 0 4px rgba(10,108,255,.12); }
+.champ input:focus + label, .champ input:not(:placeholder-shown) + label { top: 6px; font-size: .75rem; font-weight: 600; color: var(--accent); }
+/* Bouton pour afficher ou masquer le mot de passe */
+.voir { position: absolute; right: 8px; top: 9px; width: 38px; height: 38px; border: none; border-radius: 50%; background: none;
+  color: var(--doux); cursor: pointer; display: grid; place-items: center; }
+.voir:hover { background: rgba(10,108,255,.08); color: var(--accent); }
+
+/* Indicateurs sous le mot de passe : solidite et confirmation */
+.force { display: flex; gap: 6px; margin: -4px 4px 4px; }
+.force i { flex: 1; height: 5px; border-radius: 5px; background: #e3e8f0; transition: background .3s; }
+.indice { margin: 4px 4px 14px; font-size: .82rem; color: var(--doux); min-height: 1.2em; }
+.indice.bon { color: #1e7d4f; } .indice.mauvais { color: #c0392b; }
+
+.envoyer { width: 100%; justify-content: center; border: none; font: inherit; font-weight: 600; cursor: pointer; margin-top: 6px; }
+.envoyer:disabled { opacity: .75; cursor: wait; transform: none; }
+.rond { width: 18px; height: 18px; border: 2.5px solid rgba(255,255,255,.4); border-top-color: #fff; border-radius: 50%; animation: tourne .8s linear infinite; }
+@keyframes tourne { to { transform: rotate(360deg); } }
+.bascule { text-align: center; margin: 20px 0 0; color: var(--doux); }
+.bascule a { color: var(--accent); font-weight: 600; text-decoration: none; }
+
+/* Message d'erreur dans le formulaire, et la carte qui "secoue" doucement */
+.alerte { padding: 12px 16px; border-radius: 14px; margin-bottom: 16px; font-weight: 500; background: rgba(192,57,43,.1); color: #a5281b; }
+.secoue { animation: secoue .4s; }
+@keyframes secoue { 20%, 60% { transform: translateX(-7px); } 40%, 80% { transform: translateX(7px); } }

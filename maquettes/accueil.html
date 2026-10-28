@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CVBoost</title>
+<link rel="stylesheet" href="commun.css">
+<style>
+/* ===== 1. Annonce ===== */
+.hero { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; padding-top: 60px; }
+.hero h1 { font-size: clamp(2.3rem, 5.4vw, 3.8rem); }
+.hero .sous { font-size: 1.15rem; color: var(--doux); margin: 0 0 28px; max-width: 30em; }
+.rassure { color: var(--doux); font-size: .9rem; margin-top: 12px; }
+@media (max-width: 800px) { .hero { grid-template-columns: 1fr; text-align: center; padding-top: 30px; } .hero .sous { margin-inline: auto; } }
+
+/* Demonstration animee : une seule boucle de 7 s pour tous les elements */
+.scene { text-align: left; position: relative; height: 330px; max-width: 460px; width: 100%; margin: 0 auto; }
+.cv { position: absolute; left: 0; top: 30px; width: 42%; height: 250px; padding: 16px; overflow: hidden; border-radius: 18px; }
+.photo { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, #c9d6e8, #e9eef6); margin-bottom: 10px; }
+.ligne { height: 8px; border-radius: 4px; background: #dde3ec; margin: 8px 0; }
+.ligne.titre { height: 11px; width: 75%; background: #c4ccd8; } .court { width: 55%; } .moyen { width: 80%; }
+.faisceau { position: absolute; left: 0; right: 0; height: 40px; top: -40px; border-bottom: 2px solid var(--accent);
+  background: linear-gradient(180deg, transparent, rgba(10,108,255,.25), transparent); animation: scanner 7s ease-in-out infinite; }
+@keyframes scanner { 0%, 4% { top: -40px; opacity: 1; } 24% { top: 250px; opacity: 1; } 26%, 100% { top: 250px; opacity: 0; } }
+.puce { position: absolute; left: 6%; top: var(--y); padding: 6px 12px; border-radius: 999px; background: #fff; color: var(--accent);
+  font-size: .8rem; font-weight: 600; box-shadow: 0 6px 16px rgba(10,108,255,.2); opacity: 0;
+  animation: puce 7s ease-in-out infinite; animation-delay: var(--d); }
+@keyframes puce { 0%, 22% { opacity: 0; transform: scale(.4); } 28%, 40% { opacity: 1; transform: none; }
+  52% { opacity: 0; transform: translateX(170px) scale(.6); } 100% { opacity: 0; } }
+.offre { position: absolute; right: 0; top: var(--y); width: 54%; padding: 12px 14px; border-radius: 18px; opacity: 0;
+  animation: offre 7s cubic-bezier(.2,.8,.2,1) infinite; animation-delay: var(--d); }
+@keyframes offre { 0%, 46% { opacity: 0; transform: translateY(24px); } 54%, 92% { opacity: 1; transform: none; } 100% { opacity: 0; } }
+.offre b { display: block; font-size: .88rem; } .offre small { color: var(--doux); font-size: .75rem; }
+.niveau { height: 6px; border-radius: 6px; background: #e3e8f0; margin-top: 8px; overflow: hidden; }
+.niveau i { display: block; height: 100%; width: 0; border-radius: 6px; background: var(--accent); animation: remplir 7s ease-out infinite; animation-delay: var(--d); }
+@keyframes remplir { 0%, 54% { width: 0; } 70%, 100% { width: var(--n); } }
+.etiquette { float: right; font-size: .7rem; font-weight: 700; color: var(--accent); }
+
+
+/* ===== 2. Comment ca marche ===== */
+.etapes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; position: relative; margin-top: 40px; }
+.etapes::before { content: ""; position: absolute; top: 28px; left: 16%; right: 16%; height: 3px; border-radius: 3px; background: #dfe5ee; }
+.etapes::after { content: ""; position: absolute; top: 28px; left: 16%; height: 3px; width: 0; border-radius: 3px; background: var(--accent); transition: width 1.6s ease .3s; }
+.etapes.visible::after { width: 68%; }
+.etape { position: relative; z-index: 1; text-align: center; padding: 0 10px; }
+.numero { width: 58px; height: 58px; margin: 0 auto 14px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; font-size: 1.3rem; color: var(--accent); background: #fff; }
+.etape b { display: block; font-size: 1.1rem; }
+@media (max-width: 700px) {
+  .etapes { grid-template-columns: 1fr; gap: 26px; }
+  .etapes::before, .etapes::after { display: none; }
+}
+
+/* ===== 3. Fonctionnalites en mosaique ===== */
+.mosaique { display: grid; grid-template-columns: repeat(6, 1fr); gap: 18px; margin-top: 40px; }
+.carte { padding: 26px; display: flex; flex-direction: column; overflow: hidden; position: relative; transition: transform .3s; }
+.carte:hover { transform: translateY(-4px); }
+.carte h3 { font-size: 1.35rem; letter-spacing: -0.02em; margin: 12px 0 6px; }
+.carte p { margin: 0; color: var(--doux); }
+.carte .lien { margin-top: auto; padding-top: 16px; }
+.large { grid-column: span 4; } .moyenne { grid-column: span 2; } .demi { grid-column: span 3; }
+@media (max-width: 800px) { .mosaique { grid-template-columns: 1fr; } .large, .moyenne, .demi { grid-column: auto; } }
+.pictogramme { width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center; color: #fff; background: var(--accent); }
+
+/* Carte vedette : entretien vocal, fond sombre et onde sonore */
+.vedette { background: linear-gradient(140deg, #0e1424, #1b2a4f); color: #fff; border: none; min-height: 300px; }
+.vedette p { color: #b9c3d8; }
+.vedette .pictogramme { background: rgba(255,255,255,.14); }
+.onde { display: flex; align-items: center; gap: 5px; height: 70px; margin: 22px 0 6px; }
+.onde i { flex: 1; max-width: 7px; border-radius: 6px; height: 20%; background: linear-gradient(#7fb2ff, var(--accent));
+  animation: onde 1.4s ease-in-out infinite; animation-delay: calc(var(--i) * -0.13s); }
+@keyframes onde { 0%, 100% { height: 18%; } 50% { height: 100%; } }
+.vedette .btn { align-self: flex-start; margin-top: auto; }
+
+/* Petites illustrations dans les cartes */
+.mini-niveau { margin-top: 18px; }
+.mini-niveau div { display: flex; justify-content: space-between; font-size: .8rem; font-weight: 600; margin-top: 10px; }
+.mini-niveau .niveau i { animation: none; transition: width 1.2s ease .4s; }
+.visible .mini-niveau .niveau i { width: var(--n); }
+.puces { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.carte p.etiquette-puces { margin-top: 18px; font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
+.puces span { padding: 5px 12px; border-radius: 999px; font-size: .8rem; font-weight: 600; background: rgba(10,108,255,.1); color: var(--accent); }
+.puces span.manque { background: rgba(242,183,5,.18); color: #8a6400; }
+.anneau { width: 110px; height: 110px; margin: 18px 0 0; position: relative; }
+.anneau svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.anneau circle { fill: none; stroke-width: 10; }
+.anneau .piste { stroke: #e3e8f0; }
+.anneau .valeur { stroke: var(--accent); stroke-linecap: round; stroke-dasharray: 283; stroke-dashoffset: 283; transition: stroke-dashoffset 1.6s ease .3s; }
+.visible .anneau .valeur { stroke-dashoffset: 51; }  /* 283 x (1 - 0,82) = 51 : note de 82 / 100 */
+.anneau b { position: absolute; inset: 0; display: grid; place-items: center; font-size: 1.6rem; }
+
+/* ===== 4. Garanties ===== */
+.garanties { display: flex; justify-content: center; flex-wrap: wrap; gap: 14px; }
+.garanties div { display: flex; align-items: center; gap: 10px; padding: 14px 22px; border-radius: 999px; font-weight: 600; }
+.garanties .icone { color: var(--accent); }
+
+/* ===== 5. Appel final : la phrase apparait mot apres mot ===== */
+.final { padding: 90px 20px 110px; }
+.final h2 { font-size: clamp(2rem, 5vw, 3.2rem); max-width: 19em; margin: 0 auto 30px; }
+.final h2 span { display: inline-block; opacity: 0; transform: translateY(16px); transition: opacity .5s, transform .5s; transition-delay: calc(var(--i) * 70ms); }
+.final.visible h2 span { opacity: 1; transform: none; }
+.brillant { background: linear-gradient(90deg, var(--accent), #7a5cff, var(--accent-2), var(--accent)); background-size: 300% 100%;
+  -webkit-background-clip: text; background-clip: text; color: transparent; animation: brillant 6s linear infinite; }
+@keyframes brillant { to { background-position: 300% 0; } }
+.final .boutons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+@media (prefers-reduced-motion: reduce) {
+  .final h2 span { opacity: 1; transform: none; }
+  .faisceau, .puce { display: none; }
+  .offre { opacity: 1; } .niveau i { width: var(--n); }
+}
+</style></head>
+<body data-page="accueil">
+<!-- 1. Annonce (visiteur) -->
+<section class="section hero">
+  <div>
+    <h1>Votre prochaine opportunité prend vie ici.</h1>
+    <p class="sous">Déposez votre CV : CVBoost trouve les offres faites pour vous et vous prépare à l'entretien.</p>
+    <a class="btn" href="inscription.html">Déposer mon CV <svg class="icone fleche"><use href="#i-fleche"/></svg></a>
+    <p class="rassure">Sans engagement · 2 minutes · PDF ou Word</p>
+  </div>
+  <div class="scene" aria-hidden="true">
+    <div class="cv verre"><div class="photo"></div><div class="ligne titre"></div><div class="ligne court"></div><br>
+      <div class="ligne"></div><div class="ligne moyen"></div><div class="ligne"></div><div class="ligne court"></div><div class="ligne moyen"></div><div class="ligne"></div>
+      <div class="faisceau"></div></div>
+    <span class="puce" style="--y:70px; --d:0s">Comptabilité</span>
+    <span class="puce" style="--y:130px; --d:.25s">Excel</span>
+    <span class="puce" style="--y:190px; --d:.5s">Anglais</span>
+    <div class="offre verre" style="--y:20px; --d:0s; --n:92%"><span class="etiquette">Très proche</span><b>Chef comptable</b><small>Kinshasa</small><div class="niveau"><i></i></div></div>
+    <div class="offre verre" style="--y:120px; --d:.2s; --n:76%"><span class="etiquette">Proche</span><b>Auditeur junior</b><small>Lubumbashi</small><div class="niveau"><i></i></div></div>
+    <div class="offre verre" style="--y:220px; --d:.4s; --n:58%"><span class="etiquette">À explorer</span><b>Assistant financier</b><small>Goma</small><div class="niveau"><i></i></div></div>
+  </div>
+</section>
+
+
+<!-- 2. Comment ca marche -->
+<section class="section centre" id="etapes">
+  <h2 class="apparait">Comment ça marche</h2>
+  <p class="doux apparait">Trois étapes, quelques minutes.</p>
+  <div class="etapes apparait">
+    <div class="etape"><div class="numero verre">1</div><b>Déposez votre CV</b><span class="doux">PDF ou Word</span></div>
+    <div class="etape"><div class="numero verre">2</div><b>Recevez vos offres</b><span class="doux">Celles qui vous ressemblent</span></div>
+    <div class="etape"><div class="numero verre">3</div><b>Entraînez-vous</b><span class="doux">Avec la recruteuse</span></div>
+  </div>
+</section>
+
+<!-- 3. Fonctionnalites -->
+<section class="section" id="fonctions">
+  <h2 class="apparait centre">Tout ce qu'il faut pour décrocher le poste</h2>
+  <div class="mosaique">
+    <article class="carte vedette verre large apparait">
+      <div class="pictogramme"><svg class="icone"><use href="#i-micro"/></svg></div>
+      <h3>Parlez. Elle vous écoute.</h3>
+      <p>Passez un vrai entretien à voix haute avec la recruteuse, sur le poste de votre choix.</p>
+      <div class="onde" aria-hidden="true">
+        <i style="--i:0"></i><i style="--i:1"></i><i style="--i:2"></i><i style="--i:3"></i><i style="--i:4"></i><i style="--i:5"></i>
+        <i style="--i:6"></i><i style="--i:7"></i><i style="--i:8"></i><i style="--i:9"></i><i style="--i:10"></i><i style="--i:11"></i>
+        <i style="--i:12"></i><i style="--i:13"></i><i style="--i:14"></i><i style="--i:15"></i><i style="--i:16"></i><i style="--i:17"></i>
+        <i style="--i:18"></i><i style="--i:19"></i><i style="--i:20"></i><i style="--i:21"></i><i style="--i:22"></i><i style="--i:23"></i>
+      </div>
+      <a class="btn" href="inscription.html"><svg class="icone"><use href="#i-cadenas"/></svg> Essayer l'entretien vocal</a>
+    </article>
+
+    <article class="carte verre moyenne apparait">
+      <div class="pictogramme"><svg class="icone"><use href="#i-loupe"/></svg></div>
+      <h3>Les offres faites pour vous</h3>
+      <p>Classées selon votre profil.</p>
+      <div class="mini-niveau">
+        <div><span>Chef comptable</span><span style="color:var(--accent)">Très proche</span></div><div class="niveau"><i style="--n:92%"></i></div>
+        <div><span>Auditeur junior</span><span style="color:var(--accent)">Proche</span></div><div class="niveau"><i style="--n:74%"></i></div>
+      </div>
+      <a class="lien" href="inscription.html">Trouver mes offres <svg class="icone fleche"><use href="#i-fleche"/></svg></a>
+    </article>
+
+    <article class="carte verre demi apparait">
+      <div class="pictogramme"><svg class="icone"><use href="#i-cible"/></svg></div>
+      <h3>Votre candidature analysée</h3>
+      <p>Points forts, compétences à ajouter et conseils pour votre CV.</p>
+      <p class="etiquette-puces">Vos points forts</p>
+      <div class="puces"><span>Normes OHADA</span><span>Excel avancé</span><span>Encadrement</span></div>
+      <p class="etiquette-puces">À ajouter à votre CV</p>
+      <div class="puces"><span class="manque">+ Secteur minier</span><span class="manque">+ Résultats chiffrés</span></div>
+      <a class="lien" href="inscription.html">Analyser mon CV <svg class="icone fleche"><use href="#i-fleche"/></svg></a>
+    </article>
+
+    <article class="carte verre demi apparait">
+      <div class="pictogramme"><svg class="icone"><use href="#i-note"/></svg></div>
+      <h3>Une note et des conseils</h3>
+      <p>Après l'entretien : votre note, et quoi améliorer réponse par réponse.</p>
+      <div class="anneau"><svg viewBox="0 0 100 100"><circle class="piste" cx="50" cy="50" r="45"/><circle class="valeur" cx="50" cy="50" r="45"/></svg><b>82</b></div>
+      <a class="lien" href="inscription.html">Voir un exemple <svg class="icone fleche"><use href="#i-fleche"/></svg></a>
+    </article>
+  </div>
+</section>
+
+<!-- 4. Garanties -->
+<section class="section" style="padding-top:10px">
+  <div class="garanties apparait">
+    <div class="verre"><svg class="icone"><use href="#i-cle"/></svg> Ouvert à tous, sans abonnement</div>
+    <div class="verre"><svg class="icone"><use href="#i-bouclier"/></svg> Vos CV traités en toute sécurité</div>
+    <div class="verre"><svg class="icone"><use href="#i-actualise"/></svg> Des offres mises à jour chaque jour</div>
+  </div>
+</section>
+
+<!-- 5. Appel final -->
+<section class="final centre" id="final">
+  <h2 id="phrase"></h2>
+  <div class="boutons">
+    <a class="btn" href="inscription.html">Créer un compte <svg class="icone fleche"><use href="#i-fleche"/></svg></a>
+    <a class="btn clair" href="connexion.html">Se connecter</a>
+  </div>
+</section>
+
+<script src="commun.js"></script>
+<script>
+// Phrase finale decoupee en mots ; les mots entre * brillent
+const phrase = 'Alors, prêt à vous lancer vers votre *prochaine opportunité* ? Connectez-vous et déposez votre CV.';
+let brillant = false;
+document.getElementById('phrase').innerHTML = phrase.split(' ').map((mot, i) => {
+  if (mot.startsWith('*')) brillant = true;
+  const html = `<span class="${brillant ? 'brillant' : ''}" style="--i:${i}">${mot.replaceAll('*', '')}</span>`;
+  if (mot.endsWith('*')) brillant = false;
+  return html;
+}).join(' ');
+</script>
+</body></html>

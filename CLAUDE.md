@@ -184,8 +184,11 @@ d'artiste, onde sonore reagissant a la voix pendant l'entretien, anneau pour la 
 proposees : Sable et encre, Fleuve (clin d'oeil RDC), Nuit de Kinshasa. Les couleurs seront choisies
 avec l'apprenant. Captures dans le scratchpad (dossier design/).
 
-Methode choisie : une maquette par page dans le scratchpad (design/accueil.html...), captures
-envoyees, validation, puis seulement integration dans le vrai site. Decisions pour l'accueil :
+Methode choisie : une maquette par page, captures et videos envoyees, puis integration dans le vrai
+site. L'apprenant valide TOUT en une fois, a la fin, apres avoir choisi le theme (couleurs).
+Maquettes enregistrees dans le depot, dossier `maquettes/` (a ouvrir dans un navigateur) :
+commun.css et commun.js (en-tete, pied de page, icones : ce que fera base.html), formulaire.js,
+accueil.html, connexion.html, inscription.html. A supprimer une fois le design integre au site. Decisions pour l'accueil :
 - Titre : "Votre prochaine opportunite prend vie ici." ; bouton "Deposer mon CV" et
   "Sans engagement · 2 minutes · PDF ou Word" (ne jamais ecrire "gratuit").
 - Demonstration animee en CSS (CV scanne -> competences -> offres avec niveau), sans compteur
@@ -201,6 +204,13 @@ envoyees, validation, puis seulement integration dans le vrai site. Decisions po
   "Bienvenue" sur l'inscription.
 - En-tete en verre flottant (nom "CVBoost" seul, sans logo dessine ; liens, boutons) ; sur telephone, barre flottante en bas
   avec icones. Vrai pied de page (Decouvrir, Votre espace, Confiance). Les deux dans base.html.
+Propositions pour connexion et inscription (en attente de l'avis de l'apprenant) : mise en page en
+deux colonnes (message a gauche, formulaire de verre a droite) ; connexion "Bon retour parmi nous."
+avec trois cartes flottantes (offre, entretien vocal, note) ; inscription "Bienvenue sur CVBoost."
+avec trois avantages coches qui arrivent l'un apres l'autre ; etiquettes flottantes dans les
+champs, oeil pour voir le mot de passe, barre de solidite, verification de la confirmation, bouton
+qui tourne pendant l'envoi, carte qui secoue en cas d'erreur. Message apres connexion :
+"Bon retour, Prenom." Proposition : connecter automatiquement apres l'inscription.
 
 ### Partie 5 : FastAPI, Docker et deploiement Render
 
