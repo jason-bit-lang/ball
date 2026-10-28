@@ -2,6 +2,7 @@
 <html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Vos opportunités - CVBoost</title>
 <link rel="stylesheet" href="commun.css">
+<script src="theme.js"></script>
 <style>
 .page { max-width: 1100px; margin: 0 auto; padding: 30px 16px 80px; }
 
@@ -9,14 +10,14 @@
 .bandeau { padding: 34px; border-radius: 30px; position: relative; overflow: hidden;
   background: linear-gradient(135deg, rgba(10,108,255,.16), rgba(242,183,5,.12)), var(--verre); }
 .termine { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 999px; font-size: .85rem; font-weight: 700;
-  color: #1e7d4f; background: rgba(30,125,79,.12); }
+  color: var(--vert); background: rgba(30,125,79,.12); }
 .bandeau h1 { font-size: clamp(2.2rem, 5vw, 3.4rem); margin: 16px 0 6px; }
 .bandeau .meta { color: var(--doux); margin: 0 0 22px; }
 .etiquette { font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--doux); margin: 0 0 8px; }
 .puces { display: flex; flex-wrap: wrap; gap: 8px; }
-.puce { padding: 6px 14px; border-radius: 999px; font-size: .85rem; font-weight: 600; background: #fff; color: var(--accent); box-shadow: 0 2px 8px rgba(20,30,60,.06); }
+.puce { padding: 6px 14px; border-radius: 999px; font-size: .85rem; font-weight: 600; background: var(--surface); color: var(--accent); box-shadow: 0 2px 8px rgba(20,30,60,.06); }
 .puce.atout { background: rgba(10,108,255,.1); box-shadow: none; }
-.puce.renforcer { background: rgba(242,183,5,.18); color: #8a6400; box-shadow: none; }
+.puce.renforcer { background: rgba(242,183,5,.18); color: var(--jaune-texte); box-shadow: none; }
 .bandeau .puce { opacity: 0; animation: surgit .4s ease-out forwards; animation-delay: calc(.3s + var(--i) * .12s); }
 @keyframes surgit { from { opacity: 0; transform: scale(.6); } to { opacity: 1; transform: none; } }
 
@@ -25,7 +26,7 @@
 .filtres button { flex: none; }
 .filtres button { padding: 9px 18px; border-radius: 999px; border: 1px solid var(--bord); background: var(--verre); font: inherit;
   font-weight: 600; color: var(--doux); cursor: pointer; transition: all .2s; }
-.filtres button.actif { background: var(--texte); color: #fff; border-color: var(--texte); }
+.filtres button.actif { background: var(--texte); color: var(--fond); border-color: var(--texte); }
 
 /* Carte d'une offre : jauge du niveau, informations, competences, actions */
 .offre { display: grid; grid-template-columns: 92px 1fr auto; gap: 22px; align-items: center; padding: 22px 24px; margin-top: 14px;
@@ -34,8 +35,8 @@
 @keyframes monte { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
 .jauge { text-align: center; }
 .jauge .rond { width: 68px; height: 68px; margin: 0 auto 6px; border-radius: 50%; position: relative;
-  background: conic-gradient(var(--couleur) calc(var(--n) * 1%), #e3e8f0 0); }
-.jauge .rond::after { content: ""; position: absolute; inset: 7px; border-radius: 50%; background: #fff; }
+  background: conic-gradient(var(--couleur) calc(var(--n) * 1%), var(--piste) 0); }
+.jauge .rond::after { content: ""; position: absolute; inset: 7px; border-radius: 50%; background: var(--surface); }
 .jauge small { font-weight: 700; font-size: .78rem; color: var(--couleur); }
 .offre h3 { margin: 0 0 4px; font-size: 1.2rem; letter-spacing: -0.01em; }
 .infos { display: flex; flex-wrap: wrap; gap: 6px 16px; color: var(--doux); font-size: .92rem; margin-bottom: 12px; }
@@ -100,7 +101,7 @@
 <script>
 // Maquette uniquement : dans le vrai site, ces cartes sont ecrites par Jinja (boucle sur les resultats du matching)
 const NIVEAUX = {
-  'tres-proche': { nom: 'Très proche', couleur: '#1e7d4f', jauge: 90 },
+  'tres-proche': { nom: 'Très proche', couleur: 'var(--vert)', jauge: 90 },
   'proche': { nom: 'Proche', couleur: '#0a6cff', jauge: 65 },
   'explorer': { nom: 'À explorer', couleur: '#8a93a3', jauge: 35 },
 };

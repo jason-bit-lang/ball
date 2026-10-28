@@ -2,6 +2,7 @@
 <html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Chef Comptable - CVBoost</title>
 <link rel="stylesheet" href="commun.css">
+<script src="theme.js"></script>
 <style>
 .page { max-width: 1100px; margin: 0 auto; padding: 24px 16px 80px; }
 .retour { display: inline-flex; align-items: center; gap: 6px; color: var(--doux); text-decoration: none; font-weight: 600; margin-bottom: 14px; }
@@ -14,15 +15,15 @@
 .tete .qui { color: var(--doux); font-size: 1.1rem; margin: 0 0 18px; }
 .pastilles { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
 .pastilles span { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 999px; font-size: .88rem; font-weight: 600;
-  background: rgba(255,255,255,.75); }
+  background: var(--surface-douce); }
 .pastilles .icone { width: 17px; height: 17px; vertical-align: 0; }
-.pastilles .niveau { color: #1e7d4f; } .pastilles .niveau::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #1e7d4f; }
-.pastilles .urgent { background: rgba(242,183,5,.22); color: #8a6400; }
-.pastilles .close { background: #e9ecf1; color: #6b7280; }
+.pastilles .niveau { color: var(--vert); } .pastilles .niveau::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--vert); }
+.pastilles .urgent { background: rgba(242,183,5,.22); color: var(--jaune-texte); }
+.pastilles .close { background: var(--gris-doux); color: #6b7280; }
 .ronds { display: flex; justify-content: center; align-items: flex-start; gap: 28px; margin-top: 28px; }
 .rond { display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: .82rem; font-weight: 600; color: var(--doux);
   background: none; border: none; font-family: inherit; cursor: pointer; text-decoration: none; }
-.rond span { width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; background: rgba(255,255,255,.85);
+.rond span { width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; background: var(--surface-douce);
   color: var(--texte); box-shadow: var(--ombre); transition: transform .2s, background .3s, color .3s; }
 .rond:hover span { transform: scale(1.06); }
 .rond b { font-weight: inherit; }
@@ -36,7 +37,7 @@
 .info-close { margin: 16px 0 0; color: var(--doux); font-size: .92rem; }
 
 /* Panneau "Postuler" : s'ouvre sous les boutons ronds pour les candidatures par email ou sans lien */
-.panneau-postuler { max-width: 520px; margin: 22px auto 0; padding: 20px 22px; border-radius: 22px; text-align: left; background: rgba(255,255,255,.85);
+.panneau-postuler { max-width: 520px; margin: 22px auto 0; padding: 20px 22px; border-radius: 22px; text-align: left; background: var(--surface-douce);
   box-shadow: var(--ombre); animation: monte .35s ease-out; position: relative; }
 .panneau-postuler h3 { margin: 0 0 10px; font-size: 1.1rem; display: flex; align-items: center; gap: 8px; }
 .panneau-postuler .fermer { position: absolute; top: 12px; right: 14px; border: none; background: none; font-size: 1.4rem; line-height: 1;
@@ -57,7 +58,7 @@
 .ligne-puces { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 8px; }
 .ligne-puces b { font-size: .82rem; color: var(--doux); margin-right: 4px; font-weight: 600; min-width: 84px; }
 .puce { padding: 5px 12px; border-radius: 999px; font-size: .82rem; font-weight: 600; background: rgba(10,108,255,.1); color: var(--accent); }
-.puce.renforcer { background: rgba(242,183,5,.18); color: #8a6400; }
+.puce.renforcer { background: rgba(242,183,5,.18); color: var(--jaune-texte); }
 .puce.mauve { background: rgba(122,92,255,.12); color: var(--mauve); }
 
 /* Annonce decoupee en sections ; repliee au-dela des premieres sections */
@@ -76,11 +77,11 @@
 .recruteuse { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
 .avatar { width: 54px; height: 54px; flex: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; gap: 3px;
   background: linear-gradient(135deg, var(--mauve), var(--accent)); }
-.avatar i { width: 4px; border-radius: 4px; background: #fff; height: 30%; animation: respire-onde 1.4s ease-in-out infinite; animation-delay: calc(var(--i) * -.2s); }
+.avatar i { width: 4px; border-radius: 4px; background: var(--surface); height: 30%; animation: respire-onde 1.4s ease-in-out infinite; animation-delay: calc(var(--i) * -.2s); }
 @keyframes respire-onde { 50% { height: 60%; } }
 .recruteuse b { display: block; font-size: 1.1rem; }
-.recruteuse small { color: #1e7d4f; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
-.recruteuse small::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #1e7d4f; }
+.recruteuse small { color: var(--vert); font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
+.recruteuse small::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--vert); }
 .assistante .intro { color: var(--doux); margin: 0 0 16px; }
 .assistante .btn { width: 100%; justify-content: center; box-shadow: none; margin-top: 10px; }
 .btn.mauve { background: var(--mauve); }
@@ -94,7 +95,7 @@
 .btn.en-cours { background: var(--mauve); color: #fff; border-color: transparent; }
 .btn.termine { background: var(--accent); color: #fff; border-color: transparent; }
 .bulle { width: 48px; height: 48px; flex: none; border-radius: 50%; position: relative; overflow: hidden;
-  background: rgba(255,255,255,.85); box-shadow: inset 0 0 0 2px rgba(122,92,255,.25); }
+  background: var(--surface-douce); box-shadow: inset 0 0 0 2px rgba(122,92,255,.25); }
 .vague { position: absolute; left: 50%; top: 105%; width: 100px; height: 100px; margin-left: -50px; border-radius: 38%;
   background: var(--mauve); opacity: .65; animation: tourne-vague 3s linear infinite; transition: top 6s ease-out, background .5s; }
 .vague.deux { opacity: .35; border-radius: 35%; animation-duration: 4.5s; }
@@ -112,7 +113,7 @@
 .anneau { width: 92px; height: 92px; flex: none; position: relative; }
 .anneau svg { width: 100%; height: 100%; transform: rotate(-90deg); }
 .anneau circle { fill: none; stroke-width: 9; }
-.anneau .piste { stroke: #e3e8f0; }
+.anneau .piste { stroke: var(--piste); }
 .anneau .valeur { stroke: var(--couleur, var(--accent)); stroke-linecap: round; stroke-dasharray: 251; stroke-dashoffset: 251; animation: anneau 1.4s ease-out .2s forwards; }
 @keyframes anneau { to { stroke-dashoffset: calc(251 - 251 * var(--n) / 100); } }
 .anneau b { position: absolute; inset: 0; display: grid; place-items: center; font-size: 1.5rem; }
@@ -122,10 +123,10 @@
 .liste-conseils { margin: 0; padding-left: 20px; }
 .liste-conseils li { margin: 6px 0; }
 .barres div { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; font-size: .9rem; margin-top: 10px; }
-.barres .jauge { grid-column: 1 / -1; height: 7px; border-radius: 7px; background: #e3e8f0; overflow: hidden; }
+.barres .jauge { grid-column: 1 / -1; height: 7px; border-radius: 7px; background: var(--piste); overflow: hidden; }
 .barres .jauge i { display: block; height: 100%; width: 0; border-radius: 7px; background: linear-gradient(90deg, var(--accent), var(--mauve)); animation: remplit 1.2s ease-out .3s forwards; }
 @keyframes remplit { to { width: var(--n); } }
-details { padding: 10px 14px; border-radius: 14px; background: rgba(255,255,255,.7); margin-top: 8px; }
+details { padding: 10px 14px; border-radius: 14px; background: var(--surface-douce); margin-top: 8px; }
 summary { cursor: pointer; font-weight: 600; }
 details p { margin: 8px 0 0; color: var(--doux); }
 
@@ -135,7 +136,7 @@ details p { margin: 8px 0 0; color: var(--doux); }
 .en-direct::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: #c0392b; animation: clignote 1.2s infinite; }
 @keyframes clignote { 50% { opacity: .25; } }
 .minuteur { font-variant-numeric: tabular-nums; color: var(--doux); font-weight: 600; }
-.duree { height: 4px; border-radius: 4px; background: #e3e8f0; margin: 10px 0 0; overflow: hidden; }
+.duree { height: 4px; border-radius: 4px; background: var(--piste); margin: 10px 0 0; overflow: hidden; }
 .duree i { display: block; height: 100%; width: 0; background: var(--doux); transition: width 1s linear; }
 .onde-vocale { display: flex; align-items: center; justify-content: center; gap: 4px; height: 90px; margin: 16px 0 6px; }
 .onde-vocale i { width: 6px; border-radius: 6px; height: 8%; background: var(--accent); transition: height .12s, background .4s; }
@@ -148,7 +149,7 @@ details p { margin: 8px 0 0; color: var(--doux); }
 .commandes { display: flex; justify-content: center; gap: 28px; margin-top: 16px; }
 .commandes button { display: flex; flex-direction: column; align-items: center; gap: 6px; border: none; background: none; font: inherit;
   font-size: .8rem; font-weight: 600; color: var(--doux); cursor: pointer; }
-.commandes span { width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; background: #fff; color: var(--texte); box-shadow: var(--ombre); }
+.commandes span { width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; background: var(--surface); color: var(--texte); box-shadow: var(--ombre); }
 .commandes .raccrocher span { background: #e5484d; color: #fff; }
 .commandes .coupe span { background: var(--texte); color: #fff; }
 

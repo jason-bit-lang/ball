@@ -180,9 +180,8 @@ dynamique, inspiree du style Liquid Glass d'Apple Music (iOS 27 : verre depoli, 
 flottante, pages d'artistes teintees par leur photo, icone noir et blanc, bleu pour l'element actif).
 Proposition de Claude en attente de discussion : fond d'ondes soyeuses, verre, barre flottante en bas
 sur telephone, zone de depot du CV, niveau de correspondance en barre, page d'offre facon page
-d'artiste, onde sonore reagissant a la voix pendant l'entretien, anneau pour la note. Palettes
-proposees : Sable et encre, Fleuve (clin d'oeil RDC), Nuit de Kinshasa. Les couleurs seront choisies
-avec l'apprenant. Captures dans le scratchpad (dossier design/).
+d'artiste, onde sonore reagissant a la voix pendant l'entretien, anneau pour la note. Captures et
+videos dans le scratchpad (dossier design/).
 
 Methode choisie : une maquette par page, captures et videos envoyees, puis integration dans le vrai
 site. L'apprenant valide TOUT en une fois, a la fin, apres avoir choisi le theme (couleurs).
@@ -277,6 +276,13 @@ application mail" (mailto avec l'objet "Candidature : <poste>") ; site cite dans
 dans un nouvel onglet ; rien trouve (19) -> "Comment postuler" : panneau avec la section "Dossier de
 candidature" de l'annonce et le lien vers l'annonce d'origine ; offre close -> bouton grise.
 A l'integration : chercher email et site dans la description au nettoyage quand il n'y a pas de lien.
+COULEURS CHOISIES (28/10) : palette "Lumiere" (fond gris tres clair, ondes bleues et jaunes, bleu
+#0a6cff, mauve #7a5cff) en mode clair par defaut, et un MODE SOMBRE "Nuit de Kinshasa" que
+l'utilisateur choisit lui-meme avec un bouton lune / soleil dans l'en-tete (pas de bascule automatique).
+Le choix est retenu dans le navigateur (localStorage "theme"), applique dans le <head> avant
+l'affichage (theme.js) pour eviter un flash blanc. Toutes les couleurs sont des variables dans
+commun.css (:root et [data-theme="sombre"]) : --surface, --surface-douce, --piste, --trait,
+--gris-doux, --vert, --jaune-texte, --rouge-texte, --onde-1/2/3 remplacent les blancs et gris ecrits en dur.
 Bug corrige dans les maquettes : la classe "rond" servait deux fois (cercle d'attente renomme
 "cercle-attente") ; .btn a maintenant border: none et font: inherit.
 

@@ -19,7 +19,7 @@ function solidite(texte) {
   return points;
 }
 if (force) {
-  const couleurs = ['#c0392b', '#f2b705', '#1e7d4f'];
+  const couleurs = ['#c0392b', '#f2b705', 'var(--vert)'];
   const mots = ['Trop faible : 8 caractères minimum', 'Correct', 'Solide'];
   motDePasse.addEventListener('input', () => {
     const points = solidite(motDePasse.value);

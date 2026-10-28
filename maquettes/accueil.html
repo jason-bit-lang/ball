@@ -2,6 +2,7 @@
 <html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>CVBoost</title>
 <link rel="stylesheet" href="commun.css">
+<script src="theme.js"></script>
 <style>
 /* ===== 1. Annonce ===== */
 .hero { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; padding-top: 60px; }
@@ -13,13 +14,13 @@
 /* Demonstration animee : une seule boucle de 7 s pour tous les elements */
 .scene { text-align: left; position: relative; height: 330px; max-width: 460px; width: 100%; margin: 0 auto; }
 .cv { position: absolute; left: 0; top: 30px; width: 42%; height: 250px; padding: 16px; overflow: hidden; border-radius: 18px; }
-.photo { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, #c9d6e8, #e9eef6); margin-bottom: 10px; }
-.ligne { height: 8px; border-radius: 4px; background: #dde3ec; margin: 8px 0; }
-.ligne.titre { height: 11px; width: 75%; background: #c4ccd8; } .court { width: 55%; } .moyen { width: 80%; }
+.photo { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, var(--trait), var(--trait)); margin-bottom: 10px; }
+.ligne { height: 8px; border-radius: 4px; background: var(--trait); margin: 8px 0; }
+.ligne.titre { height: 11px; width: 75%; background: var(--trait); } .court { width: 55%; } .moyen { width: 80%; }
 .faisceau { position: absolute; left: 0; right: 0; height: 40px; top: -40px; border-bottom: 2px solid var(--accent);
   background: linear-gradient(180deg, transparent, rgba(10,108,255,.25), transparent); animation: scanner 7s ease-in-out infinite; }
 @keyframes scanner { 0%, 4% { top: -40px; opacity: 1; } 24% { top: 250px; opacity: 1; } 26%, 100% { top: 250px; opacity: 0; } }
-.puce { position: absolute; left: 6%; top: var(--y); padding: 6px 12px; border-radius: 999px; background: #fff; color: var(--accent);
+.puce { position: absolute; left: 6%; top: var(--y); padding: 6px 12px; border-radius: 999px; background: var(--surface); color: var(--accent);
   font-size: .8rem; font-weight: 600; box-shadow: 0 6px 16px rgba(10,108,255,.2); opacity: 0;
   animation: puce 7s ease-in-out infinite; animation-delay: var(--d); }
 @keyframes puce { 0%, 22% { opacity: 0; transform: scale(.4); } 28%, 40% { opacity: 1; transform: none; }
@@ -28,7 +29,7 @@
   animation: offre 7s cubic-bezier(.2,.8,.2,1) infinite; animation-delay: var(--d); }
 @keyframes offre { 0%, 46% { opacity: 0; transform: translateY(24px); } 54%, 92% { opacity: 1; transform: none; } 100% { opacity: 0; } }
 .offre b { display: block; font-size: .88rem; } .offre small { color: var(--doux); font-size: .75rem; }
-.niveau { height: 6px; border-radius: 6px; background: #e3e8f0; margin-top: 8px; overflow: hidden; }
+.niveau { height: 6px; border-radius: 6px; background: var(--piste); margin-top: 8px; overflow: hidden; }
 .niveau i { display: block; height: 100%; width: 0; border-radius: 6px; background: var(--accent); animation: remplir 7s ease-out infinite; animation-delay: var(--d); }
 @keyframes remplir { 0%, 54% { width: 0; } 70%, 100% { width: var(--n); } }
 .etiquette { float: right; font-size: .7rem; font-weight: 700; color: var(--accent); }
@@ -36,11 +37,11 @@
 
 /* ===== 2. Comment ca marche ===== */
 .etapes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; position: relative; margin-top: 40px; }
-.etapes::before { content: ""; position: absolute; top: 28px; left: 16%; right: 16%; height: 3px; border-radius: 3px; background: #dfe5ee; }
+.etapes::before { content: ""; position: absolute; top: 28px; left: 16%; right: 16%; height: 3px; border-radius: 3px; background: var(--trait); }
 .etapes::after { content: ""; position: absolute; top: 28px; left: 16%; height: 3px; width: 0; border-radius: 3px; background: var(--accent); transition: width 1.6s ease .3s; }
 .etapes.visible::after { width: 68%; }
 .etape { position: relative; z-index: 1; text-align: center; padding: 0 10px; }
-.numero { width: 58px; height: 58px; margin: 0 auto 14px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; font-size: 1.3rem; color: var(--accent); background: #fff; }
+.numero { width: 58px; height: 58px; margin: 0 auto 14px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; font-size: 1.3rem; color: var(--accent); background: var(--surface); }
 .etape b { display: block; font-size: 1.1rem; }
 @media (max-width: 700px) {
   .etapes { grid-template-columns: 1fr; gap: 26px; }
@@ -76,11 +77,11 @@
 .puces { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
 .carte p.etiquette-puces { margin-top: 18px; font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
 .puces span { padding: 5px 12px; border-radius: 999px; font-size: .8rem; font-weight: 600; background: rgba(10,108,255,.1); color: var(--accent); }
-.puces span.manque { background: rgba(242,183,5,.18); color: #8a6400; }
+.puces span.manque { background: rgba(242,183,5,.18); color: var(--jaune-texte); }
 .anneau { width: 110px; height: 110px; margin: 18px 0 0; position: relative; }
 .anneau svg { width: 100%; height: 100%; transform: rotate(-90deg); }
 .anneau circle { fill: none; stroke-width: 10; }
-.anneau .piste { stroke: #e3e8f0; }
+.anneau .piste { stroke: var(--piste); }
 .anneau .valeur { stroke: var(--accent); stroke-linecap: round; stroke-dasharray: 283; stroke-dashoffset: 283; transition: stroke-dashoffset 1.6s ease .3s; }
 .visible .anneau .valeur { stroke-dashoffset: 51; }  /* 283 x (1 - 0,82) = 51 : note de 82 / 100 */
 .anneau b { position: absolute; inset: 0; display: grid; place-items: center; font-size: 1.6rem; }

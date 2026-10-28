@@ -1,20 +1,37 @@
 /* Maquettes CVBoost : styles communs a toutes les pages (en-tete, pied de page, boutons...) */
-/* ===== Couleurs provisoires (palette a choisir) ===== */
+/* ===== Couleurs : palette "Lumiere" (mode clair, par defaut) ===== */
 :root {
   --fond: #f3f5f9; --texte: #14181f; --doux: #5e6573;
   --accent: #0a6cff; --accent-2: #f2b705; --mauve: #7a5cff;
   --verre: rgba(255,255,255,.62); --bord: rgba(255,255,255,.85);
   --ombre: 0 12px 32px rgba(20,30,60,.10), inset 0 1px 0 #fff;
+  --surface: #fff; --surface-douce: rgba(255,255,255,.75);       /* cartes pleines et champs */
+  --piste: #e3e8f0; --trait: #dde3ec; --gris-doux: #eef1f5;       /* fonds des jauges, traits decoratifs */
+  --vert: #1e7d4f; --jaune-texte: #8a6400; --rouge-texte: #a5281b; /* textes de couleur */
+  --onde-1: #9cc7ff; --onde-2: #ffe7a3; --onde-3: #c9dcff;        /* ondes floues du fond */
   --rayon: 24px;
+}
+/* Mode sombre "Nuit de Kinshasa" : choisi par l'utilisateur avec le bouton lune/soleil de l'en-tete */
+[data-theme="sombre"] {
+  --fond: #0d1017; --texte: #eef0f4; --doux: #9aa3b5;
+  --accent: #4c8dff; --mauve: #9b84ff;
+  --verre: rgba(32,38,54,.6); --bord: rgba(255,255,255,.12);
+  --ombre: 0 12px 32px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.06);
+  --surface: #1b2130; --surface-douce: rgba(40,47,66,.85);
+  --piste: #2a3245; --trait: #333c52; --gris-doux: #252c3b;
+  --vert: #4fd18b; --jaune-texte: #f2c94c; --rouge-texte: #ff8a80;
+  --onde-1: #1d3b7a; --onde-2: #4b2a7a; --onde-3: #5a3d1c;
+  color-scheme: dark;   /* champs et barres de defilement du navigateur en sombre */
 }
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
-body { margin: 0; font-family: Inter, 'Segoe UI', system-ui, -apple-system, sans-serif; color: var(--texte); background: var(--fond); line-height: 1.5; }
+body { margin: 0; font-family: Inter, 'Segoe UI', system-ui, -apple-system, sans-serif; color: var(--texte); background: var(--fond); line-height: 1.5;
+  transition: background .4s, color .4s; }
 /* Ondes de couleur floues qui bougent tres lentement derriere la page */
 body::before { content: ""; position: fixed; inset: -20%; z-index: -1;
-  background: radial-gradient(35% 30% at 15% 20%, #9cc7ff, transparent 70%),
-              radial-gradient(30% 30% at 85% 35%, #ffe7a3, transparent 70%),
-              radial-gradient(35% 30% at 50% 90%, #c9dcff, transparent 70%);
+  background: radial-gradient(35% 30% at 15% 20%, var(--onde-1), transparent 70%),
+              radial-gradient(30% 30% at 85% 35%, var(--onde-2), transparent 70%),
+              radial-gradient(35% 30% at 50% 90%, var(--onde-3), transparent 70%);
   animation: ondes 24s ease-in-out infinite alternate; }
 @keyframes ondes { to { transform: translate(4%, -3%) rotate(6deg); } }
 a { color: inherit; }
@@ -45,9 +62,15 @@ h2 { font-size: clamp(1.8rem, 4vw, 2.6rem); }
 .liens, .menu { display: flex; gap: 4px; align-items: center; }
 .liens a { text-decoration: none; padding: 8px 16px; border-radius: 999px; font-weight: 500; color: var(--doux); transition: background .2s, color .2s; }
 .liens a:hover { color: var(--texte); }
-.liens a.actif { background: #fff; color: var(--accent); box-shadow: 0 2px 8px rgba(20,30,60,.08); }
+.liens a.actif { background: var(--surface); color: var(--accent); box-shadow: 0 2px 8px rgba(20,30,60,.08); }
 .menu a { text-decoration: none; padding: 9px 16px; border-radius: 999px; font-weight: 600; }
 .menu .btn { padding: 10px 20px; box-shadow: none; }
+/* Bouton lune / soleil pour passer du mode clair au mode sombre */
+.bouton-theme { width: 42px; height: 42px; flex: none; border: none; border-radius: 50%; display: grid; place-items: center; cursor: pointer;
+  background: var(--surface-douce); color: var(--texte); transition: transform .3s; }
+.bouton-theme:hover { transform: rotate(-20deg); }
+.bouton-theme .soleil, [data-theme="sombre"] .bouton-theme .lune { display: none; }
+[data-theme="sombre"] .bouton-theme .soleil { display: block; }
 
 /* Sur telephone : liens du centre remplaces par une barre flottante en bas, comme une application */
 .barre-bas { display: none; }
@@ -55,7 +78,7 @@ h2 { font-size: clamp(1.8rem, 4vw, 2.6rem); }
   .liens, .menu .cache-mobile { display: none; }
   .barre-bas { display: flex; position: fixed; z-index: 10; left: 12px; right: 12px; bottom: 12px; padding: 6px; border-radius: 999px; justify-content: space-around; }
   .barre-bas a { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 0; border-radius: 999px; font-size: .7rem; font-weight: 600; text-decoration: none; color: var(--doux); }
-  .barre-bas a.actif { background: #fff; color: var(--accent); }
+  .barre-bas a.actif { background: var(--surface); color: var(--accent); }
   body { padding-bottom: 90px; }
 }
 
@@ -103,10 +126,10 @@ h2 { font-size: clamp(1.8rem, 4vw, 2.6rem); }
 
 /* Champ a etiquette flottante : l'etiquette est dans le champ et monte quand on ecrit */
 .champ { position: relative; margin-bottom: 14px; }
-.champ input { width: 100%; padding: 22px 16px 8px; font: inherit; color: var(--texte); background: rgba(255,255,255,.75);
+.champ input { width: 100%; padding: 22px 16px 8px; font: inherit; color: var(--texte); background: var(--surface-douce);
   border: 1.5px solid transparent; border-radius: 16px; outline: none; transition: border-color .2s, box-shadow .2s, background .2s; }
 .champ label { position: absolute; left: 17px; top: 15px; color: var(--doux); pointer-events: none; transition: all .2s; }
-.champ input:focus { border-color: var(--accent); background: #fff; box-shadow: 0 0 0 4px rgba(10,108,255,.12); }
+.champ input:focus { border-color: var(--accent); background: var(--surface); box-shadow: 0 0 0 4px rgba(10,108,255,.12); }
 .champ input:focus + label, .champ input:not(:placeholder-shown) + label { top: 6px; font-size: .75rem; font-weight: 600; color: var(--accent); }
 /* Bouton pour afficher ou masquer le mot de passe */
 .voir { position: absolute; right: 8px; top: 9px; width: 38px; height: 38px; border: none; border-radius: 50%; background: none;
@@ -115,9 +138,9 @@ h2 { font-size: clamp(1.8rem, 4vw, 2.6rem); }
 
 /* Indicateurs sous le mot de passe : solidite et confirmation */
 .force { display: flex; gap: 6px; margin: -4px 4px 4px; }
-.force i { flex: 1; height: 5px; border-radius: 5px; background: #e3e8f0; transition: background .3s; }
+.force i { flex: 1; height: 5px; border-radius: 5px; background: var(--piste); transition: background .3s; }
 .indice { margin: 4px 4px 14px; font-size: .82rem; color: var(--doux); min-height: 1.2em; }
-.indice.bon { color: #1e7d4f; } .indice.mauvais { color: #c0392b; }
+.indice.bon { color: var(--vert); } .indice.mauvais { color: #c0392b; }
 
 .envoyer { width: 100%; justify-content: center; border: none; font: inherit; font-weight: 600; cursor: pointer; margin-top: 6px; }
 .envoyer:disabled { opacity: .75; cursor: wait; transform: none; }
@@ -127,7 +150,7 @@ h2 { font-size: clamp(1.8rem, 4vw, 2.6rem); }
 .bascule a { color: var(--accent); font-weight: 600; text-decoration: none; }
 
 /* Message d'erreur dans le formulaire, et la carte qui "secoue" doucement */
-.alerte { padding: 12px 16px; border-radius: 14px; margin-bottom: 16px; font-weight: 500; background: rgba(192,57,43,.1); color: #a5281b; }
+.alerte { padding: 12px 16px; border-radius: 14px; margin-bottom: 16px; font-weight: 500; background: rgba(192,57,43,.1); color: var(--rouge-texte); }
 .secoue { animation: secoue .4s; }
 @keyframes secoue { 20%, 60% { transform: translateX(-7px); } 40%, 80% { transform: translateX(7px); } }
 
@@ -136,4 +159,4 @@ h2 { font-size: clamp(1.8rem, 4vw, 2.6rem); }
   background: var(--verre); border: 1px solid var(--bord); box-shadow: var(--ombre); backdrop-filter: blur(20px);
   animation: glisse .5s ease-out; }
 @keyframes glisse { from { opacity: 0; transform: translateY(-14px); } }
-.flash.succes { color: #1e7d4f; } .flash.erreur { color: #a5281b; } .flash.info { color: var(--accent); }
+.flash.succes { color: var(--vert); } .flash.erreur { color: var(--rouge-texte); } .flash.info { color: var(--accent); }

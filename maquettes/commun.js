@@ -27,6 +27,8 @@ const ICONES = `<svg width="0" height="0" style="position:absolute">
   <symbol id="i-email" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3.5 6.5l8.5 6.5 8.5-6.5"/></symbol>
   <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></symbol>
   <symbol id="i-copier" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></symbol>
+  <symbol id="i-lune" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></symbol>
+  <symbol id="i-soleil" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
   <symbol id="i-coche" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
 </svg>`;
 document.body.insertAdjacentHTML('afterbegin', ICONES);
@@ -48,13 +50,16 @@ document.body.insertAdjacentHTML('afterbegin', `
     <a class="${actif('depot')}" href="envoi.html">Propulser votre CV</a>
     <a class="${actif('historique')}" href="historique.html">Historique</a>
   </div>
-  <div class="menu"><a class="btn clair cache-mobile" href="accueil.html">Déconnexion</a></div>` : `
+  <div class="menu"><button class="bouton-theme" id="bouton-theme" aria-label="Passer en mode sombre ou clair">
+    <svg class="icone lune"><use href="#i-lune"/></svg><svg class="icone soleil"><use href="#i-soleil"/></svg></button><a class="btn clair cache-mobile" href="accueil.html">Déconnexion</a></div>` : `
   <div class="liens">
     <a class="${actif('accueil')}" href="accueil.html">Accueil</a>
     <a href="accueil.html#etapes">Comment ça marche</a>
     <a href="accueil.html#fonctions">Fonctionnalités</a>
   </div>
   <div class="menu">
+    <button class="bouton-theme" id="bouton-theme" aria-label="Passer en mode sombre ou clair">
+    <svg class="icone lune"><use href="#i-lune"/></svg><svg class="icone soleil"><use href="#i-soleil"/></svg></button>
     <a class="cache-mobile ${actif('inscription')}" href="inscription.html">Inscription</a>
     <a class="btn" href="connexion.html">Connexion</a>
   </div>`}
@@ -83,6 +88,17 @@ document.body.insertAdjacentHTML('beforeend', `
   </div>
   <div class="pied-bas"><span>© 2026 CVBoost</span><span>Projet capstone Kadea Academy</span></div>
 </footer>`);
+
+// Bouton lune / soleil : change le mode et retient le choix dans le navigateur
+document.getElementById('bouton-theme').addEventListener('click', () => {
+  const sombre = document.documentElement.dataset.theme !== 'sombre';
+  if (sombre) {
+    document.documentElement.dataset.theme = 'sombre';
+  } else {
+    delete document.documentElement.dataset.theme;
+  }
+  try { localStorage.setItem('theme', sombre ? 'sombre' : 'clair'); } catch (erreur) { /* navigation privee */ }
+});
 
 // Apparition des blocs quand ils entrent dans l'ecran
 const observateur = new IntersectionObserver(entrees => {

@@ -2,6 +2,7 @@
 <html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Historique - CVBoost</title>
 <link rel="stylesheet" href="commun.css">
+<script src="theme.js"></script>
 <style>
 .page { max-width: 1000px; margin: 0 auto; padding: 40px 16px 80px; }
 .page h1 { font-size: clamp(2.2rem, 5vw, 3.2rem); margin-bottom: 6px; }
@@ -12,7 +13,7 @@
 .onglets button { position: relative; z-index: 1; border: none; background: none; font: inherit; font-weight: 600; color: var(--doux);
   padding: 10px 22px; border-radius: 999px; cursor: pointer; transition: color .25s; white-space: nowrap; }
 .onglets button.actif { color: var(--texte); }
-.onglets .pilule { position: absolute; top: 5px; bottom: 5px; left: 5px; width: calc(50% - 5px); border-radius: 999px; background: #fff;
+.onglets .pilule { position: absolute; top: 5px; bottom: 5px; left: 5px; width: calc(50% - 5px); border-radius: 999px; background: var(--surface);
   box-shadow: 0 2px 10px rgba(20,30,60,.12); transition: transform .3s cubic-bezier(.3,.7,.2,1); }
 .onglets.droite .pilule { transform: translateX(100%); }
 .compte-nb { display: inline-grid; place-items: center; min-width: 22px; height: 22px; padding: 0 6px; margin-left: 6px; border-radius: 999px;
@@ -37,17 +38,17 @@
 .echeance { margin-top: 14px; max-width: 460px; }
 .echeance .haut { display: flex; flex-wrap: wrap; gap: 6px; justify-content: space-between; align-items: center; font-size: .88rem; margin-bottom: 6px; }
 .badge { padding: 3px 10px; border-radius: 999px; font-size: .78rem; font-weight: 700; }
-.badge.large { background: rgba(30,125,79,.12); color: #1e7d4f; }
-.badge.bientot { background: rgba(242,183,5,.2); color: #8a6400; }
-.badge.close { background: #e9ecf1; color: #6b7280; }
-.badge.inconnue { background: #eef1f5; color: var(--doux); }
-.temps { height: 6px; border-radius: 6px; background: #e3e8f0; overflow: hidden; }
+.badge.large { background: rgba(30,125,79,.12); color: var(--vert); }
+.badge.bientot { background: rgba(242,183,5,.2); color: var(--jaune-texte); }
+.badge.close { background: var(--gris-doux); color: #6b7280; }
+.badge.inconnue { background: var(--gris-doux); color: var(--doux); }
+.temps { height: 6px; border-radius: 6px; background: var(--piste); overflow: hidden; }
 .temps i { display: block; height: 100%; border-radius: 6px; background: var(--couleur); width: 0; animation: remplit 1s ease-out .3s forwards; }
 @keyframes remplit { to { width: var(--n); } }
 .entretien { display: flex; align-items: center; gap: 10px; margin-top: 12px; font-size: .9rem; color: var(--doux); }
 .mini-note { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font-size: .75rem; font-weight: 800; color: var(--accent);
-  background: conic-gradient(var(--accent) calc(var(--n) * 1%), #e3e8f0 0); position: relative; }
-.mini-note::before { content: ""; position: absolute; inset: 4px; border-radius: 50%; background: #fff; }
+  background: conic-gradient(var(--accent) calc(var(--n) * 1%), var(--piste) 0); position: relative; }
+.mini-note::before { content: ""; position: absolute; inset: 4px; border-radius: 50%; background: var(--surface); }
 .mini-note span { position: relative; }
 .actions { display: flex; flex-direction: column; gap: 10px; }
 .actions .btn { justify-content: center; padding: 11px 20px; box-shadow: none; white-space: nowrap; }
@@ -124,7 +125,7 @@ function echeance(offre) {
   const texte = 'Clôture le ' + enFrancais(offre.cloture);
   if (restants < 0) return { texte, badge: 'close', etiquette: 'Clôturée', part: 100, couleur: '#c5ccd8' };
   if (restants <= 7) return { texte, badge: 'bientot', etiquette: 'Plus que ' + restants + ' jours', part, couleur: '#f2b705' };
-  return { texte, badge: 'large', etiquette: restants + ' jours restants', part, couleur: '#1e7d4f' };
+  return { texte, badge: 'large', etiquette: restants + ' jours restants', part, couleur: 'var(--vert)' };
 }
 
 function carteFavori(offre, i) {

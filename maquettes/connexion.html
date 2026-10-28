@@ -2,21 +2,22 @@
 <html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Connexion - CVBoost</title>
 <link rel="stylesheet" href="commun.css">
+<script src="theme.js"></script>
 <style>
 /* Decor : trois cartes de verre qui flottent doucement, comme des souvenirs de l'application */
 .decor { position: relative; height: 270px; margin-top: 34px; max-width: 470px; }
 .flotte { position: absolute; padding: 14px 18px; border-radius: 20px; animation: flotte 6s ease-in-out infinite alternate; animation-delay: var(--d); }
 @keyframes flotte { from { transform: translateY(0); } to { transform: translateY(-14px); } }
 .flotte b { display: block; } .flotte small { color: var(--doux); }
-.mini-niveau { height: 6px; width: 180px; border-radius: 6px; background: #e3e8f0; margin-top: 8px; overflow: hidden; }
+.mini-niveau { height: 6px; width: 180px; border-radius: 6px; background: var(--piste); margin-top: 8px; overflow: hidden; }
 .mini-niveau i { display: block; height: 100%; width: 92%; background: var(--accent); border-radius: 6px; }
 .mini-onde { display: flex; align-items: center; gap: 3px; height: 26px; margin-top: 6px; }
 .mini-onde i { width: 4px; border-radius: 4px; background: var(--accent); animation: onde 1.2s ease-in-out infinite; animation-delay: calc(var(--i) * -0.15s); }
 @keyframes onde { 0%, 100% { height: 25%; } 50% { height: 100%; } }
 .note { display: flex; gap: 12px; align-items: center; }
 .note span { width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; color: var(--accent);
-  background: conic-gradient(var(--accent) 82%, #e3e8f0 0); position: relative; }
-.note span::before { content: ""; position: absolute; inset: 5px; border-radius: 50%; background: #fff; }
+  background: conic-gradient(var(--accent) 82%, var(--piste) 0); position: relative; }
+.note span::before { content: ""; position: absolute; inset: 5px; border-radius: 50%; background: var(--surface); }
 .note span em { position: relative; font-style: normal; font-size: .9rem; }
 </style></head>
 <body data-page="connexion">

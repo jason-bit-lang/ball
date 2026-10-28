@@ -2,6 +2,7 @@
 <html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Envoi de CV - CVBoost</title>
 <link rel="stylesheet" href="commun.css">
+<script src="theme.js"></script>
 <style>
 /* Mise en page : texte et conseils a gauche, formulaire a droite ; sur telephone, le formulaire passe avant les conseils */
 .depot { grid-template-areas: "texte formulaire" "conseils formulaire"; row-gap: 0; }
@@ -25,10 +26,10 @@
               linear-gradient(90deg, var(--accent) 50%, transparent 0) bottom / 18px 2px repeat-x,
               linear-gradient(0deg, var(--accent) 50%, transparent 0) left / 2px 18px repeat-y,
               linear-gradient(0deg, var(--accent) 50%, transparent 0) right / 2px 18px repeat-y,
-              rgba(255,255,255,.55);
+              var(--surface-douce);
   animation: pointilles 1.2s linear infinite; }
 @keyframes pointilles { to { background-position: 18px 0, -18px 100%, 0 -18px, 100% 18px, 0 0; } }
-.zone:hover { background-color: #fff; }
+.zone:hover { background-color: var(--surface); }
 .zone.survol { transform: scale(1.02); background-color: rgba(10,108,255,.08); }
 .zone input { position: absolute; width: 1px; height: 1px; opacity: 0; }
 .grande-icone { width: 74px; height: 74px; border-radius: 24px; display: grid; place-items: center; color: #fff; background: var(--accent);
@@ -43,14 +44,14 @@
 @media (hover: none) { .souris { display: none; } .tactile { display: inline; } }
 
 /* Fichier choisi : une carte apparait a la place de la zone */
-.fichier { display: flex; align-items: center; gap: 14px; padding: 16px; border-radius: 18px; background: #fff; box-shadow: var(--ombre);
+.fichier { display: flex; align-items: center; gap: 14px; padding: 16px; border-radius: 18px; background: var(--surface); box-shadow: var(--ombre);
   animation: arrive .35s ease-out; position: relative; overflow: hidden; }
 @keyframes arrive { from { opacity: 0; transform: translateY(10px) scale(.97); } }
 .type { width: 48px; height: 58px; flex: none; border-radius: 10px; display: grid; place-items: end center; padding-bottom: 8px;
   font-size: .7rem; font-weight: 800; color: #fff; background: #d64541; }
 .type.docx { background: #2b6cd9; }
 .fichier .nom { font-weight: 700; word-break: break-all; }
-.fichier .pret { display: flex; align-items: center; gap: 4px; color: #1e7d4f; font-size: .85rem; font-weight: 600; }
+.fichier .pret { display: flex; align-items: center; gap: 4px; color: var(--vert); font-size: .85rem; font-weight: 600; }
 .changer { margin-left: auto; border: none; background: none; color: var(--accent); font: inherit; font-weight: 600; cursor: pointer; }
 /* Ligne du bouton et bulle d'analyse.
    Trois etats : "en-cours" (bouton et eau mauves, l'eau monte), puis "termine" (la bulle se remplit
@@ -60,7 +61,7 @@
 .envoyer.en-cours, .envoyer.termine { opacity: 1; }
 .envoyer.en-cours { background: var(--mauve); box-shadow: 0 8px 24px rgba(122,92,255,.35); }
 .bulle { width: 54px; height: 54px; flex: none; border-radius: 50%; position: relative; overflow: hidden;
-  background: rgba(255,255,255,.8); box-shadow: inset 0 0 0 2px rgba(122,92,255,.25), 0 6px 16px rgba(122,92,255,.2);
+  background: var(--surface-douce); box-shadow: inset 0 0 0 2px rgba(122,92,255,.25), 0 6px 16px rgba(122,92,255,.2);
   animation: arrive .35s ease-out; }
 .vague { position: absolute; left: 50%; top: 105%; width: 110px; height: 110px; margin-left: -55px; border-radius: 38%;
   background: var(--mauve); opacity: .65; animation: tourne-vague 3s linear infinite;

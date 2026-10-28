@@ -2,6 +2,7 @@
 <html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Essai 2 - animations d'analyse</title>
 <link rel="stylesheet" href="commun.css">
+<script src="theme.js"></script>
 <style>
 /* Page d'essai : quatre nouvelles idees d'animation d'analyse, sans texte */
 .essais { max-width: 1100px; margin: 0 auto; padding: 30px 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
@@ -9,13 +10,13 @@
 .essai { height: 330px; display: grid; place-items: center; position: relative; overflow: hidden; }
 .essai > span { position: absolute; top: 16px; left: 20px; font-weight: 700; color: var(--doux); z-index: 2; }
 /* Petit CV dessine, reutilise au centre de plusieurs idees */
-.doc { width: 46px; height: 58px; border-radius: 9px; background: #fff; box-shadow: var(--ombre); padding: 8px 7px; position: relative; z-index: 1; }
-.doc b { display: block; height: 4px; border-radius: 2px; background: #cfd7e3; margin: 5px 0; }
+.doc { width: 46px; height: 58px; border-radius: 9px; background: var(--surface); box-shadow: var(--ombre); padding: 8px 7px; position: relative; z-index: 1; }
+.doc b { display: block; height: 4px; border-radius: 2px; background: var(--trait); margin: 5px 0; }
 .doc b:nth-child(odd) { width: 60%; }
 
 /* ===== Idee 3 : le liquide, le CV se remplit comme un verre d'eau ===== */
 .bulle { width: 190px; height: 190px; border-radius: 50%; position: relative; overflow: hidden; display: grid; place-items: center;
-  background: rgba(255,255,255,.7); box-shadow: inset 0 0 0 2px rgba(10,108,255,.15), var(--ombre); }
+  background: var(--surface-douce); box-shadow: inset 0 0 0 2px rgba(10,108,255,.15), var(--ombre); }
 .vague { position: absolute; left: 50%; width: 420px; height: 420px; margin-left: -210px; border-radius: 42%;
   animation: tourne-vague 4s linear infinite, monte-niveau 7s ease-in-out infinite; border-radius: 38%; }
 .vague.un { background: rgba(10,108,255,.55); }
@@ -50,7 +51,7 @@
   0% { transform: scaleY(.3); } 10% { transform: scaleY(.9); } 20% { transform: scaleY(.4); } 30% { transform: scaleY(1.05); }
   40%, 100% { transform: scaleY(1); }
 }
-@keyframes brille { 0%, 70% { background: linear-gradient(#7fb2ff, var(--accent)); } 80%, 100% { background: linear-gradient(#5fd39a, #1e7d4f); } }
+@keyframes brille { 0%, 70% { background: linear-gradient(#7fb2ff, var(--accent)); } 80%, 100% { background: linear-gradient(#5fd39a, var(--vert)); } }
 
 /* ===== Idee 6 : la constellation, competences reliees aux offres ===== */
 .constellation { width: 300px; height: 280px; }
@@ -110,9 +111,9 @@ offres.forEach((o, i) => {
 });
 competences.forEach((c, i) => { dessin += `<circle cx="${c[0]}" cy="${c[1]}" r="7" style="--d:${0.2 + i * 0.15}s"/>`; });
 offres.forEach((o, i) => { dessin += `<circle class="offre" cx="${o[0]}" cy="${o[1]}" r="10" style="--d:${1.4 + i * 0.2}s"/>`; });
-dessin += '<rect x="-20" y="-26" width="40" height="52" rx="8" fill="#fff" stroke="#dde3ec"/>'
-        + '<rect x="-12" y="-16" width="16" height="4" rx="2" fill="#cfd7e3"/><rect x="-12" y="-6" width="24" height="4" rx="2" fill="#cfd7e3"/>'
-        + '<rect x="-12" y="4" width="20" height="4" rx="2" fill="#cfd7e3"/><rect x="-12" y="14" width="24" height="4" rx="2" fill="#cfd7e3"/>';
+dessin += '<rect x="-20" y="-26" width="40" height="52" rx="8" fill="#fff" stroke="var(--trait)"/>'
+        + '<rect x="-12" y="-16" width="16" height="4" rx="2" fill="var(--trait)"/><rect x="-12" y="-6" width="24" height="4" rx="2" fill="var(--trait)"/>'
+        + '<rect x="-12" y="4" width="20" height="4" rx="2" fill="var(--trait)"/><rect x="-12" y="14" width="24" height="4" rx="2" fill="var(--trait)"/>';
 document.getElementById('constellation').innerHTML = dessin;
 </script>
 </body></html>
