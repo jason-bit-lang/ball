@@ -225,8 +225,11 @@ Decisions de l'apprenant (28/10) : le lien du menu s'appelle "Propulser votre CV
 "Propulser") ; la page garde le titre "Deposez votre CV." Au clic sur "Analyser mon CV", un ecran
 d'analyse SANS TEXTE (choix de l'apprenant parmi 6 essais : "le liquide", une bulle de verre qui se
 remplit d'eau avec deux vagues bleue et violette ; essais dans maquettes/analyse_essai*.html). Pas
-d'ecran plein : le bouton affiche "Analyse en cours" et la petite bulle apparait juste a cote et se remplit
-pendant que le serveur travaille ; la page ne bouge pas, l'utilisateur attend simplement, puis l'utilisateur arrive directement sur une page dediee aux
+d'ecran plein. Au clic : le bouton devient MAUVE et affiche "Analyse en cours", la petite bulle a cote
+se remplit d'eau mauve ; quand le serveur a fini, la bulle se remplit jusqu'en haut et devient BLEUE, le
+bouton devient bleu avec "Analyse terminee", puis la page des opportunites s'affiche (environ 1 s apres).
+Integration : formulaire envoye avec fetch, duree minimale de 3 s pour que l'eau ait le temps de monter
+(variable --mauve: #7a5cff). La page ne bouge pas, l'utilisateur attend simplement, puis l'utilisateur arrive directement sur une page dediee aux
 resultats (l'ancienne page intermediaire "Mon CV" disparait du parcours). CV illisible : retour sur
 la page d'envoi avec un message clair. Regle des 10 s maintenue : pas d'attente artificielle (la
 lecture du CV et le matching prennent environ 1 a 3 s).
@@ -236,6 +239,10 @@ Tres proches / Proches / A explorer ; carte par offre avec jauge du niveau, entr
 "Publiee le 7 octobre 2026", badge "Nouvelle" (moins de 7 jours), "Vos atouts" (competences en
 commun) et "A renforcer" (competences de l'offre absentes du CV), boutons "Voir l'offre" et
 "S'entrainer". Noms des competences a afficher joliment (comptabilite -> Comptabilite).
+Regle de l'apprenant : la page des opportunites n'est jamais vide. S'il n'y a pas d'offre proche, on
+propose quand meme les plus proches (niveau "A explorer") avec le message "Pas encore d'offre tres proche
+de votre profil. Voici celles qui s'en rapprochent le plus..." (si aucune offre n'a de point commun avec
+le CV, proposer les offres les plus recentes).
 
 ### Partie 5 : FastAPI, Docker et deploiement Render
 

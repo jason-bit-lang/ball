@@ -52,18 +52,23 @@
 .fichier .nom { font-weight: 700; word-break: break-all; }
 .fichier .pret { display: flex; align-items: center; gap: 4px; color: #1e7d4f; font-size: .85rem; font-weight: 600; }
 .changer { margin-left: auto; border: none; background: none; color: var(--accent); font: inherit; font-weight: 600; cursor: pointer; }
-/* Ligne du bouton : pendant l'analyse, une petite bulle de verre apparait a cote et se remplit d'eau */
+/* Ligne du bouton et bulle d'analyse.
+   Trois etats : "en-cours" (bouton et eau mauves, l'eau monte), puis "termine" (la bulle se remplit
+   jusqu'en haut, tout devient bleu, "Analyse terminee"), puis la page des opportunites s'affiche. */
 .ligne-envoi { display: flex; align-items: center; gap: 14px; margin-top: 6px; }
-.ligne-envoi .envoyer { margin-top: 0; white-space: nowrap; padding-inline: 18px; }
+.ligne-envoi .envoyer { margin-top: 0; white-space: nowrap; padding-inline: 18px; transition: background .5s, box-shadow .5s; }
+.envoyer.en-cours, .envoyer.termine { opacity: 1; }
+.envoyer.en-cours { background: var(--mauve); box-shadow: 0 8px 24px rgba(122,92,255,.35); }
 .bulle { width: 54px; height: 54px; flex: none; border-radius: 50%; position: relative; overflow: hidden;
-  background: rgba(255,255,255,.8); box-shadow: inset 0 0 0 2px rgba(10,108,255,.2), 0 6px 16px rgba(10,108,255,.18);
+  background: rgba(255,255,255,.8); box-shadow: inset 0 0 0 2px rgba(122,92,255,.25), 0 6px 16px rgba(122,92,255,.2);
   animation: arrive .35s ease-out; }
 .vague { position: absolute; left: 50%; top: 105%; width: 110px; height: 110px; margin-left: -55px; border-radius: 38%;
-  animation: tourne-vague 3s linear infinite, monte-niveau 6s ease-out forwards; }
-.vague.un { background: rgba(10,108,255,.6); }
-.vague.deux { background: rgba(122,92,255,.4); border-radius: 35%; animation-duration: 4.5s, 6s; }
+  background: var(--mauve); opacity: .65; animation: tourne-vague 3s linear infinite;
+  transition: top 6s ease-out, background .5s; }
+.vague.deux { opacity: .35; border-radius: 35%; animation-duration: 4.5s; }
 @keyframes tourne-vague { to { transform: rotate(360deg); } }
-@keyframes monte-niveau { to { top: 20%; } }   /* l'eau monte une fois, puis les vagues continuent de bouger */
+.bulle.en-cours .vague { top: 22%; }                                  /* l'eau monte lentement */
+.bulle.termine .vague { top: -40%; background: var(--accent); transition: top .7s ease-out, background .5s; }  /* pleine et bleue */
 .securite { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 14px 0 0; font-size: .85rem; color: var(--doux); }
 </style></head>
 <body data-page="depot" data-connecte>
@@ -169,14 +174,32 @@ zone.addEventListener('drop', evenement => {
   afficherFichier();
 });
 
-// Analyse : le bouton affiche "Analyse en cours" et la bulle se remplit a cote. Le formulaire part normalement :
-// la page des resultats s'affiche des que le serveur a fini.
-document.getElementById('formulaire').addEventListener('submit', evenement => {
-  evenement.preventDefault();  // maquette uniquement : on simule la reponse du serveur
+// Analyse du CV en trois temps : en cours (mauve), terminee (bleu), puis page des opportunites.
+// Dans le vrai site, envoyerAuServeur() enverra le formulaire avec fetch et renverra l'adresse de la page des resultats.
+const DUREE_MIN = 3000;   // l'eau a toujours le temps de monter, meme si le serveur repond en 1 seconde
+const bulle = document.getElementById('bulle');
+
+function envoyerAuServeur() {
+  // Maquette uniquement : le serveur repond au bout de 1,2 seconde
+  return new Promise(reponse => setTimeout(() => reponse('resultats.html'), 1200));
+}
+
+document.getElementById('formulaire').addEventListener('submit', async evenement => {
+  evenement.preventDefault();
   bouton.disabled = true;
   bouton.textContent = 'Analyse en cours';
-  document.getElementById('bulle').hidden = false;
-  setTimeout(() => { location.href = 'resultats.html'; }, 4200);  // maquette : temps de reponse simule
+  bouton.classList.add('en-cours');
+  bulle.hidden = false;
+  setTimeout(() => bulle.classList.add('en-cours'), 50);   // petit delai pour que la montee de l'eau soit animee
+  const debut = Date.now();
+  const adresse = await envoyerAuServeur();
+  const reste = Math.max(0, DUREE_MIN - (Date.now() - debut));
+  setTimeout(() => {
+    bouton.classList.replace('en-cours', 'termine');
+    bulle.classList.replace('en-cours', 'termine');
+    bouton.innerHTML = '<svg class="icone"><use href="#i-coche"/></svg> Analyse terminée';
+    setTimeout(() => { location.href = adresse; }, 1000);   // le temps de voir "Analyse terminee"
+  }, reste);
 });
 
 // Maquette uniquement : ?illisible montre le retour du serveur quand le CV ne peut pas etre lu

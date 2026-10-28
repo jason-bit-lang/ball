@@ -48,6 +48,11 @@
 .actions { display: flex; flex-direction: column; gap: 10px; align-items: stretch; }
 .actions .btn { justify-content: center; padding: 11px 20px; box-shadow: none; }
 .actions .btn.clair { font-size: .9rem; }
+/* Message quand aucune offre n'est vraiment proche : on propose quand meme les plus proches */
+.message { display: flex; gap: 16px; align-items: flex-start; padding: 20px 24px; margin-top: 26px; border-radius: 22px; }
+.message .pastille { width: 42px; height: 42px; flex: none; border-radius: 14px; display: grid; place-items: center; color: #fff; background: var(--mauve); }
+.message b { display: block; font-size: 1.05rem; margin-bottom: 4px; }
+.message p { margin: 0; color: var(--doux); }
 .encore { text-align: center; margin-top: 34px; color: var(--doux); }
 .encore a { color: var(--accent); font-weight: 600; text-decoration: none; }
 @media (max-width: 760px) {
@@ -71,6 +76,13 @@
       <span class="puce" style="--i:2">Bureautique</span><span class="puce" style="--i:3">Anglais</span>
     </div>
   </section>
+
+  <div class="message verre" id="message" hidden>
+    <span class="pastille"><svg class="icone"><use href="#i-loupe"/></svg></span>
+    <div><b>Pas encore d'offre très proche de votre profil.</b>
+      <p>Voici celles qui s'en rapprochent le plus. De nouvelles offres arrivent chaque jour : revenez bientôt,
+         ou ajoutez vos compétences en toutes lettres dans votre CV.</p></div>
+  </div>
 
   <div class="filtres" id="filtres">
     <button class="actif" data-niveau="tous">Toutes</button>
@@ -104,6 +116,14 @@ const OFFRES = [
   { titre: 'Project Finance Officer', entreprise: 'CBM', lieu: 'Bukavu et Goma', date: '12 octobre 2026', nouvelle: false,
     niveau: 'explorer', atouts: ['Comptabilité', 'Finance'], renforcer: ['Logistique'] },
 ];
+
+// Maquette uniquement : ?faible montre le cas ou aucune offre n'est proche.
+// Le site propose quand meme les offres les plus proches, au niveau "A explorer", avec un message.
+if (location.search.includes('faible')) {
+  OFFRES.forEach(offre => { offre.niveau = 'explorer'; });
+  document.getElementById('message').hidden = false;
+  document.getElementById('filtres').hidden = true;
+}
 
 function puces(liste, classe) {
   return liste.map(nom => `<span class="puce ${classe}">${nom}</span>`).join('');

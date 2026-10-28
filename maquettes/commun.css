@@ -2,7 +2,7 @@
 /* ===== Couleurs provisoires (palette a choisir) ===== */
 :root {
   --fond: #f3f5f9; --texte: #14181f; --doux: #5e6573;
-  --accent: #0a6cff; --accent-2: #f2b705;
+  --accent: #0a6cff; --accent-2: #f2b705; --mauve: #7a5cff;
   --verre: rgba(255,255,255,.62); --bord: rgba(255,255,255,.85);
   --ombre: 0 12px 32px rgba(20,30,60,.10), inset 0 1px 0 #fff;
   --rayon: 24px;
