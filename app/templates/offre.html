@@ -1,64 +1,147 @@
 {% extends "base.html" %}
+{% from "macros.html" import icone %}
 {% block title %}{{ offre.titre }} - CVBoost{% endblock %}
 {% block content %}
-<div class="page-large{% if assistante %} deux-colonnes{% endif %}">
-    <article>
-        <h2>{{ offre.titre }}</h2>
-        <p><strong>{{ offre.entreprise }}</strong> - {{ offre.lieu }}
-           {% if offre.date_publication %}- publiée le {{ offre.date_publication }}{% endif %}</p>
-        {% if offre.competences %}<p class="discret">Compétences : {{ offre.competences }}</p>{% endif %}
-        <p>
-            <a href="{{ offre.url }}" target="_blank" rel="noopener">Voir l'annonce d'origine</a>
-            {% if offre.lien_candidature %}
-            - <a href="{{ offre.lien_candidature }}" target="_blank" rel="noopener">Postuler</a>
+{% set NIVEAUX = {'tres-proche': 'Très proche de votre profil', 'proche': 'Proche de votre profil'} %}
+<main class="page">
+    <a class="retour" href="{{ url_for('recherche', id=document.id) }}">{{ icone('fleche') }} Vos opportunités</a>
+
+    <!-- En-tete facon page d'artiste : titre, informations et trois boutons ronds -->
+    <section class="tete verre">
+        <h1>{{ offre.titre }}</h1>
+        <p class="qui">{{ offre.entreprise }} · {{ offre.lieu }}</p>
+        <div class="pastilles">
+            {% if resultat.niveau in NIVEAUX %}<span class="niveau">{{ NIVEAUX[resultat.niveau] }}</span>{% endif %}
+            {% if offre.date_publication %}<span>{{ icone('calendrier') }} Publiée le {{ offre.date_publication | date_fr }}</span>{% endif %}
+            {% if offre.date_limite %}
+                <span class="{{ echeance.classe }}">{{ icone('horloge') }} {{ echeance.texte }}{% if echeance.classe == 'bientot' %} · {{ echeance.etiquette | lower }}{% endif %}</span>
             {% endif %}
-        </p>
-        <div class="description">{{ offre.description }}</div>
-        <a href="{{ url_for('recherche', id=document.id) }}" class="btn-secondary">Retour aux offres</a>
-    </article>
-
-    {# Assistante DRH : le contenu est rempli par static/entretien.js (masquee si ASSISTANTE_ACTIVE = False) #}
-    {% if assistante %}
-    <aside id="entretien" class="ia-card" data-url="{{ url_for('entretien', offre_id=offre.id, id=document.id, etape='analyse') }}">
-        <h3>Assistante DRH</h3>
-        <p>Entraînez-vous : l'assistante analyse votre CV pour ce poste, puis vous fait passer un entretien
-           <strong>à voix haute</strong>, comme une vraie recruteuse.</p>
-        <p class="discret">Votre CV et vos réponses sont envoyés à OpenAI pendant l'analyse et l'entretien.</p>
-
-        <button type="button" id="analyser">Analyser ma candidature</button>
-        <div id="analyse" hidden>
-            <p class="compatibilite">Compatibilité : <strong id="score"></strong> %</p>
-            <p id="resume"></p>
-            <h4>Points forts</h4><ul id="forts"></ul>
-            <h4>Points à améliorer</h4><ul id="faibles"></ul>
-            <h4>Compétences manquantes</h4><ul id="manquantes"></ul>
-            <h4>Conseils pour votre CV</h4><ul id="recommandations"></ul>
         </div>
+        <div class="ronds">
+            <button type="button" class="rond{{ ' favori-actif' if favori }}" id="favori" data-url="{{ url_for('favori', offre_id=offre.id) }}" data-historique="{{ url_for('history') }}"
+                    aria-pressed="{{ 'true' if favori else 'false' }}"><span>{{ icone('coeur') }}</span>Favori</button>
+            <button type="button" class="rond grand" id="lancer"><span>{{ icone('micro') }}</span>Entretien vocal</button>
+            {# Le bouton Postuler s'adapte a ce que l'annonce permet (voir maniere_de_postuler dans affichage.py) #}
+            {% if postuler == 'lien' %}
+                <a class="rond" id="postuler" href="{{ offre.lien_candidature }}" target="_blank" rel="noopener"><span>{{ icone('externe') }}</span>Postuler</a>
+            {% elif postuler == 'email' %}
+                <button type="button" class="rond" id="postuler" aria-controls="panneau-postuler"><span>{{ icone('email') }}</span>Postuler par email</button>
+            {% elif postuler == 'rien' %}
+                <button type="button" class="rond" id="postuler" aria-controls="panneau-postuler"><span>{{ icone('info') }}</span>Comment postuler</button>
+            {% else %}
+                <span class="rond inactif"><span>{{ icone('externe') }}</span>Postuler</span>
+            {% endif %}
+        </div>
+        {% if postuler == 'close' %}
+            <p class="info-close">Les candidatures sont closes, mais vous pouvez toujours vous entraîner sur ce poste.</p>
+        {% endif %}
 
-        <button type="button" id="demarrer">Démarrer l'entretien vocal</button>
-        <div id="direct" hidden>
-            <p><span id="etat">Connexion...</span> - <span id="minuteur">00:00</span></p>
-            <div id="conversation"></div>
-            <div class="boutons">
-                <button type="button" id="micro">Couper le micro</button>
-                <button type="button" id="terminer">Terminer l'entretien</button>
+        {% if postuler == 'email' %}
+            {% set adresse = offre.lien_candidature[7:] %}
+            <div class="panneau-postuler" id="panneau-postuler" hidden>
+                <button type="button" class="fermer" aria-label="Fermer">×</button>
+                <h3>{{ icone('email') }} Postuler par email</h3>
+                <div class="adresse"><span>{{ adresse }}</span>
+                    <button type="button" id="copier" data-adresse="{{ adresse }}">{{ icone('copier') }} Copier</button></div>
+                <p class="rappel">N'oubliez pas de joindre votre CV et votre lettre de motivation, et d'indiquer le poste dans l'objet.</p>
+                <a class="btn" href="{{ offre.lien_candidature }}?subject={{ ('Candidature : ' ~ offre.titre) | urlencode }}">Ouvrir mon application mail</a>
             </div>
+        {% elif postuler == 'rien' %}
+            <div class="panneau-postuler" id="panneau-postuler" hidden>
+                <button type="button" class="fermer" aria-label="Fermer">×</button>
+                <h3>{{ icone('info') }} Comment postuler</h3>
+                {% if dossier %}
+                    <ul>{% for ligne in dossier.puces or dossier.paragraphes %}<li>{{ ligne }}</li>{% endfor %}</ul>
+                {% else %}
+                    <p class="rappel">Les consignes de candidature sont précisées dans l'annonce d'origine.</p>
+                {% endif %}
+                <a class="btn clair" href="{{ offre.url }}" target="_blank" rel="noopener">{{ icone('externe') }} Voir l'annonce d'origine</a>
+            </div>
+        {% endif %}
+    </section>
+
+    <div class="corps">
+        <div>
+            <section class="bloc verre">
+                <h2>Vous et ce poste</h2>
+                <div class="ligne-puces"><b>Vos atouts</b>
+                    {% for nom in resultat.communes %}<span class="puce">{{ nom | competence }}</span>{% else %}<span class="doux">Aucune compétence en commun repérée</span>{% endfor %}</div>
+                {% if resultat.renforcer %}
+                    <div class="ligne-puces"><b>À renforcer</b>{% for nom in resultat.renforcer %}<span class="puce renforcer">{{ nom | competence }}</span>{% endfor %}</div>
+                {% endif %}
+            </section>
+            <section class="bloc verre">
+                <h2>L'annonce</h2>
+                {# Le texte (souvent lu par OCR en un seul bloc) est decoupe en sections lisibles #}
+                <div class="annonce repliee" id="annonce">
+                    {% for section in sections %}
+                        {% if section.titre %}<h3>{{ section.titre }}</h3>{% endif %}
+                        {% if section.puces %}
+                            <ul>{% for puce in section.puces %}<li>{{ puce }}</li>{% endfor %}</ul>
+                        {% else %}
+                            {% for paragraphe in section.paragraphes %}<p>{{ paragraphe }}</p>{% endfor %}
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                <button type="button" class="deplier" id="deplier">Lire toute l'annonce</button><br>
+                <a class="origine" href="{{ offre.url }}" target="_blank" rel="noopener">{{ icone('externe') }} Voir l'annonce d'origine sur mediacongo.net</a>
+            </section>
         </div>
 
-        <div id="evaluation" hidden>
-            <h4>Évaluation de l'entretien</h4>
-            <p class="compatibilite">Note globale : <strong id="note"></strong> / 100</p>
-            <p>Communication : <span id="communication"></span> / 10 -
-               Compétences techniques : <span id="competences"></span> / 10 -
-               Motivation : <span id="motivation"></span> / 10</p>
-            <p id="verdict"></p>
-            <h4>Points forts</h4><ul id="eval-forts"></ul>
-            <h4>Axes d'amélioration</h4><ul id="eval-axes"></ul>
-            <h4>Réponses à retravailler</h4><ul id="conseils"></ul>
-        </div>
-        <p id="statut" class="discret" aria-live="polite"></p>
-    </aside>
-    {% endif %}
-</div>
+        {# Assistante DRH : le contenu est rempli par static/entretien.js (masquee si ASSISTANTE_ACTIVE = False) #}
+        {% if assistante %}
+        <aside class="assistante verre" id="assistante" data-url="{{ url_for('entretien', offre_id=offre.id, id=document.id, etape='analyse') }}"
+               data-historique="{{ url_for('history') }}">
+            <div class="recruteuse">
+                <div class="avatar" aria-hidden="true">{% for i in range(5) %}<i style="--i: {{ i }}"></i>{% endfor %}</div>
+                <div><b>Votre recruteuse</b><small id="etat-recruteuse">Disponible</small></div>
+            </div>
+
+            <!-- 1. Accueil de l'assistante et analyse ecrite -->
+            <div id="accueil-assistante">
+                <p class="intro">Préparez-vous pour ce poste : je lis votre CV, puis je vous fais passer un entretien à voix haute.</p>
+                <div class="ligne-envoi" aria-live="polite">
+                    <button type="button" class="btn clair" id="analyser">{{ icone('cible') }} Analyser ma candidature</button>
+                    <div class="bulle" id="bulle-analyse" hidden><div class="vague deux"></div><div class="vague"></div></div>
+                </div>
+                <div class="resultat" id="analyse" hidden></div>
+                <button type="button" class="btn mauve" id="demarrer">{{ icone('micro') }} Démarrer l'entretien vocal</button>
+                <p class="limites">10 minutes maximum · 5 entretiens par jour</p>
+            </div>
+
+            <!-- 2. Entretien en direct -->
+            <div id="direct" hidden>
+                <div class="direct-tete"><span class="en-direct">En direct</span><span class="minuteur"><span id="temps">00:00</span> / 10:00</span></div>
+                <div class="duree"><i id="duree"></i></div>
+                <div class="onde-vocale" id="onde" aria-hidden="true">{% for i in range(28) %}<i></i>{% endfor %}</div>
+                <p class="qui-parle" id="qui-parle" aria-live="polite">Connexion...</p>
+                <div class="conversation" id="conversation"></div>
+                <div class="commandes">
+                    <button type="button" id="micro"><span>{{ icone('micro') }}</span>Micro</button>
+                    <button type="button" class="raccrocher" id="terminer"><span>{{ icone('raccrocher') }}</span>Terminer</button>
+                </div>
+            </div>
+
+            <!-- 3. Evaluation de l'entretien -->
+            <div id="evaluation" hidden>
+                <div class="ligne-envoi" id="attente-evaluation">
+                    <button type="button" class="btn en-cours" disabled>Évaluation en cours</button>
+                    <div class="bulle"><div class="vague deux"></div><div class="vague"></div></div>
+                </div>
+                <div class="resultat" id="resultat-evaluation" hidden></div>
+            </div>
+
+            <p class="statut" id="statut" role="alert"></p>
+            <p class="confidentialite">{{ icone('bouclier') }}
+                Pour l'analyse et l'entretien, votre CV et vos réponses sont traités de façon sécurisée par notre IA partenaire (OpenAI).</p>
+        </aside>
+        {% endif %}
+    </div>
+</main>
+
+<div class="toast verre" id="toast" role="status"></div>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='offre.js') }}"></script>
 {% if assistante %}<script src="{{ url_for('static', filename='entretien.js') }}"></script>{% endif %}
 {% endblock %}

@@ -1,188 +1,558 @@
 /* CVBoost - feuille de style unique.
-   Toutes les couleurs sont des variables : changer de theme = changer seulement le bloc :root. */
+   Sommaire : 1. Couleurs et base   2. Boutons   3. En-tete, barre du bas, pied de page
+   4. Formulaires   5. Pastilles, anneaux, bulle d'analyse (reutilises sur plusieurs pages)
+   6. Accueil   7. Connexion et inscription   8. Envoi du CV   9. Opportunites   10. Historique
+   11. Page d'une offre et assistante DRH   12. Accessibilite (moins d'animations) */
+
+/* ========== 1. Couleurs et base ========== */
+/* Palette "Lumiere" (mode clair, par defaut). Toutes les couleurs du site sont ici. */
 :root {
-    --fond: #f6f7f9;          /* fond de la page */
-    --surface: #ffffff;       /* cartes, formulaires, menu */
-    --surface-2: #eef1f5;     /* champs, bulles du candidat */
-    --bordure: #e1e5eb;
-    --texte: #1d2433;
-    --texte-doux: #5b6474;    /* textes secondaires */
-    --accent: #1f5fbf;        /* boutons et liens */
-    --accent-fonce: #174a96;  /* survol des boutons */
-    --sur-accent: #ffffff;    /* texte ecrit sur un bouton */
-    --bulle-ia: #e8f0fb;      /* bulles de la recruteuse */
-    --succes: #1e7d4f;
-    --erreur: #c0392b;
-    --police: 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif;
-    --police-titre: var(--police);
-    --rayon: 10px;
-    --ombre: 0 1px 3px rgba(20, 30, 50, 0.08);
-    --ombre-survol: 0 8px 20px rgba(20, 30, 50, 0.12);
+  --fond: #f3f5f9; --texte: #14181f; --doux: #5e6573;
+  --accent: #0a6cff; --accent-2: #f2b705; --mauve: #7a5cff;
+  --verre: rgba(255,255,255,.62); --bord: rgba(255,255,255,.85);
+  --ombre: 0 12px 32px rgba(20,30,60,.10), inset 0 1px 0 #fff;
+  --surface: #fff; --surface-douce: rgba(255,255,255,.75);        /* cartes pleines et champs */
+  --piste: #e3e8f0; --trait: #dde3ec; --gris-doux: #eef1f5;        /* fonds des jauges, traits decoratifs */
+  --vert: #1e7d4f; --jaune-texte: #8a6400; --rouge-texte: #a5281b;  /* textes de couleur */
+  --onde-1: #9cc7ff; --onde-2: #ffe7a3; --onde-3: #c9dcff;         /* ondes floues du fond */
+  --rayon: 24px;
 }
-
-/* Base */
+/* Mode sombre "Nuit de Kinshasa" : choisi par l'utilisateur avec le bouton lune / soleil de l'en-tete */
+[data-theme="sombre"] {
+  --fond: #0d1017; --texte: #eef0f4; --doux: #9aa3b5;
+  --accent: #4c8dff; --mauve: #9b84ff;
+  --verre: rgba(32,38,54,.6); --bord: rgba(255,255,255,.12);
+  --ombre: 0 12px 32px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.06);
+  --surface: #1b2130; --surface-douce: rgba(40,47,66,.85);
+  --piste: #2a3245; --trait: #333c52; --gris-doux: #252c3b;
+  --vert: #4fd18b; --jaune-texte: #f2c94c; --rouge-texte: #ff8a80;
+  --onde-1: #1d3b7a; --onde-2: #4b2a7a; --onde-3: #5a3d1c;
+  color-scheme: dark;   /* champs et barres de defilement du navigateur en sombre */
+}
 * { box-sizing: border-box; }
-
-body {
-    margin: 0;
-    font-family: var(--police);
-    background-color: var(--fond);
-    color: var(--texte);
-    line-height: 1.55;
-}
-
-h1, h2, h3, h4 { font-family: var(--police-titre); line-height: 1.25; }
-h2 { font-size: 1.6rem; margin: 0 0 0.6rem; }
-a { color: var(--accent); }
-.discret { color: var(--texte-doux); font-size: 0.92rem; }
-
-/* Apparition douce de chaque page (desactivee si l'utilisateur prefere moins d'animations) */
-.container { animation: apparition 0.35s ease-out; }
-@keyframes apparition {
-    from { opacity: 0; transform: translateY(6px); }
-    to { opacity: 1; transform: none; }
-}
-@media (prefers-reduced-motion: reduce) {
-    * { animation: none !important; transition: none !important; }
-}
-
-/* Menu de navigation */
-nav {
-    background-color: var(--surface);
-    border-bottom: 1px solid var(--bordure);
-    position: sticky;
-    top: 0;
-    z-index: 10;
-}
-
-.nav-container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    align-items: center;
-    gap: 10px;
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 14px 20px;
-}
-
-.nav-container strong {
-    font-family: var(--police-titre);
-    font-size: 1.4rem;
-    color: var(--accent);
-}
-
-.menu { display: flex; flex-wrap: wrap; gap: 6px 20px; align-items: center; }
-
-.menu a {
-    color: var(--texte);
-    text-decoration: none;
-    font-weight: 500;
-    transition: color 0.2s;
-}
-
-.menu a:hover { color: var(--accent); }
-
-.logout-btn {
-    border: 1px solid var(--erreur);
-    padding: 4px 12px;
-    border-radius: var(--rayon);
-    color: var(--erreur) !important;
-}
-
-.logout-btn:hover { background-color: var(--erreur); color: #fff !important; }
-
-/* Conteneurs des pages */
-.form-container, .result-container, .history-container { max-width: 520px; margin: 40px auto; padding: 0 20px; }
-.page-large { max-width: 1100px; margin: 30px auto; padding: 0 20px; }
-
-.hero-section { max-width: 720px; margin: 80px auto; padding: 0 20px; text-align: center; }
-.hero-section h2 { font-size: 2.2rem; }
-.hero-section p { color: var(--texte-doux); font-size: 1.1rem; }
-
-/* Cartes : formulaires, offres, assistante */
-form, .offre-carte, .ia-card, .doc-info, .historique-ligne {
-    background-color: var(--surface);
-    border: 1px solid var(--bordure);
-    border-radius: var(--rayon);
-    box-shadow: var(--ombre);
-}
-
-form { padding: 28px; margin: 20px 0; }
-.doc-info { padding: 16px 20px; }
-.doc-info p { margin: 4px 0; }
-.ia-card { padding: 22px; margin: 20px 0; border-top: 4px solid var(--accent); }
-
-.offre-carte, .historique-ligne { padding: 16px 20px; margin: 14px 0; transition: transform 0.2s, box-shadow 0.2s; }
-.offre-carte:hover, .historique-ligne:hover { transform: translateY(-2px); box-shadow: var(--ombre-survol); }
-.offre-carte h3 { margin: 0 0 6px; }
-.offre-carte h3 a { text-decoration: none; }
-.offre-carte p { margin: 4px 0; }
-
-/* Champs et boutons */
-label { font-weight: 500; font-size: 0.95rem; }
-
-input[type="text"], input[type="email"], input[type="password"], input[type="file"] {
-    width: 100%;
-    padding: 11px 12px;
-    margin: 6px 0 18px;
-    background-color: var(--surface-2);
-    border: 1px solid var(--bordure);
-    border-radius: var(--rayon);
-    color: var(--texte);
-    font: inherit;
-    transition: border-color 0.2s;
-}
-
-input:focus { outline: none; border-color: var(--accent); }
-
-button, .btn, .btn-primary {
-    display: inline-block;
-    padding: 11px 20px;
-    background-color: var(--accent);
-    color: var(--sur-accent);
-    border: none;
-    border-radius: var(--rayon);
-    font: inherit;
-    font-weight: 600;
-    text-decoration: none;
-    cursor: pointer;
-    transition: background-color 0.2s, transform 0.1s;
-}
-
-button { width: 100%; }
-button:hover, .btn:hover, .btn-primary:hover { background-color: var(--accent-fonce); }
-button:active, .btn:active { transform: scale(0.98); }
-button:disabled { opacity: 0.55; cursor: wait; }
-
-.btn-secondary { display: inline-block; margin-top: 20px; color: var(--texte-doux); }
-.form-footer, .file-limits { text-align: center; color: var(--texte-doux); font-size: 0.92rem; }
-
-/* Messages flash : couleur melangee avec la surface pour rester douce */
-.flash { max-width: 600px; margin: 20px auto 0; padding: 12px 16px; border-radius: var(--rayon); border-left: 4px solid; }
-.flash.success { border-color: var(--succes); background-color: color-mix(in srgb, var(--succes) 12%, var(--surface)); }
-.flash.danger { border-color: var(--erreur); background-color: color-mix(in srgb, var(--erreur) 12%, var(--surface)); }
-.flash.info { border-color: var(--accent); background-color: color-mix(in srgb, var(--accent) 12%, var(--surface)); }
-
-/* Page d'une offre : annonce a gauche, assistante a droite */
-.deux-colonnes { display: grid; grid-template-columns: 3fr 2fr; gap: 30px; align-items: start; }
-@media (max-width: 800px) {
-    .deux-colonnes { grid-template-columns: 1fr; }
-}
-.description { white-space: pre-line; line-height: 1.6; }
-
-/* Assistante DRH */
-#entretien { position: sticky; top: 80px; }
-#entretien button { margin-top: 10px; }
-#entretien h4 { margin: 16px 0 4px; }
-.compatibilite strong { font-size: 1.5rem; color: var(--accent); }
-#conversation { max-height: 320px; overflow-y: auto; }
-.bulle { padding: 10px 12px; border-radius: var(--rayon); margin: 8px 0; animation: apparition 0.25s ease-out; }
-.bulle.assistante { background-color: var(--bulle-ia); }
-.bulle.candidat { background-color: var(--surface-2); margin-left: 30px; }
-.boutons { display: flex; gap: 10px; }
-
-footer { text-align: center; color: var(--texte-doux); font-size: 0.85rem; padding: 40px 20px 20px; }
-
-/* L'attribut hidden (utilise par entretien.js) doit toujours masquer, meme avec un display: flex */
+html { scroll-behavior: smooth; }
+body { margin: 0; font-family: Inter, 'Segoe UI', system-ui, -apple-system, sans-serif; color: var(--texte); background: var(--fond);
+  line-height: 1.5; transition: background .4s, color .4s; }
+/* Ondes de couleur floues qui bougent tres lentement derriere la page */
+body::before { content: ""; position: fixed; inset: -20%; z-index: -1;
+  background: radial-gradient(35% 30% at 15% 20%, var(--onde-1), transparent 70%),
+              radial-gradient(30% 30% at 85% 35%, var(--onde-2), transparent 70%),
+              radial-gradient(35% 30% at 50% 90%, var(--onde-3), transparent 70%);
+  animation: ondes 24s ease-in-out infinite alternate; }
+@keyframes ondes { to { transform: translate(4%, -3%) rotate(6deg); } }
+a { color: inherit; }
+h1, h2 { letter-spacing: -0.03em; line-height: 1.08; margin: 0 0 14px; }
+h2 { font-size: clamp(1.8rem, 4vw, 2.6rem); }
+.doux { color: var(--doux); }
+.centre { text-align: center; }
+.section { max-width: 1100px; margin: 0 auto; padding: 70px 20px; }
+.page { max-width: 1100px; margin: 0 auto; padding: 30px 16px 80px; }
+.verre { background: var(--verre); border: 1px solid var(--bord); border-radius: var(--rayon);
+  backdrop-filter: blur(20px) saturate(170%); -webkit-backdrop-filter: blur(20px) saturate(170%); box-shadow: var(--ombre); }
+.icone { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; vertical-align: -5px; }
+/* L'attribut hidden doit toujours masquer, meme un bloc en display: grid ou flex */
 [hidden] { display: none !important; }
+/* Apparition des blocs au defilement (classe "visible" ajoutee par site.js) */
+.apparait { opacity: 0; transform: translateY(26px); transition: opacity .7s, transform .7s; }
+.apparait.visible { opacity: 1; transform: none; }
+@keyframes monte { from { opacity: 0; transform: translateY(14px); } }
+@keyframes arrive { from { opacity: 0; transform: translateY(10px) scale(.97); } }
+@keyframes tourne { to { transform: rotate(360deg); } }
+
+/* ========== 2. Boutons ========== */
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 14px 28px; border: none; border-radius: 999px; font: inherit;
+  font-weight: 600; cursor: pointer; text-decoration: none; background: var(--accent); color: #fff;
+  box-shadow: 0 8px 24px rgba(10,108,255,.3); transition: transform .2s, box-shadow .2s, background .5s; }
+.btn:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(10,108,255,.4); }
+.btn.clair { background: var(--verre); color: var(--texte); border: 1px solid var(--bord); box-shadow: var(--ombre); }
+.btn.mauve { background: var(--mauve); }
+.btn .fleche { transition: transform .25s; }
+.btn:hover .fleche { transform: translateX(5px); }
+.lien { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; color: var(--accent); text-decoration: none; margin-top: 14px; }
+
+/* ========== 3. En-tete, barre du bas, pied de page ========== */
+.entete { position: sticky; top: 12px; z-index: 10; max-width: 1100px; margin: 12px auto 0; padding: 0 16px; }
+.entete .verre { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 8px 8px 8px 22px; border-radius: 999px; }
+.logo { display: inline-flex; align-items: center; font-weight: 800; font-size: 1.25rem; letter-spacing: -0.02em; text-decoration: none; }
+.logo em { font-style: normal; color: var(--accent); }
+.liens, .menu { display: flex; gap: 4px; align-items: center; }
+.liens a { text-decoration: none; padding: 8px 16px; border-radius: 999px; font-weight: 500; color: var(--doux); transition: background .2s, color .2s; }
+.liens a:hover { color: var(--texte); }
+.liens a.actif { background: var(--surface); color: var(--accent); box-shadow: 0 2px 8px rgba(20,30,60,.08); }
+.menu a { text-decoration: none; padding: 9px 16px; border-radius: 999px; font-weight: 600; }
+.menu .btn { padding: 10px 20px; box-shadow: none; }
+/* Bouton lune / soleil pour passer du mode clair au mode sombre */
+.bouton-theme { width: 42px; height: 42px; flex: none; border: none; border-radius: 50%; display: grid; place-items: center; cursor: pointer;
+  background: var(--surface-douce); color: var(--texte); transition: transform .3s; }
+.bouton-theme:hover { transform: rotate(-20deg); }
+.bouton-theme .soleil, [data-theme="sombre"] .bouton-theme .lune { display: none; }
+[data-theme="sombre"] .bouton-theme .soleil { display: block; }
+/* Sur telephone : les liens du centre passent dans une barre flottante en bas, comme une application */
+.barre-bas { display: none; }
+@media (max-width: 700px) {
+  .liens, .menu .cache-mobile { display: none; }
+  .barre-bas { display: flex; position: fixed; z-index: 10; left: 12px; right: 12px; bottom: 12px; padding: 6px; border-radius: 999px; justify-content: space-around; }
+  .barre-bas a { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 0; border-radius: 999px;
+    font-size: .7rem; font-weight: 600; text-decoration: none; color: var(--doux); }
+  .barre-bas a.actif { background: var(--surface); color: var(--accent); }
+  body { padding-bottom: 90px; }
+}
+/* Messages flash (succes, erreur, information) : une bulle de verre qui glisse depuis le haut */
+.flash { max-width: 560px; margin: 18px auto 0; padding: 14px 20px; border-radius: 18px; font-weight: 600; text-align: center; animation: glisse .5s ease-out; }
+@keyframes glisse { from { opacity: 0; transform: translateY(-14px); } }
+.flash.succes { color: var(--vert); } .flash.erreur { color: var(--rouge-texte); } .flash.info { color: var(--accent); }
+.pied { max-width: 1100px; margin: 0 auto; padding: 0 16px 30px; }
+.pied-contenu { display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr; gap: 30px; padding: 34px; }
+.pied h4 { margin: 0 0 12px; font-size: .8rem; text-transform: uppercase; letter-spacing: .06em; color: var(--doux); }
+.pied-contenu a, .pied-contenu span { display: block; margin: 8px 0; text-decoration: none; font-weight: 500; }
+.pied-contenu a:hover { color: var(--accent); }
+.pied-contenu .logo { display: inline-flex; margin: 0; font-weight: 800; }
+.pied-marque p { margin: 12px 0 0; color: var(--doux); max-width: 18em; }
+.pied-bas { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; padding: 18px 10px 0; color: var(--doux); font-size: .85rem; }
+@media (max-width: 800px) {
+  .pied-contenu { grid-template-columns: 1fr 1fr; padding: 26px; }
+  .pied-marque { grid-column: 1 / -1; }
+}
+
+/* ========== 4. Formulaires ========== */
+.formulaire { padding: 32px; text-align: left; }
+.formulaire h2 { font-size: 1.5rem; margin-bottom: 22px; }
+.deux { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+/* Champ a etiquette flottante : l'etiquette est dans le champ et monte quand on ecrit */
+.champ { position: relative; margin-bottom: 14px; }
+.champ input { width: 100%; padding: 22px 16px 8px; font: inherit; color: var(--texte); background: var(--surface-douce);
+  border: 1.5px solid transparent; border-radius: 16px; outline: none; transition: border-color .2s, box-shadow .2s, background .2s; }
+.champ label { position: absolute; left: 17px; top: 15px; color: var(--doux); pointer-events: none; transition: all .2s; }
+.champ input:focus { border-color: var(--accent); background: var(--surface); box-shadow: 0 0 0 4px rgba(10,108,255,.12); }
+.champ input:focus + label, .champ input:not(:placeholder-shown) + label { top: 6px; font-size: .75rem; font-weight: 600; color: var(--accent); }
+/* Oeil pour afficher ou masquer le mot de passe */
+.voir { position: absolute; right: 8px; top: 9px; width: 38px; height: 38px; border: none; border-radius: 50%; background: none;
+  color: var(--doux); cursor: pointer; display: grid; place-items: center; }
+.voir:hover { background: rgba(10,108,255,.08); color: var(--accent); }
+/* Indicateurs sous le mot de passe : solidite et confirmation */
+.force { display: flex; gap: 6px; margin: -4px 4px 4px; }
+.force i { flex: 1; height: 5px; border-radius: 5px; background: var(--piste); transition: background .3s; }
+.indice { margin: 4px 4px 14px; font-size: .82rem; color: var(--doux); min-height: 1.2em; }
+.indice.bon { color: var(--vert); } .indice.mauvais { color: var(--rouge-texte); }
+.envoyer { width: 100%; justify-content: center; margin-top: 6px; }
+.envoyer:disabled { opacity: .75; cursor: wait; transform: none; }
+.cercle-attente { width: 18px; height: 18px; border: 2.5px solid rgba(255,255,255,.4); border-top-color: #fff; border-radius: 50%; animation: tourne .8s linear infinite; }
+.bascule { text-align: center; margin: 20px 0 0; color: var(--doux); }
+.bascule a { color: var(--accent); font-weight: 600; text-decoration: none; }
+.securite { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 14px 0 0; font-size: .85rem; color: var(--doux); }
+/* Message d'erreur dans un formulaire, et la carte qui "secoue" doucement */
+.alerte { padding: 12px 16px; border-radius: 14px; margin-bottom: 16px; font-weight: 500; background: rgba(192,57,43,.1); color: var(--rouge-texte); }
+.secoue { animation: secoue .4s; }
+@keyframes secoue { 20%, 60% { transform: translateX(-7px); } 40%, 80% { transform: translateX(7px); } }
+
+/* ========== 5. Elements reutilises sur plusieurs pages ========== */
+/* Pastilles de competences : bleues (atouts), jaunes (a renforcer), blanches (bandeau des opportunites) */
+.puces, .ligne-puces { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.ligne-puces { margin-top: 8px; }
+.ligne-puces b { font-size: .82rem; color: var(--doux); margin-right: 4px; font-weight: 600; min-width: 84px; }
+.puce { padding: 5px 12px; border-radius: 999px; font-size: .82rem; font-weight: 600; background: rgba(10,108,255,.1); color: var(--accent); }
+.puce.renforcer { background: rgba(242,183,5,.18); color: var(--jaune-texte); }
+.puce.blanche { background: var(--surface); box-shadow: 0 2px 8px rgba(20,30,60,.06); padding: 6px 14px; font-size: .85rem; }
+.etiquette-puces { font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--doux); margin: 18px 0 8px; }
+/* Anneau d'une note (82 / 100) : le trait bleu se remplit jusqu'a la note --n */
+.anneau { width: 92px; height: 92px; flex: none; position: relative; }
+.anneau.grand { width: 110px; height: 110px; margin-top: 18px; }
+.anneau svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.anneau circle { fill: none; stroke-width: 9; }
+.anneau .piste { stroke: var(--piste); }
+.anneau .valeur { stroke: var(--accent); stroke-linecap: round; stroke-dasharray: 283; stroke-dashoffset: 283; animation: anneau 1.4s ease-out .2s forwards; }
+@keyframes anneau { to { stroke-dashoffset: calc(283 - 283 * var(--n) / 100); } }
+.apparait:not(.visible) .anneau .valeur { animation-play-state: paused; }  /* sur l'accueil : attend d'etre a l'ecran */
+.anneau b { position: absolute; inset: 0; display: grid; place-items: center; font-size: 1.5rem; }
+/* Type d'un fichier : PDF rouge, Word bleu */
+.type-fichier { width: 46px; height: 56px; flex: none; border-radius: 10px; display: grid; place-items: end center; padding-bottom: 8px;
+  font-size: .68rem; font-weight: 800; color: #fff; background: #d64541; }
+.type-fichier.docx { background: #2b6cd9; }
+/* Bouton d'analyse et bulle de liquide. "en-cours" : bouton et eau mauves, l'eau monte ;
+   "termine" : la bulle se remplit jusqu'en haut et devient bleue, le bouton aussi. */
+.ligne-envoi { display: flex; align-items: center; gap: 14px; margin-top: 6px; }
+.ligne-envoi .btn { margin-top: 0; white-space: nowrap; padding-inline: 18px; }
+.btn.en-cours, .btn.termine { opacity: 1; color: #fff; border-color: transparent; }
+.btn.en-cours { background: var(--mauve); box-shadow: 0 8px 24px rgba(122,92,255,.35); }
+.btn.termine { background: var(--accent); }
+.bulle { width: 52px; height: 52px; flex: none; border-radius: 50%; position: relative; overflow: hidden; background: var(--surface-douce);
+  box-shadow: inset 0 0 0 2px rgba(122,92,255,.25), 0 6px 16px rgba(122,92,255,.2); animation: arrive .35s ease-out; }
+.vague { position: absolute; left: 50%; top: 105%; width: 106px; height: 106px; margin-left: -53px; border-radius: 38%;
+  background: var(--mauve); opacity: .65; animation: tourne 3s linear infinite; transition: top 6s ease-out, background .5s; }
+.vague.deux { opacity: .35; border-radius: 35%; animation-duration: 4.5s; }
+.bulle.en-cours .vague { top: 22%; }
+.bulle.termine .vague { top: -40%; background: var(--accent); transition: top .7s ease-out, background .5s; }
+/* Elements des cartes d'offres et de favoris */
+.infos { display: flex; flex-wrap: wrap; gap: 6px 16px; color: var(--doux); font-size: .92rem; }
+.infos span { display: inline-flex; align-items: center; gap: 5px; }
+.infos .icone, .pastilles .icone { width: 17px; height: 17px; vertical-align: 0; }
+.actions { display: flex; flex-direction: column; gap: 10px; }
+.actions .btn { justify-content: center; padding: 11px 20px; box-shadow: none; white-space: nowrap; }
+.badge { padding: 3px 10px; border-radius: 999px; font-size: .78rem; font-weight: 700; }
+/* Date de cloture : ouverte (vert), bientot (jaune), close ou non precisee (gris) */
+.badge.ouverte, .pastilles .ouverte { background: rgba(30,125,79,.12); color: var(--vert); }
+.badge.bientot, .pastilles .bientot { background: rgba(242,183,5,.2); color: var(--jaune-texte); }
+.badge.close, .badge.inconnue, .pastilles .close { background: var(--gris-doux); color: var(--doux); }
+
+/* ========== 6. Accueil ========== */
+.hero { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; padding-top: 60px; }
+.hero h1 { font-size: clamp(2.3rem, 5.4vw, 3.8rem); }
+.hero .sous { font-size: 1.15rem; color: var(--doux); margin: 0 0 28px; max-width: 30em; }
+.rassure { color: var(--doux); font-size: .9rem; margin-top: 12px; }
+@media (max-width: 800px) { .hero { grid-template-columns: 1fr; text-align: center; padding-top: 30px; } .hero .sous { margin-inline: auto; } }
+/* Demonstration animee : le CV est scanne, ses competences partent vers les offres. Une seule boucle de 7 s. */
+.scene { text-align: left; position: relative; height: 330px; max-width: 460px; width: 100%; margin: 0 auto; }
+.demo-cv { position: absolute; left: 0; top: 30px; width: 42%; height: 250px; padding: 16px; overflow: hidden; border-radius: 18px; }
+.photo { width: 38px; height: 38px; border-radius: 50%; background: var(--trait); margin-bottom: 10px; }
+.ligne { height: 8px; border-radius: 4px; background: var(--trait); margin: 8px 0; }
+.ligne.titre { height: 11px; width: 75%; } .ligne.court { width: 55%; } .ligne.moyen { width: 80%; }
+.faisceau { position: absolute; left: 0; right: 0; height: 40px; top: -40px; border-bottom: 2px solid var(--accent);
+  background: linear-gradient(180deg, transparent, rgba(10,108,255,.25), transparent); animation: scanner 7s ease-in-out infinite; }
+@keyframes scanner { 0%, 4% { top: -40px; opacity: 1; } 24% { top: 250px; opacity: 1; } 26%, 100% { top: 250px; opacity: 0; } }
+.demo-puce { position: absolute; left: 6%; top: var(--y); padding: 6px 12px; border-radius: 999px; background: var(--surface); color: var(--accent);
+  font-size: .8rem; font-weight: 600; box-shadow: 0 6px 16px rgba(10,108,255,.2); opacity: 0; animation: demo-puce 7s ease-in-out infinite; animation-delay: var(--d); }
+@keyframes demo-puce { 0%, 22% { opacity: 0; transform: scale(.4); } 28%, 40% { opacity: 1; transform: none; }
+  52% { opacity: 0; transform: translateX(170px) scale(.6); } 100% { opacity: 0; } }
+.demo-offre { position: absolute; right: 0; top: var(--y); width: 54%; padding: 12px 14px; border-radius: 18px; opacity: 0;
+  animation: demo-offre 7s cubic-bezier(.2,.8,.2,1) infinite; animation-delay: var(--d); }
+@keyframes demo-offre { 0%, 46% { opacity: 0; transform: translateY(24px); } 54%, 92% { opacity: 1; transform: none; } 100% { opacity: 0; } }
+.demo-offre b { display: block; font-size: .88rem; } .demo-offre small { color: var(--doux); font-size: .75rem; }
+.demo-etiquette { float: right; font-size: .7rem; font-weight: 700; color: var(--accent); }
+.barre-niveau { height: 6px; border-radius: 6px; background: var(--piste); margin-top: 8px; overflow: hidden; }
+.barre-niveau i { display: block; height: 100%; width: 0; border-radius: 6px; background: var(--accent); }
+.demo-offre .barre-niveau i { animation: remplir 7s ease-out infinite; animation-delay: var(--d); }
+@keyframes remplir { 0%, 54% { width: 0; } 70%, 100% { width: var(--n); } }
+/* Comment ca marche : trois etapes reliees par une ligne qui se remplit */
+.etapes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; position: relative; margin-top: 40px; }
+.etapes::before { content: ""; position: absolute; top: 28px; left: 16%; right: 16%; height: 3px; border-radius: 3px; background: var(--trait); }
+.etapes::after { content: ""; position: absolute; top: 28px; left: 16%; height: 3px; width: 0; border-radius: 3px; background: var(--accent); transition: width 1.6s ease .3s; }
+.etapes.visible::after { width: 68%; }
+.etape { position: relative; z-index: 1; text-align: center; padding: 0 10px; }
+.numero { width: 58px; height: 58px; margin: 0 auto 14px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; font-size: 1.3rem;
+  color: var(--accent); background: var(--surface); }
+.etape b { display: block; font-size: 1.1rem; }
+@media (max-width: 700px) { .etapes { grid-template-columns: 1fr; gap: 26px; } .etapes::before, .etapes::after { display: none; } }
+/* Fonctionnalites en mosaique */
+.mosaique { display: grid; grid-template-columns: repeat(6, 1fr); gap: 18px; margin-top: 40px; }
+.carte { padding: 26px; display: flex; flex-direction: column; overflow: hidden; position: relative; transition: transform .3s; }
+.carte:hover { transform: translateY(-4px); }
+.carte h3 { font-size: 1.35rem; letter-spacing: -0.02em; margin: 12px 0 6px; }
+.carte p { margin: 0; color: var(--doux); }
+.carte .lien { margin-top: auto; padding-top: 16px; }
+.carte .etiquette-puces { margin-top: 18px; }
+.large { grid-column: span 4; } .moyenne { grid-column: span 2; } .demi { grid-column: span 3; }
+@media (max-width: 800px) { .mosaique { grid-template-columns: 1fr; } .large, .moyenne, .demi { grid-column: auto; } }
+.pictogramme { width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center; color: #fff; background: var(--accent); }
+.mini-niveaux { margin-top: 18px; }
+.mini-niveaux div { display: flex; justify-content: space-between; font-size: .8rem; font-weight: 600; margin-top: 10px; }
+.mini-niveaux div span + span { color: var(--accent); }
+.mini-niveaux .barre-niveau i { transition: width 1.2s ease .4s; }
+.visible .mini-niveaux .barre-niveau i { width: var(--n); }
+/* Carte vedette : entretien vocal, fond sombre et onde decorative */
+.vedette { background: linear-gradient(140deg, #0e1424, #1b2a4f); color: #fff; border: none; min-height: 300px; }
+.vedette p { color: #b9c3d8; }
+.vedette .pictogramme { background: rgba(255,255,255,.14); }
+.vedette .btn { align-self: flex-start; margin-top: auto; }
+.onde { display: flex; align-items: center; gap: 5px; height: 70px; margin: 22px 0 6px; }
+.onde i { flex: 1; max-width: 7px; border-radius: 6px; height: 20%; background: linear-gradient(#7fb2ff, var(--accent));
+  animation: onde 1.4s ease-in-out infinite; animation-delay: calc(var(--i) * -0.13s); }
+@keyframes onde { 0%, 100% { height: 18%; } 50% { height: 100%; } }
+/* Garanties et appel final (la phrase apparait mot apres mot) */
+.garanties { display: flex; justify-content: center; flex-wrap: wrap; gap: 14px; }
+.garanties div { display: flex; align-items: center; gap: 10px; padding: 14px 22px; border-radius: 999px; font-weight: 600; }
+.garanties .icone { color: var(--accent); }
+.final { padding: 90px 20px 110px; }
+.final h2 { font-size: clamp(2rem, 5vw, 3.2rem); max-width: 19em; margin: 0 auto 30px; }
+.final h2 span { display: inline-block; opacity: 0; transform: translateY(16px); transition: opacity .5s, transform .5s; transition-delay: calc(var(--i) * 70ms); }
+.final.visible h2 span { opacity: 1; transform: none; }
+.brillant { background: linear-gradient(90deg, var(--accent), var(--mauve), var(--accent-2), var(--accent)); background-size: 300% 100%;
+  -webkit-background-clip: text; background-clip: text; color: transparent; animation: brillant 6s linear infinite; }
+@keyframes brillant { to { background-position: 300% 0; } }
+.final .boutons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+/* ========== 7. Connexion et inscription ========== */
+.compte { max-width: 1100px; margin: 0 auto; padding: 60px 20px 80px; display: grid; grid-template-columns: 1fr 440px; gap: 60px; align-items: center; }
+.compte h1 { font-size: clamp(2.2rem, 5vw, 3.4rem); }
+.compte .sous { font-size: 1.15rem; color: var(--doux); margin: 0; max-width: 24em; }
+@media (max-width: 860px) {
+  .compte { grid-template-columns: 1fr; gap: 26px; padding-top: 30px; text-align: center; }
+  .compte .sous { margin-inline: auto; }
+  .decor { display: none; }  /* sur telephone, on garde l'essentiel : le message et le formulaire */
+}
+/* Connexion : trois cartes de verre qui flottent doucement */
+.cartes-flottantes { position: relative; height: 270px; margin-top: 34px; max-width: 470px; }
+.flotte { position: absolute; padding: 14px 18px; border-radius: 20px; animation: flotte 6s ease-in-out infinite alternate; animation-delay: var(--d); }
+@keyframes flotte { to { transform: translateY(-14px); } }
+.flotte b { display: block; } .flotte small { color: var(--doux); }
+.flotte .barre-niveau { width: 180px; }
+.flotte .barre-niveau i { width: 92%; }
+.mini-onde { display: flex; align-items: center; gap: 3px; height: 26px; margin-top: 6px; }
+.mini-onde i { width: 4px; border-radius: 4px; background: var(--accent); animation: onde 1.2s ease-in-out infinite; animation-delay: calc(var(--i) * -0.15s); }
+.flotte-note { display: flex; gap: 12px; align-items: center; }
+.flotte-note .anneau { width: 46px; height: 46px; }
+.flotte-note .anneau circle { stroke-width: 12; }
+.flotte-note .anneau b { font-size: .9rem; color: var(--accent); }
+/* Inscription : trois avantages qui arrivent l'un apres l'autre */
+.avantages { list-style: none; padding: 0; margin: 34px 0 0; }
+.avantages li { display: flex; align-items: center; gap: 14px; padding: 14px 18px; margin-bottom: 12px; border-radius: 18px; font-weight: 600;
+  max-width: 440px; opacity: 0; transform: translateX(-20px); animation: glisse-droite .6s ease-out forwards; animation-delay: var(--d); }
+@keyframes glisse-droite { to { opacity: 1; transform: none; } }
+.coche { width: 34px; height: 34px; flex: none; border-radius: 50%; display: grid; place-items: center; color: #fff; background: var(--accent); }
+
+/* ========== 8. Envoi du CV ========== */
+/* Texte et conseils a gauche, formulaire a droite ; sur telephone, le formulaire passe avant les conseils */
+.depot { grid-template-areas: "texte formulaire" "conseils formulaire"; row-gap: 0; }
+.depot .texte { grid-area: texte; align-self: end; }
+.depot .conseils { grid-area: conseils; align-self: start; }
+.depot .formulaire { grid-area: formulaire; }
+@media (max-width: 860px) { .depot { grid-template-areas: "texte" "formulaire" "conseils"; } }
+.conseils { list-style: none; padding: 0; margin: 30px 0 0; max-width: 460px; width: 100%; }
+.conseils li { display: flex; gap: 14px; align-items: flex-start; padding: 14px 18px; margin-bottom: 12px; border-radius: 18px; text-align: left; }
+.conseils .pastille { width: 34px; height: 34px; flex: none; border-radius: 12px; display: grid; place-items: center; color: var(--accent); background: rgba(10,108,255,.1); }
+.conseils b { display: block; }
+.conseils span { color: var(--doux); font-size: .92rem; }
+@media (max-width: 860px) { .conseils { margin-inline: auto; } }
+/* Zone de depot : bordure en pointilles qui defilent lentement */
+.zone { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; min-height: 300px;
+  padding: 30px; border-radius: 22px; cursor: pointer; position: relative; transition: transform .25s, background .25s;
+  background: linear-gradient(90deg, var(--accent) 50%, transparent 0) top / 18px 2px repeat-x,
+              linear-gradient(90deg, var(--accent) 50%, transparent 0) bottom / 18px 2px repeat-x,
+              linear-gradient(0deg, var(--accent) 50%, transparent 0) left / 2px 18px repeat-y,
+              linear-gradient(0deg, var(--accent) 50%, transparent 0) right / 2px 18px repeat-y,
+              var(--surface-douce);
+  animation: pointilles 1.2s linear infinite; }
+@keyframes pointilles { to { background-position: 18px 0, -18px 100%, 0 -18px, 100% 18px, 0 0; } }
+.zone:hover { background-color: var(--surface); }
+.zone.survol { transform: scale(1.02); background-color: rgba(10,108,255,.08); }
+.zone input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.grande-icone { width: 74px; height: 74px; border-radius: 24px; display: grid; place-items: center; color: #fff; background: var(--accent);
+  box-shadow: 0 12px 28px rgba(10,108,255,.35); margin-bottom: 18px; animation: respire 2.4s ease-in-out infinite; }
+.grande-icone .icone { width: 34px; height: 34px; }
+@keyframes respire { 50% { transform: translateY(-6px); } }
+.zone b { font-size: 1.2rem; }
+.zone .choisir { color: var(--accent); font-weight: 600; }
+.formats { color: var(--doux); font-size: .88rem; margin-top: 10px; }
+/* Sur un ecran tactile, on ne "glisse" pas un fichier : le texte change */
+.tactile { display: none; }
+@media (hover: none) { .souris { display: none; } .tactile { display: inline; } }
+/* Fichier choisi : une carte apparait a la place de la zone */
+.fichier { display: flex; align-items: center; gap: 14px; padding: 16px; border-radius: 18px; background: var(--surface); box-shadow: var(--ombre); animation: arrive .35s ease-out; }
+.fichier .nom { font-weight: 700; word-break: break-all; }
+.fichier .pret { display: flex; align-items: center; gap: 4px; color: var(--vert); font-size: .85rem; font-weight: 600; }
+.changer { margin-left: auto; border: none; background: none; color: var(--accent); font: inherit; font-weight: 600; cursor: pointer; }
+
+/* ========== 9. Opportunites ========== */
+/* Bandeau du haut, facon page d'artiste : teinte de couleur et resume de l'analyse */
+.bandeau { padding: 34px; border-radius: 30px; background: linear-gradient(135deg, rgba(10,108,255,.16), rgba(242,183,5,.12)), var(--verre); }
+.badge-termine { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 999px; font-size: .85rem; font-weight: 700;
+  color: var(--vert); background: rgba(30,125,79,.12); }
+.bandeau h1 { font-size: clamp(2.2rem, 5vw, 3.4rem); margin: 16px 0 6px; }
+.bandeau .meta { color: var(--doux); margin: 0 0 4px; }
+.bandeau .puce { opacity: 0; animation: surgit .4s ease-out forwards; animation-delay: calc(.3s + var(--i) * .12s); }
+@keyframes surgit { from { opacity: 0; transform: scale(.6); } to { opacity: 1; transform: none; } }
+/* Message quand aucune offre n'est vraiment proche : on propose quand meme les plus proches */
+.message { display: flex; gap: 16px; align-items: flex-start; padding: 20px 24px; margin-top: 26px; border-radius: 22px; }
+.message .pastille { width: 42px; height: 42px; flex: none; border-radius: 14px; display: grid; place-items: center; color: #fff; background: var(--mauve); }
+.message b { display: block; font-size: 1.05rem; margin-bottom: 4px; }
+.message p { margin: 0; color: var(--doux); }
+/* Filtres par niveau */
+.filtres { display: flex; gap: 8px; margin: 30px 0 6px; overflow-x: auto; scrollbar-width: none; }
+.filtres button { flex: none; padding: 9px 18px; border-radius: 999px; border: 1px solid var(--bord); background: var(--verre); font: inherit;
+  font-weight: 600; color: var(--doux); cursor: pointer; transition: all .2s; }
+.filtres button.actif { background: var(--texte); color: var(--fond); border-color: var(--texte); }
+/* Carte d'une offre : jauge du niveau, informations, competences, actions */
+.carte-offre { display: grid; grid-template-columns: 92px 1fr auto; gap: 22px; align-items: center; padding: 22px 24px; margin-top: 14px;
+  animation: monte .5s ease-out both; animation-delay: calc(var(--i) * .12s); transition: transform .25s; }
+.carte-offre:hover { transform: translateY(-3px); }
+.carte-offre h3 { margin: 0 0 4px; font-size: 1.2rem; letter-spacing: -0.01em; }
+.carte-offre .infos { margin-bottom: 12px; }
+.jauge-niveau { text-align: center; --couleur: var(--doux); --n: 35; }
+.jauge-niveau.tres-proche { --couleur: var(--vert); --n: 90; }
+.jauge-niveau.proche { --couleur: var(--accent); --n: 65; }
+.jauge-niveau .cercle { width: 68px; height: 68px; margin: 0 auto 6px; border-radius: 50%; position: relative;
+  background: conic-gradient(var(--couleur) calc(var(--n) * 1%), var(--piste) 0); }
+.jauge-niveau .cercle::after { content: ""; position: absolute; inset: 7px; border-radius: 50%; background: var(--surface); }
+.jauge-niveau small { font-weight: 700; font-size: .78rem; color: var(--couleur); }
+.nouvelle { padding: 2px 10px; border-radius: 999px; background: var(--accent); color: #fff; font-size: .75rem; font-weight: 700; }
+.encore { text-align: center; margin-top: 34px; color: var(--doux); }
+.encore a { color: var(--accent); font-weight: 600; text-decoration: none; }
+@media (max-width: 760px) {
+  .bandeau { padding: 26px 22px; }
+  .carte-offre { grid-template-columns: 70px 1fr; gap: 14px; padding: 18px; }
+  .jauge-niveau .cercle { width: 54px; height: 54px; }
+  .carte-offre .actions { grid-column: 1 / -1; flex-direction: row; }
+  .carte-offre .actions .btn { flex: 1; }
+}
+
+/* ========== 10. Historique ========== */
+.page h1 { font-size: clamp(2.2rem, 5vw, 3.2rem); margin-bottom: 6px; }
+.page > .sous { color: var(--doux); margin: 0 0 28px; font-size: 1.1rem; }
+/* Selecteur a deux onglets, facon Apple : une pilule blanche glisse sous l'onglet choisi */
+.onglets { display: inline-grid; grid-template-columns: 1fr 1fr; position: relative; padding: 5px; border-radius: 999px; margin-bottom: 22px; }
+.onglets button { position: relative; z-index: 1; border: none; background: none; font: inherit; font-weight: 600; color: var(--doux);
+  padding: 10px 22px; border-radius: 999px; cursor: pointer; transition: color .25s; white-space: nowrap; }
+.onglets button.actif { color: var(--texte); }
+.onglets .pilule { position: absolute; top: 5px; bottom: 5px; left: 5px; width: calc(50% - 5px); border-radius: 999px; background: var(--surface);
+  box-shadow: 0 2px 10px rgba(20,30,60,.12); transition: transform .3s cubic-bezier(.3,.7,.2,1); }
+.onglets.droite .pilule { transform: translateX(100%); }
+.compte-nb { display: inline-grid; place-items: center; min-width: 22px; height: 22px; padding: 0 6px; margin-left: 6px; border-radius: 999px;
+  font-size: .75rem; background: rgba(10,108,255,.12); color: var(--accent); }
+.element { padding: 22px 24px; margin-bottom: 14px; animation: monte .45s ease-out both; animation-delay: calc(var(--i) * .08s); transition: opacity .3s, transform .3s; }
+.element h3 { margin: 0 0 4px; font-size: 1.15rem; }
+/* Offre favorite : coeur, echeance, temps ecoule, dernier entretien, actions */
+.carte-favori { display: grid; grid-template-columns: 1fr auto; gap: 18px; align-items: center; }
+.carte-favori > div { min-width: 0; }   /* le contenu ne deborde jamais de la carte */
+.titre-favori { display: flex; align-items: flex-start; gap: 12px; }
+.coeur { flex: none; width: 38px; height: 38px; border-radius: 50%; border: none; cursor: pointer; display: grid; place-items: center;
+  background: rgba(122,92,255,.12); color: var(--mauve); transition: transform .2s; }
+.coeur .icone { fill: currentColor; }
+.coeur:active { transform: scale(.85); }
+.echeance { margin-top: 14px; max-width: 460px; }
+.echeance .haut { display: flex; flex-wrap: wrap; gap: 6px; justify-content: space-between; align-items: center; font-size: .88rem; margin-bottom: 6px; }
+.temps { height: 6px; border-radius: 6px; background: var(--piste); overflow: hidden; }
+.temps i { display: block; height: 100%; border-radius: 6px; width: 0; animation: remplit 1s ease-out .3s forwards; background: var(--vert); }
+.temps.bientot i { background: var(--accent-2); } .temps.close i, .temps.inconnue i { background: var(--trait); }
+@keyframes remplit { to { width: var(--n); } }
+.entretien-fait { display: flex; align-items: center; gap: 10px; margin-top: 12px; font-size: .9rem; color: var(--doux); }
+.entretien-fait .anneau { width: 34px; height: 34px; }
+.entretien-fait .anneau circle { stroke-width: 12; }
+.entretien-fait .anneau b { font-size: .75rem; color: var(--accent); }
+/* Carte d'un CV */
+.carte-cv { display: flex; gap: 16px; align-items: center; }
+.carte-cv .milieu { flex: 1; }
+.carte-cv .puces { margin-top: 10px; }
+.carte-cv .btn { box-shadow: none; padding: 11px 18px; white-space: nowrap; }
+.vide { text-align: center; padding: 40px 24px; }
+.vide .icone { width: 40px; height: 40px; color: var(--mauve); }
+.vide p { color: var(--doux); max-width: 26em; margin: 10px auto 18px; }
+@media (max-width: 720px) {
+  .carte-favori { grid-template-columns: 1fr; }
+  .carte-favori .actions .btn { width: 100%; }
+  .carte-cv { flex-wrap: wrap; } .carte-cv .btn { width: 100%; justify-content: center; }
+  .onglets button { padding: 10px 14px; }
+}
+
+/* ========== 11. Page d'une offre et assistante DRH ========== */
+.retour { display: inline-flex; align-items: center; gap: 6px; color: var(--doux); text-decoration: none; font-weight: 600; margin-bottom: 14px; }
+.retour .icone { transform: rotate(180deg); }
+/* En-tete facon page d'artiste : titre centre, informations, trois boutons ronds */
+.tete { text-align: center; padding: 40px 24px 34px; border-radius: 32px;
+  background: linear-gradient(160deg, rgba(122,92,255,.18), rgba(10,108,255,.12) 55%, rgba(242,183,5,.10)), var(--verre); }
+.tete h1 { font-size: clamp(2.2rem, 5.5vw, 3.6rem); margin: 0 0 6px; }
+.tete .qui { color: var(--doux); font-size: 1.1rem; margin: 0 0 18px; }
+.pastilles { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.pastilles span { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 999px; font-size: .88rem; font-weight: 600; background: var(--surface-douce); }
+.pastilles .niveau { color: var(--vert); }
+.pastilles .niveau::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--vert); }
+.ronds { display: flex; justify-content: center; align-items: flex-start; gap: 28px; margin-top: 28px; }
+.rond { display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: .82rem; font-weight: 600; color: var(--doux);
+  background: none; border: none; font-family: inherit; cursor: pointer; text-decoration: none; }
+.rond span { width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; background: var(--surface-douce);
+  color: var(--texte); box-shadow: var(--ombre); transition: transform .2s, background .3s, color .3s; }
+.rond:hover span { transform: scale(1.06); }
+.rond.grand { color: var(--texte); }
+.rond.grand span { width: 84px; height: 84px; background: var(--mauve); color: #fff; box-shadow: 0 12px 30px rgba(122,92,255,.45); }
+.rond.grand .icone { width: 34px; height: 34px; }
+.rond.favori-actif span { background: var(--mauve); color: #fff; animation: pop .35s; }
+.rond.favori-actif .icone { fill: currentColor; }
+.rond.inactif { opacity: .45; pointer-events: none; }
+@keyframes pop { 50% { transform: scale(1.2); } }
+.info-close { margin: 16px 0 0; color: var(--doux); font-size: .92rem; }
+/* Panneau "Postuler" : s'ouvre sous les boutons ronds (candidature par email, ou sans lien) */
+.panneau-postuler { max-width: 520px; margin: 22px auto 0; padding: 20px 22px; border-radius: 22px; text-align: left; background: var(--surface-douce);
+  box-shadow: var(--ombre); animation: monte .35s ease-out; position: relative; }
+.panneau-postuler h3 { margin: 0 0 10px; font-size: 1.1rem; display: flex; align-items: center; gap: 8px; }
+.fermer { position: absolute; top: 12px; right: 14px; border: none; background: none; font-size: 1.4rem; line-height: 1; color: var(--doux); cursor: pointer; }
+.adresse { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 14px; background: var(--fond); font-weight: 600; word-break: break-all; }
+.adresse button { margin-left: auto; flex: none; display: inline-flex; align-items: center; gap: 6px; border: none; background: none;
+  font: inherit; font-size: .85rem; font-weight: 700; color: var(--accent); cursor: pointer; }
+.rappel { color: var(--doux); font-size: .9rem; margin: 10px 0 14px; }
+.panneau-postuler .btn { box-shadow: none; }
+.panneau-postuler ul { margin: 0 0 12px; padding-left: 20px; }
+.panneau-postuler li { margin: 6px 0; }
+/* Corps : annonce a gauche, assistante a droite */
+.corps { display: grid; grid-template-columns: 3fr 2fr; gap: 26px; align-items: start; margin-top: 26px; }
+@media (max-width: 880px) { .corps { grid-template-columns: 1fr; } }
+.bloc { padding: 26px; margin-bottom: 18px; }
+.bloc h2 { font-size: 1.35rem; margin: 0 0 14px; }
+/* Annonce decoupee en sections, repliee au-dela de la hauteur d'un ecran */
+.annonce h3 { font-size: 1.05rem; margin: 22px 0 8px; }
+.annonce h3:first-child { margin-top: 0; }
+.annonce p { margin: 0 0 8px; line-height: 1.65; }
+.annonce ul { margin: 0; padding-left: 0; list-style: none; }
+.annonce li { position: relative; padding: 5px 0 5px 22px; line-height: 1.55; }
+.annonce li::before { content: ""; position: absolute; left: 4px; top: 14px; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
+.annonce.repliee { max-height: 520px; overflow: hidden; -webkit-mask-image: linear-gradient(#000 75%, transparent); mask-image: linear-gradient(#000 75%, transparent); }
+.deplier { margin-top: 10px; border: none; background: none; font: inherit; font-weight: 700; color: var(--accent); cursor: pointer; }
+.origine { display: inline-flex; align-items: center; gap: 6px; margin-top: 16px; color: var(--doux); font-size: .9rem; }
+/* Assistante DRH */
+.assistante { padding: 24px; position: sticky; top: 90px; scroll-margin-top: 90px; }
+.recruteuse { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+.avatar { width: 54px; height: 54px; flex: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; gap: 3px;
+  background: linear-gradient(135deg, var(--mauve), var(--accent)); }
+.avatar i { width: 4px; border-radius: 4px; background: #fff; height: 30%; animation: respire-onde 1.4s ease-in-out infinite; animation-delay: calc(var(--i) * -.2s); }
+@keyframes respire-onde { 50% { height: 60%; } }
+.recruteuse b { display: block; font-size: 1.1rem; }
+.recruteuse small { color: var(--vert); font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
+.recruteuse small::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--vert); }
+.assistante .intro { color: var(--doux); margin: 0 0 16px; }
+.assistante .btn { width: 100%; justify-content: center; box-shadow: none; margin-top: 10px; }
+.assistante .ligne-envoi .btn { width: auto; flex: 1; }
+.limites { text-align: center; font-size: .82rem; color: var(--doux); margin: 12px 0 0; }
+.statut { color: var(--rouge-texte); font-weight: 500; margin: 12px 0 0; }
+.statut:empty { display: none; }
+.confidentialite { display: flex; gap: 8px; font-size: .8rem; color: var(--doux); margin: 14px 0 0; padding-top: 14px; border-top: 1px solid var(--piste); }
+.confidentialite .icone { flex: none; width: 18px; height: 18px; }
+/* Resultats de l'analyse et de l'evaluation : les blocs arrivent l'un apres l'autre */
+.resultat { margin-top: 18px; }
+.resultat > * { animation: monte .45s ease-out both; }
+.resultat > *:nth-child(2) { animation-delay: .1s; } .resultat > *:nth-child(3) { animation-delay: .2s; }
+.resultat > *:nth-child(4) { animation-delay: .3s; } .resultat > *:nth-child(n+5) { animation-delay: .4s; }
+.score { display: flex; align-items: center; gap: 16px; }
+.score p { margin: 0; color: var(--doux); }
+.liste-conseils { margin: 0; padding-left: 20px; }
+.liste-conseils li { margin: 6px 0; }
+.barres div { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; font-size: .9rem; margin-top: 10px; }
+.barres .jauge { grid-column: 1 / -1; height: 7px; border-radius: 7px; background: var(--piste); overflow: hidden; }
+.barres .jauge i { display: block; height: 100%; width: 0; border-radius: 7px; background: linear-gradient(90deg, var(--accent), var(--mauve)); animation: remplit 1.2s ease-out .3s forwards; }
+details { padding: 10px 14px; border-radius: 14px; background: var(--surface-douce); margin-top: 8px; }
+summary { cursor: pointer; font-weight: 600; }
+details p { margin: 8px 0 0; color: var(--doux); }
+/* Entretien en direct : lecteur avec une onde qui suit la voix (bleue : recruteuse, mauve : candidat) */
+.direct-tete { display: flex; justify-content: space-between; align-items: center; font-weight: 700; }
+.en-direct { display: inline-flex; align-items: center; gap: 8px; color: #e5484d; }
+.en-direct::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: #e5484d; animation: clignote 1.2s infinite; }
+@keyframes clignote { 50% { opacity: .25; } }
+.minuteur { font-variant-numeric: tabular-nums; color: var(--doux); font-weight: 600; }
+.duree { height: 4px; border-radius: 4px; background: var(--piste); margin: 10px 0 0; overflow: hidden; }
+.duree i { display: block; height: 100%; width: 0; background: var(--doux); transition: width 1s linear; }
+.onde-vocale { display: flex; align-items: center; justify-content: center; gap: 4px; height: 90px; margin: 16px 0 6px; }
+.onde-vocale i { width: 6px; border-radius: 6px; height: 8%; background: var(--accent); transition: height .1s, background .4s; }
+.onde-vocale.candidat i { background: var(--mauve); }
+.qui-parle { text-align: center; font-weight: 700; margin: 0 0 12px; min-height: 1.5em; }
+.conversation { max-height: 210px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+.bulle-texte { padding: 9px 13px; border-radius: 16px; font-size: .9rem; max-width: 88%; margin: 0; animation: monte .3s ease-out; }
+.bulle-texte.recruteur { background: rgba(10,108,255,.1); align-self: flex-start; border-bottom-left-radius: 4px; }
+.bulle-texte.candidat { background: rgba(122,92,255,.12); align-self: flex-end; border-bottom-right-radius: 4px; }
+.commandes { display: flex; justify-content: center; gap: 28px; margin-top: 16px; }
+.commandes button { display: flex; flex-direction: column; align-items: center; gap: 6px; border: none; background: none; font: inherit;
+  font-size: .8rem; font-weight: 600; color: var(--doux); cursor: pointer; }
+.commandes span { width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; background: var(--surface); color: var(--texte); box-shadow: var(--ombre); }
+.commandes .raccrocher span { background: #e5484d; color: #fff; }
+.commandes .coupe span { background: var(--texte); color: var(--fond); }
+/* Bulle de confirmation (favori ajoute, adresse copiee...) */
+.toast { position: fixed; left: 50%; bottom: 28px; z-index: 30; transform: translate(-50%, 20px); opacity: 0; pointer-events: none;
+  display: flex; align-items: center; gap: 12px; padding: 12px 18px; border-radius: 999px; font-weight: 600; transition: all .35s; white-space: nowrap; }
+.toast.visible { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
+.toast a { color: var(--accent); text-decoration: none; }
+@media (max-width: 700px) { .toast { bottom: 96px; } }
+
+/* ========== 12. Accessibilite : si l'appareil demande moins d'animations, tout s'affiche sans bouger ========== */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  .apparait, .final h2 span, .avantages li, .demo-offre, .carte-offre, .element { opacity: 1; transform: none; }
+  .faisceau, .demo-puce { display: none; }
+  .barre-niveau i, .temps i, .barres .jauge i { width: var(--n); }
+  .anneau .valeur { stroke-dashoffset: calc(283 - 283 * var(--n) / 100); }
+  .bulle.en-cours .vague { top: 22%; }
+}

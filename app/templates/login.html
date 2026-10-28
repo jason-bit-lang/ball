@@ -1,20 +1,41 @@
 {% extends "base.html" %}
+{% from "macros.html" import icone, anneau %}
 {% block title %}Connexion - CVBoost{% endblock %}
 {% block content %}
-<div class="form-container">
-<h2>Connexion</h2>
+<main class="compte">
+    <div>
+        <h1>Bon retour parmi nous.</h1>
+        <p class="sous">Vos offres et votre recruteuse vous attendent.</p>
+        {# Decor : trois cartes de verre qui flottent doucement, comme des souvenirs de l'application #}
+        <div class="cartes-flottantes decor" aria-hidden="true">
+            <div class="flotte verre" style="left: 0; top: 10px; --d: 0s">
+                <b>Chef comptable</b><small>Kinshasa · Très proche</small><div class="barre-niveau"><i></i></div>
+            </div>
+            <div class="flotte verre" style="left: 210px; top: 95px; --d: -2s">
+                <b>Entretien vocal</b><small>La recruteuse vous écoute</small>
+                <div class="mini-onde">{% for i in range(10) %}<i style="--i: {{ i }}"></i>{% endfor %}</div>
+            </div>
+            <div class="flotte verre flotte-note" style="left: 20px; top: 200px; --d: -4s">
+                {{ anneau(82) }}<div><b>Votre note</b><small>Communication 8 / 10</small></div>
+            </div>
+        </div>
+    </div>
 
-<form method="POST">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <label>Email</label>
-    <input type="email" name="email" value="{{ email }}" placeholder="exemple@gmail.com" required>
-    <label>Mot de passe</label>
-    <input type="password" name="password" placeholder="Votre mot de passe" required>
-    <button type="submit">Se connecter</button>
-</form>
-<p class="form-footer">
-    Pas encore de compte ?
-    <a href="{{ url_for('register') }}">Inscrivez-vous</a>
-</p>
-</div>
+    <form class="formulaire verre{{ ' secoue' if erreur }}" method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <h2>Connexion</h2>
+        {% if erreur %}<div class="alerte" role="alert">{{ erreur }}</div>{% endif %}
+        <div class="champ">
+            <input type="email" name="email" id="email" value="{{ email }}" placeholder=" " autocomplete="email" required>
+            <label for="email">Email</label>
+        </div>
+        <div class="champ">
+            <input type="password" name="password" id="password" placeholder=" " autocomplete="current-password" required>
+            <label for="password">Mot de passe</label>
+            <button type="button" class="voir" aria-label="Afficher le mot de passe">{{ icone('oeil') }}</button>
+        </div>
+        <button type="submit" class="btn envoyer" data-attente="Connexion...">Se connecter {{ icone('fleche', 'fleche') }}</button>
+        <p class="bascule">Pas encore de compte ? <a href="{{ url_for('register') }}">Créer un compte</a></p>
+    </form>
+</main>
 {% endblock %}

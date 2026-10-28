@@ -1,17 +1,74 @@
 {% extends "base.html" %}
+{% from "macros.html" import icone, anneau %}
 {% block title %}Historique - CVBoost{% endblock %}
 {% block content %}
-<div class="history-container">
-<h2>Mon historique</h2>
+<main class="page">
+    <h1>Votre historique.</h1>
+    <p class="sous">Vos offres favorites et vos CV, au même endroit.</p>
 
-{% for doc in documents %}
-<div class="historique-ligne">
-    <strong>{{ doc.original_filename }}</strong>
-    <p class="discret">{{ doc.upload_date.strftime('%d/%m/%Y %H:%M') }} - {{ doc.status }}</p>
-    <a href="{{ url_for('result', id=doc.id) }}">Voir</a>
-</div>
-{% else %}
-<p>Vous n'avez encore envoyé aucun CV. <a href="{{ url_for('upload') }}">Envoyer mon CV</a></p>
-{% endfor %}
-</div>
+    <div class="onglets verre" id="onglets">
+        <span class="pilule"></span>
+        <button type="button" class="actif" data-onglet="favoris">Offres favorites<span class="compte-nb" id="nb-favoris">{{ favoris | length }}</span></button>
+        <button type="button" data-onglet="cv">Mes CV<span class="compte-nb">{{ cvs | length }}</span></button>
+    </div>
+
+    <section id="favoris">
+        {% for carte in favoris %}
+        {% set offre = carte.offre %}
+        {# L'entretien et la page de l'offre utilisent le dernier CV lisible de l'utilisateur #}
+        {% set lien_offre = url_for('offre', offre_id=offre.id, id=dernier_cv.id) if dernier_cv else url_for('upload') %}
+        <article class="element carte-favori verre" style="--i: {{ loop.index0 }}">
+            <div>
+                <div class="titre-favori">
+                    <button type="button" class="coeur" data-url="{{ url_for('favori', offre_id=offre.id) }}" aria-label="Retirer des favoris">{{ icone('coeur') }}</button>
+                    <div><h3>{{ offre.titre }}</h3>
+                        <div class="infos"><span>{{ offre.entreprise }}</span><span>{{ icone('lieu') }}{{ offre.lieu }}</span></div></div>
+                </div>
+                <div class="echeance">
+                    <div class="haut"><span>{{ icone('calendrier') }} {{ carte.echeance.texte }}</span>
+                        {% if carte.echeance.etiquette %}<span class="badge {{ carte.echeance.classe }}">{{ carte.echeance.etiquette }}</span>{% endif %}</div>
+                    <div class="temps {{ carte.echeance.classe }}"><i style="--n: {{ carte.echeance.part }}%"></i></div>
+                </div>
+                {% if carte.note is not none %}
+                    <div class="entretien-fait">{{ anneau(carte.note) }} Dernier entretien : {{ carte.note }} / 100</div>
+                {% else %}
+                    <div class="entretien-fait">Pas encore d'entretien sur ce poste</div>
+                {% endif %}
+            </div>
+            <div class="actions">
+                <a class="btn mauve" href="{{ lien_offre }}#assistante">{{ icone('micro') }}
+                    {{ 'Refaire un entretien' if carte.note is not none else "Lancer l'entretien" }}</a>
+                <a class="btn clair" href="{{ lien_offre }}">Voir l'offre</a>
+            </div>
+        </article>
+        {% else %}
+        <div class="vide verre">{{ icone('coeur') }}
+            <h3>Aucune offre favorite pour l'instant</h3>
+            <p>Ouvrez une offre qui vous plaît et touchez le cœur : elle vous attendra ici, avec sa date de clôture.</p>
+            <a class="btn" href="{{ url_for('recherche', id=dernier_cv.id) if dernier_cv else url_for('upload') }}">Voir mes opportunités</a>
+        </div>
+        {% endfor %}
+    </section>
+
+    <section id="cv" hidden>
+        {% for cv in cvs %}
+        {% set extension = cv.document.original_filename.rsplit('.', 1)[-1].lower() %}
+        <article class="element carte-cv verre" style="--i: {{ loop.index0 }}">
+            <span class="type-fichier {{ extension }}">{{ extension.upper() }}</span>
+            <div class="milieu"><h3>{{ cv.document.original_filename }}</h3>
+                <div class="infos"><span>Déposé le {{ cv.document.upload_date | date_fr }}</span></div>
+                {% if cv.competences %}
+                    <div class="puces">{% for nom in cv.competences %}<span class="puce">{{ nom | competence }}</span>{% endfor %}</div>
+                {% endif %}</div>
+            <a class="btn" href="{{ url_for('recherche', id=cv.document.id) }}">Voir mes opportunités {{ icone('fleche', 'fleche') }}</a>
+        </article>
+        {% else %}
+        <div class="vide verre">{{ icone('fichier') }}
+            <h3>Aucun CV pour l'instant</h3>
+            <p>Déposez votre CV : CVBoost le lit et vous propose les offres qui vous correspondent.</p>
+            <a class="btn" href="{{ url_for('upload') }}">Propulser votre CV</a>
+        </div>
+        {% endfor %}
+    </section>
+</main>
 {% endblock %}

@@ -1,0 +1,19 @@
+{# Petits morceaux de page reutilises. Import : {% from "macros.html" import icone, anneau %} #}
+
+{# Icone dessinee (voir icones.html) #}
+{% macro icone(nom, classe='') -%}
+<svg class="icone {{ classe }}" aria-hidden="true"><use href="#i-{{ nom }}"/></svg>
+{%- endmacro %}
+
+{# Anneau d'une note sur 100 : le trait se remplit jusqu'a la note #}
+{% macro anneau(note, classe='') -%}
+<div class="anneau {{ classe }}" style="--n: {{ note }}">
+    <svg viewBox="0 0 100 100"><circle class="piste" cx="50" cy="50" r="45"/><circle class="valeur" cx="50" cy="50" r="45"/></svg>
+    <b>{{ note }}</b>
+</div>
+{%- endmacro %}
+
+{# Lien de la barre du bas (telephone) #}
+{% macro lien_bas(adresse, nom_icone, texte, actif) -%}
+<a href="{{ adresse }}" class="{{ 'actif' if actif }}">{{ icone(nom_icone) }}{{ texte }}</a>
+{%- endmacro %}

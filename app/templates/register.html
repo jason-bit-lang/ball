@@ -1,27 +1,52 @@
 {% extends "base.html" %}
+{% from "macros.html" import icone %}
 {% block title %}Inscription - CVBoost{% endblock %}
 {% block content %}
-<div class="form-container">
-<h2>Inscription</h2>
+<main class="compte">
+    <div>
+        <h1>Bienvenue sur CVBoost.</h1>
+        <p class="sous">Créez votre compte en une minute, et laissez votre CV travailler pour vous.</p>
+        <ul class="avantages decor">
+            <li class="verre" style="--d: .2s"><span class="coche">{{ icone('coche') }}</span>Des offres choisies pour votre profil</li>
+            <li class="verre" style="--d: .45s"><span class="coche">{{ icone('coche') }}</span>Une analyse claire de votre candidature</li>
+            <li class="verre" style="--d: .7s"><span class="coche">{{ icone('coche') }}</span>Des entretiens pour vous entraîner à voix haute</li>
+        </ul>
+    </div>
 
-{# Les champs gardent leur valeur si le formulaire contient une erreur (sauf les mots de passe) #}
-<form method="POST">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <label>Nom</label>
-    <input type="text" name="nom" value="{{ form.get('nom', '') }}" placeholder="Votre nom" required>
-    <label>Prénom</label>
-    <input type="text" name="prenom" value="{{ form.get('prenom', '') }}" placeholder="Votre prénom" required>
-    <label>Email</label>
-    <input type="email" name="email" value="{{ form.get('email', '') }}" placeholder="exemple@gmail.com" required>
-    <label>Mot de passe (8 caractères minimum)</label>
-    <input type="password" name="password" placeholder="Mot de passe" minlength="8" required>
-    <label>Confirmer le mot de passe</label>
-    <input type="password" name="confirmation_mot_secret" placeholder="Confirmez le mot de passe" minlength="8" required>
-    <button type="submit">S'inscrire</button>
-</form>
-<p class="form-footer">
-    Vous avez déjà un compte ?
-    <a href="{{ url_for('login') }}">Connectez-vous</a>
-</p>
-</div>
+    {# Les champs gardent leur valeur si le formulaire contient une erreur (sauf les mots de passe) #}
+    <form class="formulaire verre{{ ' secoue' if erreur }}" method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <h2>Créer un compte</h2>
+        {% if erreur %}<div class="alerte" role="alert">{{ erreur }}</div>{% endif %}
+        <div class="deux">
+            <div class="champ">
+                <input type="text" name="prenom" id="prenom" value="{{ form.get('prenom', '') }}" placeholder=" " autocomplete="given-name" required>
+                <label for="prenom">Prénom</label>
+            </div>
+            <div class="champ">
+                <input type="text" name="nom" id="nom" value="{{ form.get('nom', '') }}" placeholder=" " autocomplete="family-name" required>
+                <label for="nom">Nom</label>
+            </div>
+        </div>
+        <div class="champ">
+            <input type="email" name="email" id="email" value="{{ form.get('email', '') }}" placeholder=" " autocomplete="email" required>
+            <label for="email">Email</label>
+        </div>
+        <div class="champ">
+            <input type="password" name="password" id="password" placeholder=" " minlength="8" autocomplete="new-password" required>
+            <label for="password">Mot de passe (8 caractères minimum)</label>
+            <button type="button" class="voir" aria-label="Afficher le mot de passe">{{ icone('oeil') }}</button>
+        </div>
+        <div class="force" aria-hidden="true"><i></i><i></i><i></i></div>
+        <p class="indice" id="indice-force" aria-live="polite"></p>
+        <div class="champ">
+            <input type="password" name="confirmation_mot_secret" id="confirmation" placeholder=" " minlength="8" autocomplete="new-password" required>
+            <label for="confirmation">Confirmer le mot de passe</label>
+        </div>
+        <p class="indice" id="indice-confirmation" aria-live="polite"></p>
+        <button type="submit" class="btn envoyer" data-attente="Création du compte...">Créer mon compte {{ icone('fleche', 'fleche') }}</button>
+        <p class="securite">{{ icone('bouclier') }} Vos données sont traitées en toute sécurité</p>
+        <p class="bascule">Déjà un compte ? <a href="{{ url_for('login') }}">Se connecter</a></p>
+    </form>
+</main>
 {% endblock %}

@@ -5,12 +5,14 @@ from datetime import timedelta
 from flask import render_template, request, redirect, url_for, flash, jsonify
 from flask_login import login_required, current_user, login_user, logout_user
 from werkzeug.utils import secure_filename
+from pipeline.nettoyage_offres import trouver_competences
 from . import app, db
+from .affichage import decouper_description, echeance, maniere_de_postuler
 from .ia import (TEXTE_MIN, IAIndisponible, analyser_candidature, creer_entretien_vocal, evaluer_entretien,
                  extraire_texte)
 from .journal import log_event
-from .matching import rechercher
-from .models import Document, EntretienVocal, Offre, User, now_utc
+from .matching import comparer, cv_reconnu, offres_recentes, rechercher
+from .models import Document, EntretienVocal, Favori, Offre, User, now_utc
 
 # Extensions acceptees et premiers octets attendus pour chacune
 # (un PDF commence par %PDF, un DOCX est une archive zip qui commence par PK)
@@ -24,6 +26,8 @@ ASSISTANTE_ACTIVE = True
 ENTRETIENS_PAR_JOUR = 5   # chaque entretien vocal est payant : limite par utilisateur sur 24 h
 SDP_MAX = 20000           # taille maximale de l'offre WebRTC envoyee par le navigateur
 ROLES = {'recruteur', 'candidat'}
+CV_ILLISIBLE = ("Nous n'avons pas pu analyser correctement votre CV. Veuillez envoyer un autre CV, "
+                "ou une autre version de votre CV, pour que nous puissions l'analyser correctement.")
 
 
 def form_value(name):
@@ -69,12 +73,33 @@ def texte_du_cv(document):
     return texte if statut == STATUT_ANALYSE else ''
 
 
+def demande_du_script():
+    """Vrai si la demande vient du script de la page d'envoi (envoi.js) : on lui repond en JSON."""
+    return request.headers.get('X-Requested-With') == 'fetch'
+
+
+def refuser_envoi(message):
+    """Envoi refuse : message en JSON pour le script de la page, sinon message flash et retour a la page."""
+    if demande_du_script():
+        return jsonify(erreur=message), 400
+    flash(message, 'erreur')
+    return redirect(url_for('upload'))
+
+
 def reject_upload(reason, message, filename=''):
     """Refus d'un envoi : on le note dans le journal puis on previent l'utilisateur."""
     log_event('UPLOAD_REJECTED', reason=reason, file=filename,
               ext=file_extension(filename), size=request.content_length or 0)
-    flash(message, 'danger')
-    return redirect(url_for('upload'))
+    return refuser_envoi(message)
+
+
+def supprimer_document(document):
+    """Retire un CV inutilisable : le fichier du dossier uploads/ et sa ligne dans la base."""
+    chemin = os.path.join(app.config['UPLOAD_FOLDER'], document.stored_filename)
+    if os.path.exists(chemin):
+        os.remove(chemin)
+    db.session.delete(document)
+    db.session.commit()
 
 
 @app.route('/')
@@ -109,17 +134,19 @@ def register():
             error = None
 
         if error:
-            flash(error, 'danger')
-            return render_template('register.html', form=request.form)
+            # L'erreur s'affiche dans la carte du formulaire ; les champs gardent leur valeur
+            return render_template('register.html', form=request.form, erreur=error)
 
         user = User(nom=nom, prenom=prenom, email=email)
         user.set_password(password)
         db.session.add(user)
         db.session.commit()
-        flash('Inscription réussie. Vous pouvez maintenant vous connecter.', 'success')
-        return redirect(url_for('login'))
+        # Connexion automatique : le nouvel utilisateur arrive directement sur l'envoi de son CV
+        login_user(user)
+        flash(f'Bienvenue sur CVBoost, {user.prenom}.', 'succes')
+        return redirect(url_for('upload'))
 
-    return render_template('register.html', form={})
+    return render_template('register.html', form={}, erreur=None)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -136,15 +163,14 @@ def login():
         # on ne revele pas quels emails existent
         if user is None or not user.check_password(password):
             log_event('LOGIN_FAIL', email=email)
-            flash('Email ou mot de passe incorrect.', 'danger')
-            return render_template('login.html', email=email)
+            return render_template('login.html', email=email, erreur='Email ou mot de passe incorrect.')
 
         login_user(user)
         log_event('LOGIN_OK', email=email)
-        flash(f'Bienvenue {user.prenom}.', 'success')
+        flash(f'Bon retour, {user.prenom}.', 'succes')
         return redirect(safe_next_page())
 
-    return render_template('login.html', email='')
+    return render_template('login.html', email='', erreur=None)
 
 
 @app.route('/logout')
@@ -181,13 +207,17 @@ def upload():
                             user_id=current_user.id)
         db.session.add(document)
         db.session.commit()
-        # Le CV est lu tout de suite : l'utilisateur sait immediatement s'il est exploitable
-        if texte_du_cv(document):
-            flash('CV envoyé et analysé avec succès.', 'success')
-        else:
-            flash("CV envoyé, mais son texte est illisible (CV scanné ?). Envoyez une version PDF ou DOCX "
-                  "créée avec un traitement de texte.", 'danger')
-        return redirect(url_for('result', id=document.id))
+        # Le CV est lu tout de suite. Il est refuse seulement si rien n'y est reconnu
+        # (scan sans texte, ou texte sans aucune competence ni aucun mot en commun avec les offres).
+        texte = texte_du_cv(document)
+        if not texte or not cv_reconnu(texte):
+            log_event('CV_ILLISIBLE', file=original_filename)
+            supprimer_document(document)
+            return refuser_envoi(CV_ILLISIBLE)
+        adresse = url_for('recherche', id=document.id)
+        if demande_du_script():
+            return jsonify(adresse=adresse)
+        return redirect(adresse)
 
     return render_template('upload.html')
 
@@ -198,39 +228,75 @@ def file_too_large(error):
     return reject_upload('too_large', 'Fichier trop volumineux : 5 Mo maximum.')
 
 
+def derniere_note(offre_id):
+    """Note du dernier entretien vocal evalue sur cette offre, ou None."""
+    entretien = (EntretienVocal.query.filter_by(user_id=current_user.id, offre_id=offre_id)
+                 .filter(EntretienVocal.note.isnot(None)).order_by(EntretienVocal.date.desc()).first())
+    return entretien.note if entretien else None
+
+
 @app.route('/history')
 @login_required
 def history():
-    documents = (Document.query.filter_by(user_id=current_user.id)
+    """Historique : offres favorites (avec leur date de cloture et la derniere note) et CV lisibles."""
+    documents = (Document.query.filter_by(user_id=current_user.id, status=STATUT_ANALYSE)
                  .order_by(Document.upload_date.desc()).all())
-    return render_template('history.html', documents=documents)
-
-
-@app.route('/result/<int:id>')
-@login_required
-def result(id):
-    document = document_du_user(id)
-    texte_du_cv(document)
-    return render_template('result.html', document=document, analyse=STATUT_ANALYSE)
+    cvs = [{'document': document, 'competences': trouver_competences(texte_du_cv(document))} for document in documents]
+    favoris = Favori.query.filter_by(user_id=current_user.id).order_by(Favori.date.desc()).all()
+    cartes = [{'offre': favori.offre, 'echeance': echeance(favori.offre), 'note': derniere_note(favori.offre_id)}
+              for favori in favoris]
+    dernier_cv = documents[0] if documents else None
+    return render_template('history.html', favoris=cartes, cvs=cvs, dernier_cv=dernier_cv)
 
 
 @app.route('/recherche/<int:id>')
 @login_required
 def recherche(id):
-    """Bouton "Rechercher" : offres les plus proches du CV (matching TF-IDF)."""
+    """Page des opportunites : offres ouvertes les plus proches du CV (matching TF-IDF).
+    Elle n'est jamais vide : sans offre en commun avec le CV, on propose les plus recentes."""
     document = document_du_user(id)
     texte = texte_du_cv(document)
-    resultats = rechercher(texte) if texte else []
+    if not texte:
+        flash(CV_ILLISIBLE, 'erreur')
+        return redirect(url_for('upload'))
+    resultats = rechercher(texte) or offres_recentes(texte)
+    proches = [resultat for resultat in resultats if resultat['niveau'] != 'explorer']
     log_event('RECHERCHE', cv=document.id, resultats=len(resultats))
-    return render_template('offres.html', document=document, resultats=resultats)
+    return render_template('resultats.html', document=document, resultats=resultats, proches=len(proches),
+                           competences=trouver_competences(texte))
 
 
 @app.route('/offre/<int:offre_id>/cv/<int:id>')
 @login_required
 def offre(offre_id, id):
     """Detail d'une offre, avec l'assistante DRH a cote."""
-    return render_template('offre.html', offre=db.get_or_404(Offre, offre_id), document=document_du_user(id),
-                           assistante=ASSISTANTE_ACTIVE)
+    offre = db.get_or_404(Offre, offre_id)
+    document = document_du_user(id)
+    texte = texte_du_cv(document)
+    # Niveau de l'offre si elle fait partie des resultats du CV, sinon "a explorer"
+    resultat = next((r for r in rechercher(texte) if r['offre'].id == offre.id), None) if texte else None
+    if resultat is None:
+        resultat = comparer(offre, set(trouver_competences(texte)))
+    sections = decouper_description(offre.description)
+    dossier = next((section for section in sections if 'candidature' in section['titre'].lower()), None)
+    favori = Favori.query.filter_by(user_id=current_user.id, offre_id=offre.id).first() is not None
+    return render_template('offre.html', offre=offre, document=document, resultat=resultat, sections=sections,
+                           dossier=dossier, favori=favori, echeance=echeance(offre),
+                           postuler=maniere_de_postuler(offre), assistante=ASSISTANTE_ACTIVE)
+
+
+@app.route('/favori/<int:offre_id>', methods=['POST'])
+@login_required
+def favori(offre_id):
+    """Bouton coeur : ajoute l'offre aux favoris, ou l'en retire si elle y est deja."""
+    offre = db.get_or_404(Offre, offre_id)
+    existant = Favori.query.filter_by(user_id=current_user.id, offre_id=offre.id).first()
+    if existant:
+        db.session.delete(existant)
+    else:
+        db.session.add(Favori(user_id=current_user.id, offre_id=offre.id))
+    db.session.commit()
+    return jsonify(favori=existant is None)
 
 
 def entretiens_du_jour():
@@ -278,6 +344,12 @@ def entretien(offre_id, id, etape):
             if not transcription_valide(transcription):
                 return jsonify(erreur="Aucune réponse enregistrée : l'entretien ne peut pas être évalué."), 400
             reponse = evaluer_entretien(texte, offre, transcription)
+            # La note est gardee pour l'historique, sur le dernier entretien lance pour cette offre
+            dernier = (EntretienVocal.query.filter_by(user_id=current_user.id, offre_id=offre.id)
+                       .order_by(EntretienVocal.date.desc()).first())
+            if dernier:
+                dernier.note = reponse['note_globale']
+                db.session.commit()
     except IAIndisponible as erreur:
         log_event('IA_ERREUR', cv=id, offre=offre_id, etape=etape, cause=repr(erreur.__cause__))
         return jsonify(erreur=str(erreur)), 503

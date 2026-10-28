@@ -1,14 +1,49 @@
 {% extends "base.html" %}
-{% block title %}Envoi de CV - CVBoost{% endblock %}
+{% from "macros.html" import icone %}
+{% block title %}Déposez votre CV - CVBoost{% endblock %}
 {% block content %}
-<div class="form-container">
-<h2>Envoyer mon CV</h2>
+<main class="compte depot">
+    <div class="texte">
+        <h1>Déposez votre CV.</h1>
+        <p class="sous">CVBoost le lit, repère vos compétences et cherche les offres qui vous correspondent.</p>
+    </div>
+    <ul class="conseils">
+        <li class="verre"><span class="pastille">{{ icone('fichier') }}</span>
+            <div><b>Un fichier créé sur ordinateur</b><span>PDF ou Word, pas une photo ni un scan.</span></div></li>
+        <li class="verre"><span class="pastille">{{ icone('cible') }}</span>
+            <div><b>Vos compétences en toutes lettres</b><span>Excel, comptabilité, anglais : écrivez-les clairement.</span></div></li>
+        <li class="verre"><span class="pastille">{{ icone('note') }}</span>
+            <div><b>Des expériences avec des résultats</b><span>Dates, missions et chiffres parlent aux recruteurs.</span></div></li>
+    </ul>
 
-<form method="POST" enctype="multipart/form-data">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <input type="file" name="cv" accept=".pdf,.docx" required>
-    <button type="submit">Envoyer</button>
-</form>
-<p class="file-limits">Formats acceptés : PDF, DOCX (5 Mo maximum)</p>
-</div>
+    {# Le formulaire marche aussi sans JavaScript ; avec, envoi.js montre l'analyse et la bulle de liquide #}
+    <form class="formulaire verre" id="formulaire" method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <h2>Votre CV</h2>
+        <div class="alerte" id="alerte" role="alert" hidden></div>
+
+        <label class="zone" id="zone">
+            <input type="file" name="cv" id="cv" accept=".pdf,.docx" required>
+            <span class="grande-icone">{{ icone('depot') }}</span>
+            <b class="souris">Glissez votre CV ici</b>
+            <b class="tactile">Touchez pour choisir votre CV</b>
+            <span class="souris">ou <span class="choisir">choisissez un fichier</span></span>
+            <span class="formats">PDF ou Word · 5 Mo maximum</span>
+        </label>
+
+        <div class="fichier" id="fichier" hidden>
+            <span class="type-fichier" id="type">PDF</span>
+            <div><div class="nom" id="nom"></div><div class="doux" id="taille"></div>
+                <div class="pret">{{ icone('coche') }} Prêt à être analysé</div></div>
+            <button type="button" class="changer" id="changer">Changer</button>
+        </div>
+
+        <div class="ligne-envoi" aria-live="polite">
+            <button type="submit" class="btn envoyer" id="envoyer">Analyser mon CV {{ icone('fleche', 'fleche') }}</button>
+            <div class="bulle" id="bulle" hidden><div class="vague deux"></div><div class="vague"></div></div>
+        </div>
+        <p class="securite">{{ icone('bouclier') }} Votre CV est traité en toute sécurité</p>
+    </form>
+</main>
 {% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='envoi.js') }}"></script>{% endblock %}

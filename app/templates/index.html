@@ -1,17 +1,118 @@
 {% extends "base.html" %}
+{% from "macros.html" import icone, anneau %}
 {% block content %}
-<div class="hero-section">
-<h2>Bienvenue sur CVBoost</h2>
-<p>Vous avez l'opportunité de changer votre carrière grâce à l'intelligence artificielle.
-    CVBoost étudie votre CV et vous permet d'augmenter vos chances de trouver des opportunités professionnelles.
-</p>
-<p>
-    {# Le bouton mene a l'etape suivante selon que l'utilisateur est connecte ou non #}
+{# Les boutons menent a l'inscription pour un visiteur, a l'envoi du CV pour un utilisateur connecte #}
+{% set depart = url_for('upload') if current_user.is_authenticated else url_for('register') %}
+
+<!-- 1. Annonce et demonstration animee -->
+<section class="section hero">
+    <div>
+        <h1>Votre prochaine opportunité prend vie ici.</h1>
+        <p class="sous">Déposez votre CV : CVBoost trouve les offres faites pour vous et vous prépare à l'entretien.</p>
+        <a class="btn" href="{{ depart }}">Déposer mon CV {{ icone('fleche', 'fleche') }}</a>
+        <p class="rassure">Sans engagement · 2 minutes · PDF ou Word</p>
+    </div>
+    <div class="scene" aria-hidden="true">
+        <div class="demo-cv verre">
+            <div class="photo"></div><div class="ligne titre"></div><div class="ligne court"></div><br>
+            <div class="ligne"></div><div class="ligne moyen"></div><div class="ligne"></div>
+            <div class="ligne court"></div><div class="ligne moyen"></div><div class="ligne"></div>
+            <div class="faisceau"></div>
+        </div>
+        <span class="demo-puce" style="--y: 70px; --d: 0s">Comptabilité</span>
+        <span class="demo-puce" style="--y: 130px; --d: .25s">Excel</span>
+        <span class="demo-puce" style="--y: 190px; --d: .5s">Anglais</span>
+        <div class="demo-offre verre" style="--y: 20px; --d: 0s; --n: 92%"><span class="demo-etiquette">Très proche</span>
+            <b>Chef comptable</b><small>Kinshasa</small><div class="barre-niveau"><i></i></div></div>
+        <div class="demo-offre verre" style="--y: 120px; --d: .2s; --n: 76%"><span class="demo-etiquette">Proche</span>
+            <b>Auditeur junior</b><small>Lubumbashi</small><div class="barre-niveau"><i></i></div></div>
+        <div class="demo-offre verre" style="--y: 220px; --d: .4s; --n: 58%"><span class="demo-etiquette">À explorer</span>
+            <b>Assistant financier</b><small>Goma</small><div class="barre-niveau"><i></i></div></div>
+    </div>
+</section>
+
+<!-- 2. Comment ca marche -->
+<section class="section centre" id="etapes">
+    <h2 class="apparait">Comment ça marche</h2>
+    <p class="doux apparait">Trois étapes, quelques minutes.</p>
+    <div class="etapes apparait">
+        <div class="etape"><div class="numero verre">1</div><b>Déposez votre CV</b><span class="doux">PDF ou Word</span></div>
+        <div class="etape"><div class="numero verre">2</div><b>Recevez vos offres</b><span class="doux">Celles qui vous ressemblent</span></div>
+        <div class="etape"><div class="numero verre">3</div><b>Entraînez-vous</b><span class="doux">Avec la recruteuse</span></div>
+    </div>
+</section>
+
+<!-- 3. Fonctionnalites en mosaique -->
+<section class="section" id="fonctions">
+    <h2 class="apparait centre">Tout ce qu'il faut pour décrocher le poste</h2>
+    <div class="mosaique">
+        <article class="carte vedette verre large apparait">
+            <div class="pictogramme">{{ icone('micro') }}</div>
+            <h3>Parlez. Elle vous écoute.</h3>
+            <p>Passez un vrai entretien à voix haute avec la recruteuse, sur le poste de votre choix.</p>
+            <div class="onde" aria-hidden="true">
+                {% for i in range(24) %}<i style="--i: {{ i }}"></i>{% endfor %}
+            </div>
+            <a class="btn" href="{{ depart }}">
+                {% if not current_user.is_authenticated %}{{ icone('cadenas') }}{% endif %} Essayer l'entretien vocal</a>
+        </article>
+
+        <article class="carte verre moyenne apparait">
+            <div class="pictogramme">{{ icone('loupe') }}</div>
+            <h3>Les offres faites pour vous</h3>
+            <p>Classées selon votre profil.</p>
+            <div class="mini-niveaux">
+                <div><span>Chef comptable</span><span>Très proche</span></div><div class="barre-niveau"><i style="--n: 92%"></i></div>
+                <div><span>Auditeur junior</span><span>Proche</span></div><div class="barre-niveau"><i style="--n: 74%"></i></div>
+            </div>
+            <a class="lien" href="{{ depart }}">Trouver mes offres {{ icone('fleche', 'fleche') }}</a>
+        </article>
+
+        <article class="carte verre demi apparait">
+            <div class="pictogramme">{{ icone('cible') }}</div>
+            <h3>Votre candidature analysée</h3>
+            <p>Points forts, compétences à ajouter et conseils pour votre CV.</p>
+            <p class="etiquette-puces">Vos points forts</p>
+            <div class="puces"><span class="puce">Normes OHADA</span><span class="puce">Excel avancé</span><span class="puce">Encadrement</span></div>
+            <p class="etiquette-puces">À ajouter à votre CV</p>
+            <div class="puces"><span class="puce renforcer">+ Secteur minier</span><span class="puce renforcer">+ Résultats chiffrés</span></div>
+            <a class="lien" href="{{ depart }}">Analyser mon CV {{ icone('fleche', 'fleche') }}</a>
+        </article>
+
+        <article class="carte verre demi apparait">
+            <div class="pictogramme">{{ icone('note') }}</div>
+            <h3>Une note et des conseils</h3>
+            <p>Après l'entretien : votre note, et quoi améliorer réponse par réponse.</p>
+            {{ anneau(82, 'grand') }}
+            <a class="lien" href="{{ depart }}">Voir un exemple {{ icone('fleche', 'fleche') }}</a>
+        </article>
+    </div>
+</section>
+
+<!-- 4. Garanties -->
+<section class="section" style="padding-top: 10px">
+    <div class="garanties apparait">
+        <div class="verre">{{ icone('cle') }} Ouvert à tous, sans abonnement</div>
+        <div class="verre">{{ icone('bouclier') }} Vos CV traités en toute sécurité</div>
+        <div class="verre">{{ icone('actualise') }} Des offres mises à jour chaque jour</div>
+    </div>
+</section>
+
+<!-- 5. Appel final : la phrase apparait mot apres mot, "prochaine opportunite" brille -->
+<section class="final centre">
     {% if current_user.is_authenticated %}
-        <a href="{{ url_for('upload') }}" class="btn-primary">Envoyer mon CV</a>
+        {% set phrase = "Alors, prêt à vous lancer vers votre prochaine opportunité ? Déposez votre CV." %}
     {% else %}
-        <a href="{{ url_for('register') }}" class="btn-primary">Commencer maintenant</a>
+        {% set phrase = "Alors, prêt à vous lancer vers votre prochaine opportunité ? Connectez-vous et déposez votre CV." %}
     {% endif %}
-</p>
-</div>
+    <h2>{% for mot in phrase.split() %}<span class="{{ 'brillant' if mot in ['prochaine', 'opportunité'] }}" style="--i: {{ loop.index0 }}">{{ mot }}</span> {% endfor %}</h2>
+    <div class="boutons">
+        {% if current_user.is_authenticated %}
+            <a class="btn" href="{{ url_for('upload') }}">Déposer mon CV {{ icone('fleche', 'fleche') }}</a>
+        {% else %}
+            <a class="btn" href="{{ url_for('register') }}">Créer un compte {{ icone('fleche', 'fleche') }}</a>
+            <a class="btn clair" href="{{ url_for('login') }}">Se connecter</a>
+        {% endif %}
+    </div>
+</section>
 {% endblock %}

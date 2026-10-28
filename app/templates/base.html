@@ -1,43 +1,103 @@
+{% from "macros.html" import icone, lien_bas %}
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    {# Jeton anti-CSRF lu par les scripts qui envoient des donnees (entretien.js) #}
+    {# Jeton anti-CSRF lu par les scripts qui envoient des donnees (envoi.js, offre.js, entretien.js) #}
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{% block title %}CVBoost{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script>
+        // Mode clair ou sombre : applique le choix enregistre AVANT l'affichage (pas de flash blanc)
+        try {
+            if (localStorage.getItem('theme') === 'sombre') document.documentElement.dataset.theme = 'sombre';
+        } catch (erreur) {
+            // navigation privee : le choix n'est simplement pas memorise
+        }
+    </script>
 </head>
 <body>
-<nav>
-    <div class="nav-container">
-        <strong>CVBoost</strong>
-        <div class="menu">
-            <a href="{{ url_for('index') }}">Accueil</a>
-            {# Le menu change selon que l'utilisateur est connecte ou non #}
-            {% if current_user.is_authenticated %}
-                <a href="{{ url_for('upload') }}">Envoi de CV</a>
-                <a href="{{ url_for('history') }}">Votre historique</a>
-                <a href="{{ url_for('logout') }}" class="logout-btn">Déconnexion</a>
-            {% else %}
-                <a href="{{ url_for('login') }}">Connexion</a>
-                <a href="{{ url_for('register') }}">Inscription</a>
-            {% endif %}
-        </div>
-    </div>
+{% include "icones.html" %}
+{# Page actuelle, pour mettre son lien en surbrillance dans le menu #}
+{% set page = request.endpoint %}
+{% set bouton_theme %}
+    <button type="button" class="bouton-theme" id="bouton-theme" aria-label="Passer en mode sombre ou clair">
+        {{ icone('lune', 'lune') }}{{ icone('soleil', 'soleil') }}</button>
+{% endset %}
+
+<header class="entete">
+    <nav class="verre">
+        <a class="logo" href="{{ url_for('index') }}">CV<em>Boost</em></a>
+        {# Le menu change selon que l'utilisateur est connecte ou non #}
+        {% if current_user.is_authenticated %}
+            <div class="liens">
+                <a class="{{ 'actif' if page == 'index' }}" href="{{ url_for('index') }}">Accueil</a>
+                <a class="{{ 'actif' if page == 'upload' }}" href="{{ url_for('upload') }}">Propulser votre CV</a>
+                <a class="{{ 'actif' if page == 'history' }}" href="{{ url_for('history') }}">Historique</a>
+            </div>
+            <div class="menu">{{ bouton_theme }}<a class="btn clair cache-mobile" href="{{ url_for('logout') }}">Déconnexion</a></div>
+        {% else %}
+            <div class="liens">
+                <a class="{{ 'actif' if page == 'index' }}" href="{{ url_for('index') }}">Accueil</a>
+                <a href="{{ url_for('index') }}#etapes">Comment ça marche</a>
+                <a href="{{ url_for('index') }}#fonctions">Fonctionnalités</a>
+            </div>
+            <div class="menu">
+                {{ bouton_theme }}
+                <a class="cache-mobile" href="{{ url_for('register') }}">Inscription</a>
+                <a class="btn" href="{{ url_for('login') }}">Connexion</a>
+            </div>
+        {% endif %}
+    </nav>
+</header>
+
+{# Sur telephone : barre flottante en bas de l'ecran, comme une application #}
+<nav class="barre-bas verre">
+    {{ lien_bas(url_for('index'), 'maison', 'Accueil', page == 'index') }}
+    {% if current_user.is_authenticated %}
+        {{ lien_bas(url_for('upload'), 'depot', 'Propulser', page == 'upload') }}
+        {{ lien_bas(url_for('history'), 'horloge', 'Historique', page == 'history') }}
+        {{ lien_bas(url_for('logout'), 'sortie', 'Quitter', False) }}
+    {% else %}
+        {{ lien_bas(url_for('index') ~ '#fonctions', 'grille', 'Fonctions', False) }}
+        {{ lien_bas(url_for('login'), 'personne', 'Connexion', page == 'login') }}
+        {{ lien_bas(url_for('register'), 'cle', 'Inscription', page == 'register') }}
+    {% endif %}
 </nav>
 
-<div class="container">
-    {# Messages de succes ou d'erreur envoyes par flash() dans routes.py #}
-    {% for category, message in get_flashed_messages(with_categories=true) %}
-        <div class="flash {{ category }}">{{ message }}</div>
-    {% endfor %}
+{# Messages envoyes par flash() dans routes.py : succes (vert), erreur (rouge), info (bleu) #}
+{% for categorie, message in get_flashed_messages(with_categories=true) %}
+    <div class="flash verre {{ categorie }}" role="status">{{ message }}</div>
+{% endfor %}
 
-    {% block content %}{% endblock %}
-</div>
+{% block content %}{% endblock %}
 
-<footer>
-    <p>CVBoost - Projet capstone Kadea Academy</p>
+<footer class="pied">
+    <div class="pied-contenu verre">
+        <div class="pied-marque">
+            <a class="logo" href="{{ url_for('index') }}">CV<em>Boost</em></a>
+            <p>Votre prochaine opportunité prend vie ici.</p>
+        </div>
+        <div><h4>Découvrir</h4>
+            <a href="{{ url_for('index') }}#etapes">Comment ça marche</a>
+            <a href="{{ url_for('index') }}#fonctions">Fonctionnalités</a>
+            <a href="{{ url_for('index') }}#fonctions">Entretien vocal</a></div>
+        <div><h4>Votre espace</h4>
+            {% if current_user.is_authenticated %}
+                <a href="{{ url_for('upload') }}">Propulser votre CV</a>
+                <a href="{{ url_for('history') }}">Historique</a>
+                <a href="{{ url_for('logout') }}">Déconnexion</a>
+            {% else %}
+                <a href="{{ url_for('login') }}">Connexion</a>
+                <a href="{{ url_for('register') }}">Créer un compte</a>
+            {% endif %}</div>
+        <div><h4>Confiance</h4><span>CV traités en toute sécurité</span><span>Offres mises à jour chaque jour</span></div>
+    </div>
+    <div class="pied-bas"><span>© 2026 CVBoost</span><span>Projet capstone Kadea Academy</span></div>
 </footer>
+
+<script src="{{ url_for('static', filename='site.js') }}"></script>
+{% block scripts %}{% endblock %}
 </body>
 </html>

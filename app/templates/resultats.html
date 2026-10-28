@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% from "macros.html" import icone %}
+{% block title %}Vos opportunités - CVBoost{% endblock %}
+{% block content %}
+{% set NIVEAUX = {'tres-proche': 'Très proche', 'proche': 'Proche', 'explorer': 'À explorer'} %}
+<main class="page">
+    <section class="bandeau verre">
+        <span class="badge-termine">{{ icone('coche') }} Analyse terminée</span>
+        <h1>Vos opportunités.</h1>
+        <p class="meta">D'après {{ document.original_filename }} · analysé le {{ document.upload_date | date_fr }}</p>
+        {% if competences %}
+            <p class="etiquette-puces">Compétences repérées dans votre CV</p>
+            <div class="puces">
+                {% for nom in competences %}<span class="puce blanche" style="--i: {{ loop.index0 }}">{{ nom | competence }}</span>{% endfor %}
+            </div>
+        {% endif %}
+    </section>
+
+    {# La page n'est jamais vide : sans offre proche, on propose quand meme les plus proches #}
+    {% if proches == 0 %}
+        <div class="message verre">
+            <span class="pastille">{{ icone('loupe') }}</span>
+            <div><b>Pas encore d'offre très proche de votre profil.</b>
+                <p>Voici celles qui s'en rapprochent le plus. De nouvelles offres arrivent chaque jour : revenez bientôt,
+                   ou ajoutez vos compétences en toutes lettres dans votre CV.</p></div>
+        </div>
+    {% else %}
+        <div class="filtres" id="filtres">
+            <button type="button" class="actif" data-niveau="tous">Toutes</button>
+            <button type="button" data-niveau="tres-proche">Très proches</button>
+            <button type="button" data-niveau="proche">Proches</button>
+            <button type="button" data-niveau="explorer">À explorer</button>
+        </div>
+    {% endif %}
+
+    {% for r in resultats %}
+    {% set lien_offre = url_for('offre', offre_id=r.offre.id, id=document.id) %}
+    <article class="carte-offre verre" data-niveau="{{ r.niveau }}" style="--i: {{ loop.index0 }}">
+        <div class="jauge-niveau {{ r.niveau }}"><div class="cercle"></div><small>{{ NIVEAUX[r.niveau] }}</small></div>
+        <div>
+            <h3>{{ r.offre.titre }}</h3>
+            <div class="infos">
+                <span>{{ r.offre.entreprise }}</span>
+                <span>{{ icone('lieu') }}{{ r.offre.lieu }}</span>
+                {% if r.offre.date_publication %}<span>{{ icone('calendrier') }}Publiée le {{ r.offre.date_publication | date_fr }}</span>{% endif %}
+                {% if est_nouvelle(r.offre) %}<span class="nouvelle">Nouvelle</span>{% endif %}
+            </div>
+            {% if r.communes %}
+                <div class="ligne-puces"><b>Vos atouts</b>{% for nom in r.communes %}<span class="puce">{{ nom | competence }}</span>{% endfor %}</div>
+            {% endif %}
+            {% if r.renforcer %}
+                <div class="ligne-puces"><b>À renforcer</b>{% for nom in r.renforcer[:3] %}<span class="puce renforcer">{{ nom | competence }}</span>{% endfor %}</div>
+            {% endif %}
+        </div>
+        <div class="actions">
+            <a class="btn" href="{{ lien_offre }}">Voir l'offre {{ icone('fleche', 'fleche') }}</a>
+            <a class="btn clair" href="{{ lien_offre }}#assistante">{{ icone('micro') }} S'entraîner</a>
+        </div>
+    </article>
+    {% endfor %}
+
+    <p class="encore">Ce n'est pas tout à fait vous ? <a href="{{ url_for('upload') }}">Propulsez une autre version de votre CV</a></p>
+</main>
+{% endblock %}
