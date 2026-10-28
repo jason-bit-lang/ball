@@ -52,23 +52,18 @@
 .fichier .nom { font-weight: 700; word-break: break-all; }
 .fichier .pret { display: flex; align-items: center; gap: 4px; color: #1e7d4f; font-size: .85rem; font-weight: 600; }
 .changer { margin-left: auto; border: none; background: none; color: var(--accent); font: inherit; font-weight: 600; cursor: pointer; }
-/* Ecran d'analyse : couvre la page pendant que le serveur lit le CV et cherche les offres */
-.analyse { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; padding: 20px;
-  background: rgba(243,245,249,.55); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); animation: fondu .3s; }
-@keyframes fondu { from { opacity: 0; } }
-/* La bulle de verre se remplit d'eau pendant l'analyse : deux vagues tournent en montant */
-.bulle { width: 210px; height: 210px; border-radius: 50%; position: relative; overflow: hidden; display: grid; place-items: center;
-  background: rgba(255,255,255,.75); box-shadow: inset 0 0 0 2px rgba(10,108,255,.15), 0 20px 50px rgba(20,30,60,.15);
-  animation: arrive .4s ease-out; }
-.vague { position: absolute; left: 50%; top: 105%; width: 440px; height: 440px; margin-left: -220px; border-radius: 38%;
-  animation: tourne-vague 4s linear infinite, monte-niveau 6s ease-out forwards; }
-.vague.un { background: rgba(10,108,255,.55); }
-.vague.deux { background: rgba(122,92,255,.35); border-radius: 35%; animation-duration: 6s, 6s; }
+/* Ligne du bouton : pendant l'analyse, une petite bulle de verre apparait a cote et se remplit d'eau */
+.ligne-envoi { display: flex; align-items: center; gap: 14px; margin-top: 6px; }
+.ligne-envoi .envoyer { margin-top: 0; white-space: nowrap; padding-inline: 18px; }
+.bulle { width: 54px; height: 54px; flex: none; border-radius: 50%; position: relative; overflow: hidden;
+  background: rgba(255,255,255,.8); box-shadow: inset 0 0 0 2px rgba(10,108,255,.2), 0 6px 16px rgba(10,108,255,.18);
+  animation: arrive .35s ease-out; }
+.vague { position: absolute; left: 50%; top: 105%; width: 110px; height: 110px; margin-left: -55px; border-radius: 38%;
+  animation: tourne-vague 3s linear infinite, monte-niveau 6s ease-out forwards; }
+.vague.un { background: rgba(10,108,255,.6); }
+.vague.deux { background: rgba(122,92,255,.4); border-radius: 35%; animation-duration: 4.5s, 6s; }
 @keyframes tourne-vague { to { transform: rotate(360deg); } }
-@keyframes monte-niveau { to { top: 25%; } }   /* l'eau monte une fois, puis les vagues continuent de bouger */
-.doc { width: 52px; height: 66px; border-radius: 10px; background: #fff; box-shadow: var(--ombre); padding: 9px 8px; position: relative; z-index: 1; }
-.doc b { display: block; height: 5px; border-radius: 3px; background: #cfd7e3; margin: 6px 0; }
-.doc b:nth-child(odd) { width: 60%; }
+@keyframes monte-niveau { to { top: 20%; } }   /* l'eau monte une fois, puis les vagues continuent de bouger */
 /* Texte lu seulement par les lecteurs d'ecran (personnes malvoyantes) : invisible a l'ecran */
 .lecteur-ecran { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 .securite { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 14px 0 0; font-size: .85rem; color: var(--doux); }
@@ -110,19 +105,16 @@
       <button type="button" class="changer" id="changer">Changer</button>
     </div>
 
-    <button type="submit" class="btn envoyer" id="envoyer" disabled>Analyser mon CV <svg class="icone fleche"><use href="#i-fleche"/></svg></button>
+    <div class="ligne-envoi">
+      <button type="submit" class="btn envoyer" id="envoyer" disabled>Analyser mon CV <svg class="icone fleche"><use href="#i-fleche"/></svg></button>
+      <div class="bulle" id="bulle" role="status" hidden>
+        <div class="vague deux"></div><div class="vague un"></div>
+        <span class="lecteur-ecran">Analyse de votre CV en cours</span>
+      </div>
+    </div>
     <p class="securite"><svg class="icone"><use href="#i-bouclier"/></svg> Votre CV est traité en toute sécurité</p>
   </form>
 </main>
-
-<!-- Ecran d'analyse, sans texte : la bulle se remplit pendant que le serveur travaille -->
-<div class="analyse" id="analyse" hidden>
-  <div class="bulle" role="status">
-    <div class="vague deux"></div><div class="vague un"></div>
-    <div class="doc"><b></b><b></b><b></b><b></b><b></b></div>
-    <span class="lecteur-ecran">Analyse de votre CV en cours</span>
-  </div>
-</div>
 
 <script src="commun.js"></script>
 <script>
@@ -182,12 +174,12 @@ zone.addEventListener('drop', evenement => {
   afficherFichier();
 });
 
-// Analyse : l'ecran d'analyse s'affiche. Le formulaire part normalement :
-// la page des resultats remplace cet ecran des que le serveur a fini.
+// Analyse : la bulle apparait a cote du bouton et se remplit. Le formulaire part normalement :
+// la page des resultats s'affiche des que le serveur a fini.
 document.getElementById('formulaire').addEventListener('submit', evenement => {
   evenement.preventDefault();  // maquette uniquement : on simule la reponse du serveur
   bouton.disabled = true;
-  document.getElementById('analyse').hidden = false;
+  document.getElementById('bulle').hidden = false;
   setTimeout(() => { location.href = 'resultats.html'; }, 4200);  // maquette : temps de reponse simule
 });
 
