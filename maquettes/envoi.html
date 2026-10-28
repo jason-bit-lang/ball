@@ -175,13 +175,29 @@ zone.addEventListener('drop', evenement => {
 });
 
 // Analyse du CV en trois temps : en cours (mauve), terminee (bleu), puis page des opportunites.
-// Dans le vrai site, envoyerAuServeur() enverra le formulaire avec fetch et renverra l'adresse de la page des resultats.
+// Dans le vrai site, envoyerAuServeur() enverra le formulaire avec fetch. Le serveur repondra
+// { adresse: page des resultats } ou, si rien n'a pu etre lu dans le CV, { erreur: message }.
 const DUREE_MIN = 3000;   // l'eau a toujours le temps de monter, meme si le serveur repond en 1 seconde
+const CV_ILLISIBLE = "Nous n'avons pas pu analyser correctement votre CV. Veuillez envoyer un autre CV, "
+  + "ou une autre version de votre CV, pour que nous puissions l'analyser correctement.";
 const bulle = document.getElementById('bulle');
 
 function envoyerAuServeur() {
-  // Maquette uniquement : le serveur repond au bout de 1,2 seconde
-  return new Promise(reponse => setTimeout(() => reponse('resultats.html'), 1200));
+  // Maquette uniquement : le serveur repond au bout de 1,2 seconde ; ?illisible simule un CV illisible
+  const reponse = location.search.includes('illisible') ? { erreur: CV_ILLISIBLE } : { adresse: 'resultats.html' };
+  return new Promise(resultat => setTimeout(() => resultat(reponse), 1200));
+}
+
+// CV illisible : le message s'affiche et la zone de depot revient, prete pour un autre fichier
+function analyseRatee(message) {
+  bulle.hidden = true;
+  bulle.classList.remove('en-cours');
+  bouton.classList.remove('en-cours');
+  bouton.innerHTML = 'Analyser mon CV <svg class="icone fleche"><use href="#i-fleche"/></svg>';
+  champ.value = '';
+  carte.hidden = true;
+  zone.hidden = false;
+  afficherErreur(message);
 }
 
 document.getElementById('formulaire').addEventListener('submit', async evenement => {
@@ -192,19 +208,19 @@ document.getElementById('formulaire').addEventListener('submit', async evenement
   bulle.hidden = false;
   setTimeout(() => bulle.classList.add('en-cours'), 50);   // petit delai pour que la montee de l'eau soit animee
   const debut = Date.now();
-  const adresse = await envoyerAuServeur();
+  const reponse = await envoyerAuServeur();
   const reste = Math.max(0, DUREE_MIN - (Date.now() - debut));
   setTimeout(() => {
+    if (reponse.erreur) {
+      analyseRatee(reponse.erreur);
+      return;
+    }
     bouton.classList.replace('en-cours', 'termine');
     bulle.classList.replace('en-cours', 'termine');
     bouton.innerHTML = '<svg class="icone"><use href="#i-coche"/></svg> Analyse terminée';
-    setTimeout(() => { location.href = adresse; }, 1000);   // le temps de voir "Analyse terminee"
+    setTimeout(() => { location.href = reponse.adresse; }, 1000);   // le temps de voir "Analyse terminee"
   }, reste);
 });
 
-// Maquette uniquement : ?illisible montre le retour du serveur quand le CV ne peut pas etre lu
-if (location.search.includes('illisible')) {
-  afficherErreur("Nous n'avons pas pu lire ce CV (scan ou photo). Déposez une version PDF ou Word créée sur ordinateur.");
-}
 </script>
 </body></html>

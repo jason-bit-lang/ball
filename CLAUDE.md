@@ -230,8 +230,12 @@ se remplit d'eau mauve ; quand le serveur a fini, la bulle se remplit jusqu'en h
 bouton devient bleu avec "Analyse terminee", puis la page des opportunites s'affiche (environ 1 s apres).
 Integration : formulaire envoye avec fetch, duree minimale de 3 s pour que l'eau ait le temps de monter
 (variable --mauve: #7a5cff). La page ne bouge pas, l'utilisateur attend simplement, puis l'utilisateur arrive directement sur une page dediee aux
-resultats (l'ancienne page intermediaire "Mon CV" disparait du parcours). CV illisible : retour sur
-la page d'envoi avec un message clair. Regle des 10 s maintenue : pas d'attente artificielle (la
+resultats (l'ancienne page intermediaire "Mon CV" disparait du parcours). CV illisible, SI ET
+SEULEMENT SI rien n'est reconnu dans le fichier (texte quasi vide comme un scan, moins de TEXTE_MIN = 200
+caracteres, ou texte sans aucune competence ni aucun point commun avec les offres) : l'analyse
+s'arrete, la zone de depot revient et le message s'affiche : "Nous n'avons pas pu analyser
+correctement votre CV. Veuillez envoyer un autre CV, ou une autre version de votre CV, pour que nous
+puissions l'analyser correctement." Dans tous les autres cas, des offres sont proposees. Regle des 10 s maintenue : pas d'attente artificielle (la
 lecture du CV et le matching prennent environ 1 a 3 s).
 Proposition pour la page des resultats (maquettes/resultats.html) : bandeau "Vos opportunites."
 (Analyse terminee, nom du CV, date, competences reperees dans le CV en pastilles) ; filtres Toutes /
