@@ -186,7 +186,7 @@ avec l'apprenant. Captures dans le scratchpad (dossier design/).
 
 Methode choisie : une maquette par page dans le scratchpad (design/accueil.html...), captures
 envoyees, validation, puis seulement integration dans le vrai site. Decisions pour l'accueil :
-- Titre : "Votre prochain emploi en RDC commence ici." ; bouton "Deposer mon CV" et
+- Titre : "Votre prochaine opportunite prend vie ici." ; bouton "Deposer mon CV" et
   "Sans engagement · 2 minutes · PDF ou Word" (ne jamais ecrire "gratuit").
 - Demonstration animee en CSS (CV scanne -> competences -> offres avec niveau), sans compteur
   d'offres (il revele nos faiblesses) ni bandeau defilant.
@@ -199,7 +199,7 @@ envoyees, validation, puis seulement integration dans le vrai site. Decisions po
   deposez votre CV." mot par mot, "prochaine opportunite" en degrade.
 - Pas de variante "Bon retour" sur l'accueil : le "Bon retour" va sur la page de connexion et le
   "Bienvenue" sur l'inscription.
-- En-tete en verre flottant (logo dessine, liens, boutons) ; sur telephone, barre flottante en bas
+- En-tete en verre flottant (nom "CVBoost" seul, sans logo dessine ; liens, boutons) ; sur telephone, barre flottante en bas
   avec icones. Vrai pied de page (Decouvrir, Votre espace, Confiance). Les deux dans base.html.
 
 ### Partie 5 : FastAPI, Docker et deploiement Render
