@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Essai 2 - animations d'analyse</title>
+<link rel="stylesheet" href="commun.css">
+<style>
+/* Page d'essai : quatre nouvelles idees d'animation d'analyse, sans texte */
+.essais { max-width: 1100px; margin: 0 auto; padding: 30px 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+@media (max-width: 800px) { .essais { grid-template-columns: 1fr; } }
+.essai { height: 330px; display: grid; place-items: center; position: relative; overflow: hidden; }
+.essai > span { position: absolute; top: 16px; left: 20px; font-weight: 700; color: var(--doux); z-index: 2; }
+/* Petit CV dessine, reutilise au centre de plusieurs idees */
+.doc { width: 46px; height: 58px; border-radius: 9px; background: #fff; box-shadow: var(--ombre); padding: 8px 7px; position: relative; z-index: 1; }
+.doc b { display: block; height: 4px; border-radius: 2px; background: #cfd7e3; margin: 5px 0; }
+.doc b:nth-child(odd) { width: 60%; }
+
+/* ===== Idee 3 : le liquide, le CV se remplit comme un verre d'eau ===== */
+.bulle { width: 190px; height: 190px; border-radius: 50%; position: relative; overflow: hidden; display: grid; place-items: center;
+  background: rgba(255,255,255,.7); box-shadow: inset 0 0 0 2px rgba(10,108,255,.15), var(--ombre); }
+.vague { position: absolute; left: 50%; width: 420px; height: 420px; margin-left: -210px; border-radius: 42%;
+  animation: tourne-vague 4s linear infinite, monte-niveau 7s ease-in-out infinite; border-radius: 38%; }
+.vague.un { background: rgba(10,108,255,.55); }
+.vague.deux { background: rgba(122,92,255,.35); animation-duration: 6s, 7s; border-radius: 35%; }
+@keyframes tourne-vague { to { transform: rotate(360deg); } }
+@keyframes monte-niveau { from { top: 105%; } 85%, to { top: 22%; } }
+
+/* ===== Idee 4 : le radar, un balayage qui fait apparaitre les offres ===== */
+.radar { width: 230px; height: 230px; border-radius: 50%; position: relative; display: grid; place-items: center;
+  background: repeating-radial-gradient(circle, transparent 0 37px, rgba(10,108,255,.14) 37px 38px); }
+.radar::before { content: ""; position: absolute; inset: 0; border-radius: 50%;
+  background: conic-gradient(from 0deg, rgba(10,108,255,.35), transparent 22%); animation: balaie 2.4s linear infinite; }
+@keyframes balaie { to { transform: rotate(360deg); } }
+.point { position: absolute; width: 12px; height: 12px; margin: -6px; border-radius: 50%; background: var(--accent); opacity: 0;
+  left: var(--x); top: var(--y); animation: repere 6s ease-out infinite; animation-delay: var(--d); }
+.point::after { content: ""; position: absolute; inset: -8px; border-radius: 50%; border: 2px solid var(--accent); opacity: 0; animation: echo 1.6s ease-out infinite; }
+@keyframes repere { 0% { opacity: 0; transform: scale(0); } 8%, 85% { opacity: 1; transform: scale(1); } 100% { opacity: 0; } }
+@keyframes echo { from { opacity: .7; transform: scale(.5); } to { opacity: 0; transform: scale(1.8); } }
+
+/* ===== Idee 5 : le classement, des barres qui s'agitent puis se rangent de la plus haute a la plus basse ===== */
+.classement { position: relative; width: 250px; height: 170px; }
+.colonne { position: absolute; bottom: 0; left: 0; width: 18px; height: var(--h); transform-origin: bottom;
+  animation: range 6s cubic-bezier(.6,0,.2,1) infinite; }
+.colonne i { display: block; height: 100%; border-radius: 6px; background: linear-gradient(#7fb2ff, var(--accent));
+  transform-origin: bottom; animation: agite 6s ease-in-out infinite; }
+.colonne.top i { animation: agite 6s ease-in-out infinite, brille 6s infinite; }
+@keyframes range {
+  0%, 40% { transform: translateX(calc(var(--depart) * 24px)); }
+  65%, 100% { transform: translateX(calc(var(--arrivee) * 24px)); }
+}
+@keyframes agite {
+  0% { transform: scaleY(.3); } 10% { transform: scaleY(.9); } 20% { transform: scaleY(.4); } 30% { transform: scaleY(1.05); }
+  40%, 100% { transform: scaleY(1); }
+}
+@keyframes brille { 0%, 70% { background: linear-gradient(#7fb2ff, var(--accent)); } 80%, 100% { background: linear-gradient(#5fd39a, #1e7d4f); } }
+
+/* ===== Idee 6 : la constellation, competences reliees aux offres ===== */
+.constellation { width: 300px; height: 280px; }
+.constellation line { stroke: rgba(10,108,255,.45); stroke-width: 1.5; stroke-dasharray: 160; stroke-dashoffset: 160;
+  animation: trace 6s ease-out infinite; animation-delay: var(--d); }
+.constellation circle { fill: var(--accent); transform-box: fill-box; transform-origin: center; transform: scale(0);
+  animation: allume 6s ease-out infinite; animation-delay: var(--d); }
+.constellation circle.offre { fill: #7a5cff; }
+@keyframes trace { 0% { stroke-dashoffset: 160; } 15%, 85% { stroke-dashoffset: 0; opacity: 1; } 100% { stroke-dashoffset: 0; opacity: 0; } }
+@keyframes allume { 0% { transform: scale(0); } 8%, 85% { transform: scale(1); } 100% { transform: scale(0); } }
+.constellation .doc-svg { animation: none; transform: none; }
+</style></head>
+<body data-page="essai" data-connecte>
+<main class="essais">
+  <div class="essai verre"><span>Idée 3 · Le liquide</span>
+    <div class="bulle"><div class="vague deux"></div><div class="vague un"></div>
+      <div class="doc"><b></b><b></b><b></b><b></b><b></b></div></div>
+  </div>
+  <div class="essai verre"><span>Idée 4 · Le radar</span>
+    <div class="radar" id="radar"><div class="doc"><b></b><b></b><b></b><b></b><b></b></div></div>
+  </div>
+  <div class="essai verre"><span>Idée 5 · Le classement</span>
+    <div class="classement" id="classement"></div>
+  </div>
+  <div class="essai verre"><span>Idée 6 · La constellation</span>
+    <svg class="constellation" id="constellation" viewBox="-150 -140 300 280"></svg>
+  </div>
+</main>
+<script src="commun.js"></script>
+<script>
+// Radar : des offres reperees a des places et des moments differents
+const POINTS = [[70, 22, 0.4], [28, 64, 1.1], [80, 70, 1.8], [22, 30, 2.4], [60, 88, 3.0]];
+document.getElementById('radar').insertAdjacentHTML('beforeend', POINTS.map(p =>
+  `<i class="point" style="--x:${p[0]}%; --y:${p[1]}%; --d:${p[2]}s"></i>`).join(''));
+
+// Classement : 10 barres melangees qui se rangent ; les 3 plus hautes passent au vert
+const HAUTEURS = [55, 90, 30, 75, 45, 100, 20, 65, 85, 40];
+const triees = [...HAUTEURS].sort((a, b) => b - a);
+document.getElementById('classement').innerHTML = HAUTEURS.map((h, i) => {
+  const rang = triees.indexOf(h);
+  return `<div class="colonne ${rang < 3 ? 'top' : ''}" style="--h:${h}%; --depart:${i}; --arrivee:${rang}"><i></i></div>`;
+}).join('');
+
+// Constellation : le CV au centre, 5 competences autour, puis des offres reliees aux competences
+let dessin = '';
+const competences = [];
+for (let i = 0; i < 5; i++) {
+  const angle = i * 72 * Math.PI / 180;
+  const x = Math.round(Math.cos(angle) * 62), y = Math.round(Math.sin(angle) * 62);
+  competences.push([x, y]);
+  dessin += `<line x1="0" y1="0" x2="${x}" y2="${y}" style="--d:${0.2 + i * 0.15}s"/>`;
+}
+const offres = [[130, -60, 0], [118, 70, 1], [-20, 125, 2], [-128, 40, 3], [-105, -95, 4], [40, -125, 0]];
+offres.forEach((o, i) => {
+  const c = competences[o[2]];
+  dessin += `<line x1="${c[0]}" y1="${c[1]}" x2="${o[0]}" y2="${o[1]}" style="--d:${1.2 + i * 0.2}s"/>`;
+});
+competences.forEach((c, i) => { dessin += `<circle cx="${c[0]}" cy="${c[1]}" r="7" style="--d:${0.2 + i * 0.15}s"/>`; });
+offres.forEach((o, i) => { dessin += `<circle class="offre" cx="${o[0]}" cy="${o[1]}" r="10" style="--d:${1.4 + i * 0.2}s"/>`; });
+dessin += '<rect x="-20" y="-26" width="40" height="52" rx="8" fill="#fff" stroke="#dde3ec"/>'
+        + '<rect x="-12" y="-16" width="16" height="4" rx="2" fill="#cfd7e3"/><rect x="-12" y="-6" width="24" height="4" rx="2" fill="#cfd7e3"/>'
+        + '<rect x="-12" y="4" width="20" height="4" rx="2" fill="#cfd7e3"/><rect x="-12" y="14" width="24" height="4" rx="2" fill="#cfd7e3"/>';
+document.getElementById('constellation').innerHTML = dessin;
+</script>
+</body></html>
