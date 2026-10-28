@@ -269,6 +269,14 @@ evaluation (anneau de la note, barres /10, reponses a retravailler repliables). 
 "Ajoutee a vos favoris - Voir l'historique". Offre close : pastille grise, Postuler grise, message
 "vous pouvez toujours vous entrainer". Constat : beaucoup d'offres en base sont deja closes (ex. les
 offres SODEICO du 20/10) : a l'integration, retirer les offres closes des resultats.
+Bouton "Postuler" (accepte par l'apprenant ; PAS d'option "candidature envoyee") : il s'adapte a
+l'annonce. Lien de candidature direct (62 offres sur 117) -> site de l'employeur dans un nouvel onglet
+("Vous allez sur le site de l'employeur") ; adresse email trouvee dans le texte (33) -> "Postuler par
+email" : panneau avec l'adresse, bouton Copier, rappel (CV, lettre, poste en objet) et "Ouvrir mon
+application mail" (mailto avec l'objet "Candidature : <poste>") ; site cite dans le texte (3) -> ouvert
+dans un nouvel onglet ; rien trouve (19) -> "Comment postuler" : panneau avec la section "Dossier de
+candidature" de l'annonce et le lien vers l'annonce d'origine ; offre close -> bouton grise.
+A l'integration : chercher email et site dans la description au nettoyage quand il n'y a pas de lien.
 Bug corrige dans les maquettes : la classe "rond" servait deux fois (cercle d'attente renomme
 "cercle-attente") ; .btn a maintenant border: none et font: inherit.
 

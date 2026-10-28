@@ -25,6 +25,7 @@
 .rond span { width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; background: rgba(255,255,255,.85);
   color: var(--texte); box-shadow: var(--ombre); transition: transform .2s, background .3s, color .3s; }
 .rond:hover span { transform: scale(1.06); }
+.rond b { font-weight: inherit; }
 .rond.grand span { width: 84px; height: 84px; background: var(--mauve); color: #fff; box-shadow: 0 12px 30px rgba(122,92,255,.45); }
 .rond.grand .icone { width: 34px; height: 34px; }
 .rond.grand { color: var(--texte); }
@@ -33,6 +34,20 @@
 .rond.inactif { opacity: .45; pointer-events: none; }
 @keyframes pop { 50% { transform: scale(1.2); } }
 .info-close { margin: 16px 0 0; color: var(--doux); font-size: .92rem; }
+
+/* Panneau "Postuler" : s'ouvre sous les boutons ronds pour les candidatures par email ou sans lien */
+.panneau-postuler { max-width: 520px; margin: 22px auto 0; padding: 20px 22px; border-radius: 22px; text-align: left; background: rgba(255,255,255,.85);
+  box-shadow: var(--ombre); animation: monte .35s ease-out; position: relative; }
+.panneau-postuler h3 { margin: 0 0 10px; font-size: 1.1rem; display: flex; align-items: center; gap: 8px; }
+.panneau-postuler .fermer { position: absolute; top: 12px; right: 14px; border: none; background: none; font-size: 1.4rem; line-height: 1;
+  color: var(--doux); cursor: pointer; }
+.adresse { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 14px; background: var(--fond); font-weight: 600; word-break: break-all; }
+.adresse button { margin-left: auto; flex: none; display: inline-flex; align-items: center; gap: 6px; border: none; background: none;
+  font: inherit; font-size: .85rem; font-weight: 700; color: var(--accent); cursor: pointer; }
+.panneau-postuler .rappel { color: var(--doux); font-size: .9rem; margin: 10px 0 14px; }
+.panneau-postuler .btn { box-shadow: none; }
+.panneau-postuler ul { margin: 0 0 12px; padding-left: 20px; }
+.panneau-postuler li { margin: 6px 0; }
 
 /* ===== Corps : annonce a gauche, assistante a droite ===== */
 .corps { display: grid; grid-template-columns: 3fr 2fr; gap: 26px; align-items: start; margin-top: 26px; }
@@ -160,8 +175,9 @@ details p { margin: 8px 0 0; color: var(--doux); }
     <div class="ronds">
       <button class="rond" id="favori"><span><svg class="icone"><use href="#i-coeur"/></svg></span>Favori</button>
       <button class="rond grand" id="lancer"><span><svg class="icone"><use href="#i-micro"/></svg></span>Entretien vocal</button>
-      <a class="rond" id="postuler" href="#"><span><svg class="icone"><use href="#i-externe"/></svg></span>Postuler</a>
+      <a class="rond" id="postuler" href="#"><span><svg class="icone" id="icone-postuler"><use href="#i-externe"/></svg></span><b id="texte-postuler">Postuler</b></a>
     </div>
+    <div class="panneau-postuler" id="panneau-postuler" hidden></div>
     <p class="info-close" id="info-close" hidden>Les candidatures sont closes, mais vous pouvez toujours vous entraîner sur ce poste.</p>
   </section>
 
@@ -254,15 +270,70 @@ if (location.search.includes('close')) {
   document.getElementById('info-close').hidden = false;
 }
 
+// Postuler : le bouton s'adapte a ce que l'annonce permet (dans le vrai site, le serveur choisit le cas)
+//   lien  : lien de candidature direct -> site de l'employeur dans un nouvel onglet (62 offres sur 117)
+//   email : adresse trouvee dans le texte -> panneau avec l'adresse, Copier et l'application mail (33 offres)
+//   site  : site cite dans le texte -> ouvert dans un nouvel onglet (3 offres)
+//   rien  : rien trouve -> panneau "Comment postuler" avec la section "Dossier de candidature" (19 offres)
+// Maquette uniquement : ?postuler=email (ou site, rien) change de cas ; par defaut, lien direct.
+const CAS = new URLSearchParams(location.search).get('postuler') || 'lien';
+const EMAIL = 'recrutement@exemple.cd';
+const TITRE_OFFRE = 'Chef Comptable';
+const boutonPostuler = document.getElementById('postuler');
+const panneau = document.getElementById('panneau-postuler');
+
+function montrerToast(html) {
+  const toast = document.getElementById('toast');
+  toast.innerHTML = html;
+  toast.classList.add('visible');
+  setTimeout(() => toast.classList.remove('visible'), 2600);
+}
+
+function ouvrirPanneau(html) {
+  panneau.innerHTML = '<button class="fermer" aria-label="Fermer">×</button>' + html;
+  panneau.hidden = false;
+  panneau.querySelector('.fermer').addEventListener('click', () => { panneau.hidden = true; });
+}
+
+if (CAS === 'email') {
+  document.getElementById('texte-postuler').textContent = 'Postuler par email';
+  document.getElementById('icone-postuler').innerHTML = '<use href="#i-email"/>';
+} else if (CAS === 'rien') {
+  document.getElementById('texte-postuler').textContent = 'Comment postuler';
+  document.getElementById('icone-postuler').innerHTML = '<use href="#i-info"/>';
+}
+
+boutonPostuler.addEventListener('click', evenement => {
+  evenement.preventDefault();  // maquette : aucun site n'est vraiment ouvert
+  if (CAS === 'lien' || CAS === 'site') {
+    montrerToast("Vous allez sur le site de l'employeur...");
+  } else if (CAS === 'email') {
+    const objet = encodeURIComponent('Candidature : ' + TITRE_OFFRE);
+    ouvrirPanneau(`
+      <h3><svg class="icone"><use href="#i-email"/></svg> Postuler par email</h3>
+      <div class="adresse"><span id="adresse">${EMAIL}</span>
+        <button id="copier"><svg class="icone"><use href="#i-copier"/></svg> Copier</button></div>
+      <p class="rappel">N'oubliez pas de joindre votre CV et votre lettre de motivation, et d'indiquer le poste dans l'objet.</p>
+      <a class="btn" href="mailto:${EMAIL}?subject=${objet}">Ouvrir mon application mail</a>`);
+    document.getElementById('copier').addEventListener('click', () => {
+      navigator.clipboard.writeText(EMAIL);
+      document.getElementById('copier').innerHTML = '<svg class="icone"><use href="#i-coche"/></svg> Copiée';
+    });
+  } else {
+    const dossier = SECTIONS.find(section => section.titre === 'Dossier de candidature');
+    ouvrirPanneau(`
+      <h3><svg class="icone"><use href="#i-info"/></svg> Comment postuler</h3>
+      <ul>${dossier.elements.map(element => `<li>${element}</li>`).join('')}</ul>
+      <a class="btn clair" href="#"><svg class="icone"><use href="#i-externe"/></svg> Voir l'annonce d'origine</a>`);
+  }
+});
+
 // Favori : le coeur se remplit et une bulle confirme l'ajout a l'historique
 document.getElementById('favori').addEventListener('click', () => {
   const coeur = document.getElementById('favori');
   coeur.classList.toggle('favori-actif');
-  const toast = document.getElementById('toast');
-  toast.innerHTML = coeur.classList.contains('favori-actif')
-    ? 'Ajoutée à vos favoris <a href="historique.html">Voir l\'historique</a>' : 'Retirée de vos favoris';
-  toast.classList.add('visible');
-  setTimeout(() => toast.classList.remove('visible'), 2600);
+  montrerToast(coeur.classList.contains('favori-actif')
+    ? 'Ajoutée à vos favoris <a href="historique.html">Voir l\'historique</a>' : 'Retirée de vos favoris');
 });
 
 // Analyse de la candidature : bouton mauve et bulle, puis bleu "Analyse terminee", puis les resultats
