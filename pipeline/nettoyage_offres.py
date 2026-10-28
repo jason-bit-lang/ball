@@ -6,6 +6,7 @@ Lancement : python -m pipeline.nettoyage_offres
 """
 import re
 import unicodedata
+from datetime import date
 import pandas as pd
 from .config import OFFRES_BRUTES, OFFRES_PROPRES, TAUX_CDF_USD
 
@@ -131,6 +132,39 @@ def competences_connues(noms):
     return ', '.join(gardees)
 
 
+# Date limite de candidature ecrite dans l'annonce : "au plus tard le 03 novembre 2026",
+# "Date limite : 10/11/2026", "cloture de la publication : 16 novembre 2026"...
+MOIS = ['janvier', 'fevrier', 'mars', 'avril', 'mai', 'juin', 'juillet', 'aout', 'septembre', 'octobre',
+        'novembre', 'decembre']
+DATE_LIMITE_REGEX = re.compile(r'(?:date limite|au plus tard|cloture|deadline|dernier delai|avant le)\b\D{0,50}?'
+                               r'(\d{1,2})(?:er)?\s*[/.-]?\s*(' + '|'.join(MOIS) + r'|\d{1,2})\s*[/.-]?\s*(20\d\d)')
+EMAIL_REGEX = re.compile(r'[\w.+-]+@[\w-]+(?:\.[\w-]+)+')
+SITE_REGEX = re.compile(r'(?:https?://|www\.)[\w-]+(?:\.[\w-]+)+(?:/\S*)?', re.I)
+
+
+def trouver_date_limite(description):
+    """Premiere date limite lisible dans l'annonce, au format AAAA-MM-JJ, sinon None."""
+    for jour, mois, annee in DATE_LIMITE_REGEX.findall(normaliser(description)):
+        numero_mois = MOIS.index(mois) + 1 if mois in MOIS else int(mois)
+        try:
+            return date(int(annee), numero_mois, int(jour)).isoformat()
+        except ValueError:  # date impossible (32 octobre, mois 13...) : on essaie la suivante
+            continue
+    return None
+
+
+def trouver_contact(description):
+    """Quand l'annonce n'a pas de lien de candidature : une adresse email (mailto:) ou un site cite."""
+    email = EMAIL_REGEX.search(description)
+    if email:
+        return 'mailto:' + email.group(0).rstrip('.')
+    site = SITE_REGEX.search(description)
+    if site:
+        adresse = site.group(0).rstrip('.,;)')
+        return adresse if adresse.lower().startswith('http') else 'https://' + adresse
+    return None
+
+
 MENTIONS_MIN = 2  # une seule mention dans une longue annonce est souvent une formule standard
 
 
@@ -187,6 +221,15 @@ def nettoyer(df):
     # format='mixed' accepte aussi les dates deja ecrites 2026-10-26 dans le meme fichier.
     df['date_publication'] = pd.to_datetime(df['date_publication'], dayfirst=True, errors='coerce',
                                             format='mixed').dt.date
+
+    # 5 bis. Date limite de candidature et moyen de postuler, lus dans le texte de l'annonce
+    df['date_limite'] = df['description'].map(trouver_date_limite)
+    # Une date limite anterieure a la publication est une autre date de l'annonce : on l'ignore
+    publication = df['date_publication'].astype('string')
+    df.loc[df['date_limite'] < publication, 'date_limite'] = None
+    resume['avec_date_limite'] = int(df['date_limite'].notna().sum())
+    df['lien_candidature'] = df['lien_candidature'].fillna(df['description'].map(trouver_contact))
+    resume['avec_moyen_de_postuler'] = int(df['lien_candidature'].notna().sum())
 
     # 6. Competences : une liste lisible + une colonne 0/1 par competence (encodage "one-hot")
     listes = pd.Series([trouver_competences(t, d) for t, d in zip(df['titre'], df['description'])],

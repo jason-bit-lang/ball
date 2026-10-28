@@ -7,7 +7,7 @@ from . import db
 from .models import Offre
 
 LIENS_AUTORISES = ('http://', 'https://', 'mailto:')  # bloque les liens "javascript:" piegés
-CHAMPS = ['titre', 'entreprise', 'lieu', 'description', 'date_publication', 'lien_candidature',
+CHAMPS = ['titre', 'entreprise', 'lieu', 'description', 'date_publication', 'date_limite', 'lien_candidature',
           'competences', 'titre_ia', 'competences_ia']
 
 

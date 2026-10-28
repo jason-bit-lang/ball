@@ -44,15 +44,28 @@ class Offre(db.Model):
     lieu = db.Column(db.String(200))
     description = db.Column(db.Text, nullable=False)
     date_publication = db.Column(db.String(10))  # AAAA-MM-JJ
-    lien_candidature = db.Column(db.String(500))
+    date_limite = db.Column(db.String(10))       # AAAA-MM-JJ, lue dans l'annonce (vide si non precisee)
+    lien_candidature = db.Column(db.String(500))  # site de candidature, ou "mailto:adresse" 
     competences = db.Column(db.String(500))      # trouvees par le nettoyage Pandas
     titre_ia = db.Column(db.String(300))         # trouves par le modele LoRA (traitement par lot sur Colab)
     competences_ia = db.Column(db.String(500))
 
 
 class EntretienVocal(db.Model):
-    """Une ligne par entretien vocal lance : sert a limiter le nombre d'entretiens payants par jour."""
+    """Une ligne par entretien vocal lance : limite le nombre d'entretiens payants par jour
+    et garde la note de l'evaluation, affichee dans l'historique."""
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     offre_id = db.Column(db.Integer, db.ForeignKey('offre.id'), nullable=False)
     date = db.Column(db.DateTime, default=now_utc)
+    note = db.Column(db.Integer)  # note globale /100, remplie a la fin de l'entretien
+
+
+class Favori(db.Model):
+    """Offre mise en favori par un utilisateur (bouton coeur de la page d'une offre)."""
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    offre_id = db.Column(db.Integer, db.ForeignKey('offre.id'), nullable=False)
+    date = db.Column(db.DateTime, default=now_utc)
+    offre = db.relationship('Offre')
+    __table_args__ = (db.UniqueConstraint('user_id', 'offre_id'),)  # une offre n'est en favori qu'une fois
