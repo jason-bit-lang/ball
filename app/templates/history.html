@@ -5,11 +5,11 @@
 <h2>Mon historique</h2>
 
 {% for doc in documents %}
-<p>
+<div class="historique-ligne">
     <strong>{{ doc.original_filename }}</strong>
-    - {{ doc.upload_date.strftime('%d/%m/%Y %H:%M') }} - {{ doc.status }}
-    <a href="{{ url_for('result', id=doc.id) }}" class="btn-secondary">Voir</a>
-</p>
+    <p class="discret">{{ doc.upload_date.strftime('%d/%m/%Y %H:%M') }} - {{ doc.status }}</p>
+    <a href="{{ url_for('result', id=doc.id) }}">Voir</a>
+</div>
 {% else %}
 <p>Vous n'avez encore envoyé aucun CV. <a href="{{ url_for('upload') }}">Envoyer mon CV</a></p>
 {% endfor %}
