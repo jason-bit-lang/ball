@@ -174,20 +174,20 @@ Choix faits pendant la partie 3 :
 Claude propose plusieurs themes fluides et dynamiques ; l'apprenant choisit ou propose le sien.
 Aucun emoji ni emoticone. Beau et sobre, sans exces.
 
-En cours (28/10) : `style.css` reecrit avec des variables de couleur (theme A clair par defaut,
-provisoire). L'apprenant veut plus qu'un changement de couleurs : chaque page belle, authentique et
+TERMINEE le 28/10 : design integre au site, teste (69 tests Python + 78 tests navigateur) et
+rapport PDF livre. Ce qui suit garde la trace des decisions prises avec l'apprenant.
+Point de depart : l'apprenant veut plus qu'un changement de couleurs : chaque page belle, authentique et
 dynamique, inspiree du style Liquid Glass d'Apple Music (iOS 27 : verre depoli, barre de navigation
 flottante, pages d'artistes teintees par leur photo, icone noir et blanc, bleu pour l'element actif).
-Proposition de Claude en attente de discussion : fond d'ondes soyeuses, verre, barre flottante en bas
+Proposition de Claude (adoptee) : fond d'ondes soyeuses, verre, barre flottante en bas
 sur telephone, zone de depot du CV, niveau de correspondance en barre, page d'offre facon page
 d'artiste, onde sonore reagissant a la voix pendant l'entretien, anneau pour la note. Captures et
 videos dans le scratchpad (dossier design/).
 
 Methode choisie : une maquette par page, captures et videos envoyees, puis integration dans le vrai
 site. L'apprenant valide TOUT en une fois, a la fin, apres avoir choisi le theme (couleurs).
-Maquettes enregistrees dans le depot, dossier `maquettes/` (a ouvrir dans un navigateur) :
-commun.css et commun.js (en-tete, pied de page, icones : ce que fera base.html), formulaire.js,
-accueil.html, connexion.html, inscription.html, envoi.html, resultats.html, historique.html, offre.html. A supprimer une fois le design integre au site. Decisions pour l'accueil :
+Les maquettes (dossier `maquettes/`, une page HTML par ecran) ont ete supprimees apres l'integration ;
+elles restent dans l'historique git : `git checkout ac1322b -- maquettes`. Decisions pour l'accueil :
 - Titre : "Votre prochaine opportunite prend vie ici." ; bouton "Deposer mon CV" et
   "Sans engagement · 2 minutes · PDF ou Word" (ne jamais ecrire "gratuit").
 - Demonstration animee en CSS (CV scanne -> competences -> offres avec niveau), sans compteur
@@ -338,23 +338,30 @@ l'envoi (`BackgroundTasks` de FastAPI).
 - OpenAI : cle placee par l'apprenant dans `.env` (local) et dans les variables Render.
   Ne jamais la copier dans un fichier versionne ni dans un message.
 
-## Verifications en attente cote apprenant (rappelees dans le rapport de la partie 3)
+## Verifications en attente cote apprenant (rappelees dans les rapports des parties 3 et 4)
 
 - Deplacer `instance/cvboost.db` vers `database/`, puis `pip install -r requirements.txt`.
 - Cle OpenAI dans `.env` et credit sur le compte OpenAI.
 - Entretien vocal dans un vrai navigateur (Chrome ou Edge) : entendre la recruteuse, etre compris,
   evaluation affichee en moins de 10 s.
 - Notebook LoRA sur Colab : facultatif (l'essai complet est deja fait), utile pour la demonstration.
+- Partie 4 : `git pull`, relancer `python run.py` (les nouvelles colonnes sont ajoutees toutes seules
+  a la base existante), parcourir chaque page en clair et en sombre, sur ordinateur et sur telephone.
 
-## Etat du projet et environnement de travail (mis a jour le 27/10)
+## Etat du projet et environnement de travail (mis a jour le 28/10)
 
-- Parties 1, 2 et 3 terminees, rapports PDF livres (partie 2 : section 7 problemes/solutions ;
-  partie 3 : sections 2 bis resultats LoRA, 3 assistante DRH, 4 bis problemes, 4 ter taille du code).
-  Prochaine etape : partie 4 (design : proposer 2 ou 3 themes, l'apprenant choisit), puis 5 et 6.
-  A corriger en partie 4 : description des offres en un seul bloc, dates au format 2026-10-07,
-  scores TF-IDF peu parlants (afficher un niveau), phrase sur l'envoi des donnees a OpenAI.
+- Parties 1, 2, 3 et 4 terminees, rapports PDF livres (partie 2 : section 7 problemes/solutions ;
+  partie 3 : sections 2 bis resultats LoRA, 3 assistante DRH, 4 bis problemes, 4 ter taille du code ;
+  partie 4 : design page par page, code, tests, problemes et solutions).
+  Prochaine etape : partie 5 (FastAPI, Docker, Render), puis 6.
+- Fichiers du design (partie 4) : `app/templates/base.html` (en-tete, barre du bas, pied de page,
+  theme), `macros.html` (icone, anneau), `icones.html` (icones SVG), une page par ecran ;
+  `app/static/style.css` (12 sections, variables clair / sombre), `site.js` (commun), `envoi.js`
+  (envoi du CV et bulle), `offre.js` (favori, Postuler, annonce), `entretien.js` (assistante DRH) ;
+  `app/affichage.py` (dates en francais, echeance, annonce en sections, maniere de postuler) ;
+  `run.py` ajoute les colonnes manquantes a une base existante.
 - Les rapports (HTML sources + PDF) et les tests (test_partie1_v2.py, test_partie2_*.py,
-  test_partie3.py, navigateur *.js) sont dans le dossier scratchpad de la session, pas dans le
+  test_partie3.py, p4test/test_partie4.py, p4test/navigateur_partie4.js) sont dans le dossier scratchpad de la session, pas dans le
   depot. PDF generes depuis le HTML avec Playwright (page.pdf). Les tests de la partie 3 remplacent
   OpenAI par un faux client ; activer l'assistante a l'execution (rt.ASSISTANTE_ACTIVE = True).
 - Environnement cloud : cle OpenAI dans la variable `OPENAI_API_KEY` (visible seulement dans les

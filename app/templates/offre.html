@@ -44,6 +44,9 @@
                 <div class="adresse"><span>{{ adresse }}</span>
                     <button type="button" id="copier" data-adresse="{{ adresse }}">{{ icone('copier') }} Copier</button></div>
                 <p class="rappel">N'oubliez pas de joindre votre CV et votre lettre de motivation, et d'indiquer le poste dans l'objet.</p>
+                {# L'adresse est lue par OCR dans une annonce scannee : une lettre peut etre fausse #}
+                <p class="rappel">Adresse lue automatiquement dans l'annonce : en cas de doute, vérifiez-la sur
+                    <a href="{{ offre.url }}" target="_blank" rel="noopener">l'annonce d'origine</a>.</p>
                 <a class="btn" href="{{ offre.lien_candidature }}?subject={{ ('Candidature : ' ~ offre.titre) | urlencode }}">Ouvrir mon application mail</a>
             </div>
         {% elif postuler == 'rien' %}
