@@ -18,6 +18,8 @@ const ICONES = `<svg width="0" height="0" style="position:absolute">
   <symbol id="i-fichier" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></symbol>
   <symbol id="i-oeil" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
   <symbol id="i-sortie" viewBox="0 0 24 24"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 17l5-5-5-5M15 12H4"/></symbol>
+  <symbol id="i-lieu" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-12a7 7 0 0 1 14 0c0 5.8-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/></symbol>
+  <symbol id="i-calendrier" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></symbol>
   <symbol id="i-coche" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
 </svg>`;
 document.body.insertAdjacentHTML('afterbegin', ICONES);
@@ -36,7 +38,7 @@ document.body.insertAdjacentHTML('afterbegin', `
   ${connecte ? `
   <div class="liens">
     <a class="${actif('accueil')}" href="accueil.html">Accueil</a>
-    <a class="${actif('depot')}" href="envoi.html">Déposer un CV</a>
+    <a class="${actif('depot')}" href="envoi.html">Propulser votre CV</a>
     <a class="${actif('historique')}" href="#">Historique</a>
   </div>
   <div class="menu"><a class="btn clair cache-mobile" href="accueil.html">Déconnexion</a></div>` : `
@@ -52,7 +54,7 @@ document.body.insertAdjacentHTML('afterbegin', `
 </nav></header>
 <nav class="barre-bas verre">${connecte ? `
   ${lienBas('accueil', 'maison', 'Accueil', 'accueil.html')}
-  ${lienBas('depot', 'depot', 'Déposer', 'envoi.html')}
+  ${lienBas('depot', 'depot', 'Propulser', 'envoi.html')}
   ${lienBas('historique', 'horloge', 'Historique', '#')}
   ${lienBas('sortie', 'sortie', 'Quitter', 'accueil.html')}` : `
   ${lienBas('accueil', 'maison', 'Accueil', 'accueil.html')}

@@ -52,12 +52,32 @@
 .fichier .nom { font-weight: 700; word-break: break-all; }
 .fichier .pret { display: flex; align-items: center; gap: 4px; color: #1e7d4f; font-size: .85rem; font-weight: 600; }
 .changer { margin-left: auto; border: none; background: none; color: var(--accent); font: inherit; font-weight: 600; cursor: pointer; }
-/* Pendant l'envoi : le faisceau de l'accueil parcourt la carte du fichier */
-.faisceau { position: absolute; left: 0; right: 0; top: -40px; height: 40px; display: none; border-bottom: 2px solid var(--accent);
-  background: linear-gradient(180deg, transparent, rgba(10,108,255,.22), transparent); }
-.envoi-en-cours .faisceau { display: block; animation: balaye 1.4s ease-in-out infinite; }
+/* Ecran d'analyse : couvre la page pendant que le serveur lit le CV et cherche les offres */
+.analyse { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; padding: 20px;
+  background: rgba(243,245,249,.55); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); animation: fondu .3s; }
+@keyframes fondu { from { opacity: 0; } }
+.panneau { width: 100%; max-width: 420px; padding: 34px 30px; text-align: center; animation: arrive .4s ease-out; }
+.panneau h2 { font-size: 1.5rem; margin: 22px 0 4px; }
+/* Le CV et son faisceau de lumiere, comme sur l'accueil */
+.cv-scan { width: 120px; height: 150px; margin: 0 auto; padding: 14px; border-radius: 16px; background: #fff; box-shadow: var(--ombre);
+  position: relative; overflow: hidden; text-align: left; }
+.cv-scan .photo { width: 26px; height: 26px; border-radius: 50%; background: #dde3ec; margin-bottom: 8px; }
+.cv-scan i { display: block; height: 6px; border-radius: 3px; background: #e3e8f0; margin: 7px 0; }
+.cv-scan i:nth-child(odd) { width: 70%; }
+.faisceau { position: absolute; left: 0; right: 0; top: -40px; height: 40px; border-bottom: 2px solid var(--accent);
+  background: linear-gradient(180deg, transparent, rgba(10,108,255,.25), transparent); animation: balaye 1.6s ease-in-out infinite; }
 @keyframes balaye { to { top: 100%; } }
-.etape-envoi { text-align: center; color: var(--accent); font-weight: 600; min-height: 1.5em; margin: 14px 0 0; }
+/* Etapes : en attente (rond gris), en cours (rond qui tourne), terminee (coche bleue) */
+.etapes-analyse { list-style: none; padding: 0; margin: 22px 0; text-align: left; }
+.etapes-analyse li { display: flex; align-items: center; gap: 12px; padding: 7px 0; color: var(--doux); font-weight: 500; transition: color .3s; }
+.etapes-analyse li::before { content: ""; width: 20px; height: 20px; flex: none; border-radius: 50%; border: 2px solid #d5dbe5; box-sizing: border-box; }
+.etapes-analyse li.en-cours { color: var(--texte); font-weight: 600; }
+.etapes-analyse li.en-cours::before { border-color: rgba(10,108,255,.25); border-top-color: var(--accent); animation: tourne .8s linear infinite; }
+.etapes-analyse li.fait { color: var(--texte); }
+.etapes-analyse li.fait::before { border: none; background: var(--accent) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 12.5l4 4L18 8'/%3E%3C/svg%3E") center / 14px no-repeat; }
+.progression { height: 6px; border-radius: 6px; background: #e3e8f0; overflow: hidden; }
+.progression i { display: block; height: 100%; width: 0; border-radius: 6px; background: var(--accent); transition: width 6s cubic-bezier(.1,.7,.3,1); }
+.analyse.lance .progression i { width: 92%; }
 .securite { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 14px 0 0; font-size: .85rem; color: var(--doux); }
 </style></head>
 <body data-page="depot" data-connecte>
@@ -95,14 +115,28 @@
       <div><div class="nom" id="nom"></div><div class="doux" id="taille"></div>
         <div class="pret"><svg class="icone"><use href="#i-coche"/></svg> Prêt à être analysé</div></div>
       <button type="button" class="changer" id="changer">Changer</button>
-      <span class="faisceau"></span>
     </div>
 
     <button type="submit" class="btn envoyer" id="envoyer" disabled>Analyser mon CV <svg class="icone fleche"><use href="#i-fleche"/></svg></button>
-    <p class="etape-envoi" id="etape" aria-live="polite"></p>
     <p class="securite"><svg class="icone"><use href="#i-bouclier"/></svg> Votre CV est traité en toute sécurité</p>
   </form>
 </main>
+
+<!-- Ecran d'analyse, affiche des que l'utilisateur lance l'analyse -->
+<div class="analyse" id="analyse" hidden>
+  <div class="panneau verre" role="status" aria-live="polite">
+    <div class="cv-scan"><div class="photo"></div><i></i><i></i><i></i><i></i><i></i><i></i><i></i><span class="faisceau"></span></div>
+    <h2>Analyse de votre CV</h2>
+    <p class="doux">Quelques secondes, nous préparons vos offres.</p>
+    <ol class="etapes-analyse" id="etapes-analyse">
+      <li>Envoi du fichier</li>
+      <li>Lecture de votre CV</li>
+      <li>Repérage de vos compétences</li>
+      <li>Comparaison avec les offres du jour</li>
+    </ol>
+    <div class="progression"><i></i></div>
+  </div>
+</div>
 
 <script src="commun.js"></script>
 <script>
@@ -162,18 +196,29 @@ zone.addEventListener('drop', evenement => {
   afficherFichier();
 });
 
-// Envoi : le faisceau balaye la carte et des etapes s'affichent pendant que le serveur lit le CV
-const ETAPES = ['Envoi du fichier...', 'Lecture de votre CV...', 'Recherche de vos compétences...'];
+// Analyse : l'ecran d'analyse s'affiche et les etapes se cochent une a une.
+// Le formulaire part normalement : la page des resultats remplace cet ecran des que le serveur a fini.
 document.getElementById('formulaire').addEventListener('submit', evenement => {
-  evenement.preventDefault();  // maquette uniquement : rien n'est envoye
+  evenement.preventDefault();  // maquette uniquement : on simule la reponse du serveur
   bouton.disabled = true;
-  carte.classList.add('envoi-en-cours');
+  const ecran = document.getElementById('analyse');
+  const etapes = document.querySelectorAll('#etapes-analyse li');
+  ecran.hidden = false;
+  setTimeout(() => ecran.classList.add('lance'), 50);
   let numero = 0;
-  document.getElementById('etape').textContent = ETAPES[0];
-  setInterval(() => {
-    numero = Math.min(numero + 1, ETAPES.length - 1);
-    document.getElementById('etape').textContent = ETAPES[numero];
-  }, 1300);
+  etapes[0].className = 'en-cours';
+  const minuteur = setInterval(() => {
+    if (numero === etapes.length - 1) { clearInterval(minuteur); return; }  // la derniere etape tourne jusqu'a la reponse
+    etapes[numero].className = 'fait';
+    numero = numero + 1;
+    etapes[numero].className = 'en-cours';
+  }, 900);
+  setTimeout(() => { location.href = 'resultats.html'; }, 4200);  // maquette : temps de reponse simule
 });
+
+// Maquette uniquement : ?illisible montre le retour du serveur quand le CV ne peut pas etre lu
+if (location.search.includes('illisible')) {
+  afficherErreur("Nous n'avons pas pu lire ce CV (scan ou photo). Déposez une version PDF ou Word créée sur ordinateur.");
+}
 </script>
 </body></html>

@@ -188,7 +188,7 @@ Methode choisie : une maquette par page, captures et videos envoyees, puis integ
 site. L'apprenant valide TOUT en une fois, a la fin, apres avoir choisi le theme (couleurs).
 Maquettes enregistrees dans le depot, dossier `maquettes/` (a ouvrir dans un navigateur) :
 commun.css et commun.js (en-tete, pied de page, icones : ce que fera base.html), formulaire.js,
-accueil.html, connexion.html, inscription.html, envoi.html. A supprimer une fois le design integre au site. Decisions pour l'accueil :
+accueil.html, connexion.html, inscription.html, envoi.html, resultats.html. A supprimer une fois le design integre au site. Decisions pour l'accueil :
 - Titre : "Votre prochaine opportunite prend vie ici." ; bouton "Deposer mon CV" et
   "Sans engagement · 2 minutes · PDF ou Word" (ne jamais ecrire "gratuit").
 - Demonstration animee en CSS (CV scanne -> competences -> offres avec niveau), sans compteur
@@ -219,7 +219,21 @@ votre CV" sur telephone) ; verification du type et des 5 Mo avant l'envoi ; cart
 (PDF rouge, Word bleu, taille, "Pret a etre analyse", Changer) ; pendant l'envoi, faisceau de
 l'accueil sur la carte et etapes (Envoi, Lecture, Recherche de vos competences). Sur telephone, la
 zone passe avant les conseils. Messages flash en bulle de verre ; en-tete d'un utilisateur connecte :
-Accueil, Deposer un CV, Historique, Deconnexion (barre du bas : Accueil, Deposer, Historique, Quitter).
+Accueil, Propulser votre CV, Historique, Deconnexion (barre du bas : Accueil, Propulser, Historique,
+Quitter).
+Decisions de l'apprenant (28/10) : le lien du menu s'appelle "Propulser votre CV" (barre du bas :
+"Propulser") ; la page garde le titre "Deposez votre CV." Au clic sur "Analyser mon CV", un ecran
+d'analyse anime (CV et faisceau, 4 etapes cochees une a une, barre de progression) reste affiche
+pendant que le serveur travaille, puis l'utilisateur arrive directement sur une page dediee aux
+resultats (l'ancienne page intermediaire "Mon CV" disparait du parcours). CV illisible : retour sur
+la page d'envoi avec un message clair. Regle des 10 s maintenue : pas d'attente artificielle (la
+lecture du CV et le matching prennent environ 1 a 3 s).
+Proposition pour la page des resultats (maquettes/resultats.html) : bandeau "Vos opportunites."
+(Analyse terminee, nom du CV, date, competences reperees dans le CV en pastilles) ; filtres Toutes /
+Tres proches / Proches / A explorer ; carte par offre avec jauge du niveau, entreprise, lieu, date
+"Publiee le 7 octobre 2026", badge "Nouvelle" (moins de 7 jours), "Vos atouts" (competences en
+commun) et "A renforcer" (competences de l'offre absentes du CV), boutons "Voir l'offre" et
+"S'entrainer". Noms des competences a afficher joliment (comptabilite -> Comptabilite).
 
 ### Partie 5 : FastAPI, Docker et deploiement Render
 
