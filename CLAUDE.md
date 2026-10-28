@@ -184,6 +184,24 @@ d'artiste, onde sonore reagissant a la voix pendant l'entretien, anneau pour la 
 proposees : Sable et encre, Fleuve (clin d'oeil RDC), Nuit de Kinshasa. Les couleurs seront choisies
 avec l'apprenant. Captures dans le scratchpad (dossier design/).
 
+Methode choisie : une maquette par page dans le scratchpad (design/accueil.html...), captures
+envoyees, validation, puis seulement integration dans le vrai site. Decisions pour l'accueil :
+- Titre : "Votre prochain emploi en RDC commence ici." ; bouton "Deposer mon CV" et
+  "Sans engagement · 2 minutes · PDF ou Word" (ne jamais ecrire "gratuit").
+- Demonstration animee en CSS (CV scanne -> competences -> offres avec niveau), sans compteur
+  d'offres (il revele nos faiblesses) ni bandeau defilant.
+- "Comment ca marche" en 3 etapes ; mosaique des fonctionnalites (entretien vocal avec onde
+  decorative et bouton a cadenas qui mene a l'inscription, sans extrait de voix ; offres ; analyse ;
+  note en anneau).
+- Garanties : "Ouvert a tous, sans abonnement", "Vos CV traites en toute securite", "Des offres
+  mises a jour chaque jour" (pas de mention des employeurs ni "seulement en RDC").
+- Appel final : "Alors, pret a vous lancer vers votre prochaine opportunite ? Connectez-vous et
+  deposez votre CV." mot par mot, "prochaine opportunite" en degrade.
+- Pas de variante "Bon retour" sur l'accueil : le "Bon retour" va sur la page de connexion et le
+  "Bienvenue" sur l'inscription.
+- En-tete en verre flottant (logo dessine, liens, boutons) ; sur telephone, barre flottante en bas
+  avec icones. Vrai pied de page (Decouvrir, Votre espace, Confiance). Les deux dans base.html.
+
 ### Partie 5 : FastAPI, Docker et deploiement Render
 
 - Orchestrateur FastAPI (`/speak-smart`) :
