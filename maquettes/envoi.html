@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Envoi de CV - CVBoost</title>
+<link rel="stylesheet" href="commun.css">
+<style>
+/* Mise en page : texte et conseils a gauche, formulaire a droite ; sur telephone, le formulaire passe avant les conseils */
+.depot { grid-template-areas: "texte formulaire" "conseils formulaire"; row-gap: 0; }
+.depot .texte { grid-area: texte; align-self: end; }
+.depot .conseils { grid-area: conseils; align-self: start; }
+.depot .formulaire { grid-area: formulaire; }
+@media (max-width: 860px) { .depot { grid-template-areas: "texte" "formulaire" "conseils"; } }
+
+/* Conseils pour un CV bien lu */
+.conseils { list-style: none; padding: 0; margin: 30px 0 0; max-width: 460px; width: 100%; }
+.conseils li { display: flex; gap: 14px; align-items: flex-start; padding: 14px 18px; margin-bottom: 12px; border-radius: 18px; text-align: left; }
+.conseils .pastille { width: 34px; height: 34px; flex: none; border-radius: 12px; display: grid; place-items: center; color: var(--accent); background: rgba(10,108,255,.1); }
+.conseils b { display: block; }
+.conseils span { color: var(--doux); font-size: .92rem; }
+@media (max-width: 860px) { .conseils { margin-inline: auto; } }
+
+/* Zone de depot : bordure en pointilles qui defilent lentement */
+.zone { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; min-height: 300px;
+  padding: 30px; border-radius: 22px; cursor: pointer; position: relative; transition: transform .25s, background .25s;
+  background: linear-gradient(90deg, var(--accent) 50%, transparent 0) top / 18px 2px repeat-x,
+              linear-gradient(90deg, var(--accent) 50%, transparent 0) bottom / 18px 2px repeat-x,
+              linear-gradient(0deg, var(--accent) 50%, transparent 0) left / 2px 18px repeat-y,
+              linear-gradient(0deg, var(--accent) 50%, transparent 0) right / 2px 18px repeat-y,
+              rgba(255,255,255,.55);
+  animation: pointilles 1.2s linear infinite; }
+@keyframes pointilles { to { background-position: 18px 0, -18px 100%, 0 -18px, 100% 18px, 0 0; } }
+.zone:hover { background-color: #fff; }
+.zone.survol { transform: scale(1.02); background-color: rgba(10,108,255,.08); }
+.zone input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.grande-icone { width: 74px; height: 74px; border-radius: 24px; display: grid; place-items: center; color: #fff; background: var(--accent);
+  box-shadow: 0 12px 28px rgba(10,108,255,.35); margin-bottom: 18px; animation: respire 2.4s ease-in-out infinite; }
+.grande-icone .icone { width: 34px; height: 34px; }
+@keyframes respire { 50% { transform: translateY(-6px); } }
+.zone b { font-size: 1.2rem; }
+.zone .choisir { color: var(--accent); font-weight: 600; }
+.formats { color: var(--doux); font-size: .88rem; margin-top: 10px; }
+/* Sur un ecran tactile, on ne "glisse" pas un fichier : le texte change */
+.tactile { display: none; }
+@media (hover: none) { .souris { display: none; } .tactile { display: inline; } }
+
+/* Fichier choisi : une carte apparait a la place de la zone */
+.fichier { display: flex; align-items: center; gap: 14px; padding: 16px; border-radius: 18px; background: #fff; box-shadow: var(--ombre);
+  animation: arrive .35s ease-out; position: relative; overflow: hidden; }
+@keyframes arrive { from { opacity: 0; transform: translateY(10px) scale(.97); } }
+.type { width: 48px; height: 58px; flex: none; border-radius: 10px; display: grid; place-items: end center; padding-bottom: 8px;
+  font-size: .7rem; font-weight: 800; color: #fff; background: #d64541; }
+.type.docx { background: #2b6cd9; }
+.fichier .nom { font-weight: 700; word-break: break-all; }
+.fichier .pret { display: flex; align-items: center; gap: 4px; color: #1e7d4f; font-size: .85rem; font-weight: 600; }
+.changer { margin-left: auto; border: none; background: none; color: var(--accent); font: inherit; font-weight: 600; cursor: pointer; }
+/* Pendant l'envoi : le faisceau de l'accueil parcourt la carte du fichier */
+.faisceau { position: absolute; left: 0; right: 0; top: -40px; height: 40px; display: none; border-bottom: 2px solid var(--accent);
+  background: linear-gradient(180deg, transparent, rgba(10,108,255,.22), transparent); }
+.envoi-en-cours .faisceau { display: block; animation: balaye 1.4s ease-in-out infinite; }
+@keyframes balaye { to { top: 100%; } }
+.etape-envoi { text-align: center; color: var(--accent); font-weight: 600; min-height: 1.5em; margin: 14px 0 0; }
+.securite { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 14px 0 0; font-size: .85rem; color: var(--doux); }
+</style></head>
+<body data-page="depot" data-connecte>
+
+<div class="flash succes" id="bienvenue" hidden>Bienvenue sur CVBoost, Grace.</div>
+<main class="compte depot">
+  <div class="texte">
+    <h1>Déposez votre CV.</h1>
+    <p class="sous">CVBoost le lit, repère vos compétences et cherche les offres qui vous correspondent.</p>
+  </div>
+    <ul class="conseils">
+      <li class="verre apparait"><span class="pastille"><svg class="icone"><use href="#i-fichier"/></svg></span>
+        <div><b>Un fichier créé sur ordinateur</b><span>PDF ou Word, pas une photo ni un scan.</span></div></li>
+      <li class="verre apparait"><span class="pastille"><svg class="icone"><use href="#i-cible"/></svg></span>
+        <div><b>Vos compétences en toutes lettres</b><span>Excel, comptabilité, anglais : écrivez-les clairement.</span></div></li>
+      <li class="verre apparait"><span class="pastille"><svg class="icone"><use href="#i-note"/></svg></span>
+        <div><b>Des expériences avec des résultats</b><span>Dates, missions et chiffres parlent aux recruteurs.</span></div></li>
+    </ul>
+
+  <form class="formulaire verre" id="formulaire" method="POST" enctype="multipart/form-data">
+    <h2>Votre CV</h2>
+    <div class="alerte" id="alerte" hidden></div>
+
+    <label class="zone" id="zone">
+      <input type="file" name="cv" id="cv" accept=".pdf,.docx" required>
+      <span class="grande-icone"><svg class="icone"><use href="#i-depot"/></svg></span>
+      <b class="souris">Glissez votre CV ici</b>
+      <b class="tactile">Touchez pour choisir votre CV</b>
+      <span class="souris">ou <span class="choisir">choisissez un fichier</span></span>
+      <span class="formats">PDF ou Word · 5 Mo maximum</span>
+    </label>
+
+    <div class="fichier" id="fichier" hidden>
+      <span class="type" id="type">PDF</span>
+      <div><div class="nom" id="nom"></div><div class="doux" id="taille"></div>
+        <div class="pret"><svg class="icone"><use href="#i-coche"/></svg> Prêt à être analysé</div></div>
+      <button type="button" class="changer" id="changer">Changer</button>
+      <span class="faisceau"></span>
+    </div>
+
+    <button type="submit" class="btn envoyer" id="envoyer" disabled>Analyser mon CV <svg class="icone fleche"><use href="#i-fleche"/></svg></button>
+    <p class="etape-envoi" id="etape" aria-live="polite"></p>
+    <p class="securite"><svg class="icone"><use href="#i-bouclier"/></svg> Votre CV est traité en toute sécurité</p>
+  </form>
+</main>
+
+<script src="commun.js"></script>
+<script>
+// Maquette uniquement : ?bienvenue montre le message affiche juste apres l'inscription
+document.getElementById('bienvenue').hidden = !location.search.includes('bienvenue');
+
+// Zone de depot du CV : choix ou glisser-deposer, verification avant l'envoi, animation pendant l'envoi
+const TAILLE_MAX = 5 * 1024 * 1024;   // 5 Mo, comme sur le serveur
+const champ = document.getElementById('cv');
+const zone = document.getElementById('zone');
+const carte = document.getElementById('fichier');
+const bouton = document.getElementById('envoyer');
+const alerte = document.getElementById('alerte');
+
+function afficherErreur(message) {
+  alerte.textContent = message;
+  alerte.hidden = false;
+  document.getElementById('formulaire').classList.remove('secoue');
+  void alerte.offsetWidth;  // relance l'animation si elle a deja eu lieu
+  document.getElementById('formulaire').classList.add('secoue');
+}
+
+function afficherFichier() {
+  const fichier = champ.files[0];
+  if (!fichier) return;
+  const extension = fichier.name.split('.').pop().toLowerCase();
+  if (extension !== 'pdf' && extension !== 'docx') {
+    afficherErreur('Seuls les fichiers PDF ou Word (.docx) sont acceptés.');
+    return;
+  }
+  if (fichier.size > TAILLE_MAX) {
+    afficherErreur('Ce fichier dépasse 5 Mo. Enregistrez une version plus légère.');
+    return;
+  }
+  alerte.hidden = true;
+  document.getElementById('nom').textContent = fichier.name;
+  document.getElementById('taille').textContent = fichier.size < 1024 * 1024
+    ? Math.round(fichier.size / 1024) + ' Ko' : (fichier.size / 1024 / 1024).toFixed(1) + ' Mo';
+  const type = document.getElementById('type');
+  type.textContent = extension.toUpperCase();
+  type.className = 'type ' + extension;
+  zone.hidden = true;
+  carte.hidden = false;
+  bouton.disabled = false;
+}
+
+champ.addEventListener('change', afficherFichier);
+document.getElementById('changer').addEventListener('click', () => champ.click());
+
+// Glisser-deposer : la zone s'illumine quand un fichier la survole
+zone.addEventListener('dragover', evenement => { evenement.preventDefault(); zone.classList.add('survol'); });
+zone.addEventListener('dragleave', () => zone.classList.remove('survol'));
+zone.addEventListener('drop', evenement => {
+  evenement.preventDefault();
+  zone.classList.remove('survol');
+  champ.files = evenement.dataTransfer.files;
+  afficherFichier();
+});
+
+// Envoi : le faisceau balaye la carte et des etapes s'affichent pendant que le serveur lit le CV
+const ETAPES = ['Envoi du fichier...', 'Lecture de votre CV...', 'Recherche de vos compétences...'];
+document.getElementById('formulaire').addEventListener('submit', evenement => {
+  evenement.preventDefault();  // maquette uniquement : rien n'est envoye
+  bouton.disabled = true;
+  carte.classList.add('envoi-en-cours');
+  let numero = 0;
+  document.getElementById('etape').textContent = ETAPES[0];
+  setInterval(() => {
+    numero = Math.min(numero + 1, ETAPES.length - 1);
+    document.getElementById('etape').textContent = ETAPES[numero];
+  }, 1300);
+});
+</script>
+</body></html>

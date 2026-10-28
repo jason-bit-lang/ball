@@ -188,7 +188,7 @@ Methode choisie : une maquette par page, captures et videos envoyees, puis integ
 site. L'apprenant valide TOUT en une fois, a la fin, apres avoir choisi le theme (couleurs).
 Maquettes enregistrees dans le depot, dossier `maquettes/` (a ouvrir dans un navigateur) :
 commun.css et commun.js (en-tete, pied de page, icones : ce que fera base.html), formulaire.js,
-accueil.html, connexion.html, inscription.html. A supprimer une fois le design integre au site. Decisions pour l'accueil :
+accueil.html, connexion.html, inscription.html, envoi.html. A supprimer une fois le design integre au site. Decisions pour l'accueil :
 - Titre : "Votre prochaine opportunite prend vie ici." ; bouton "Deposer mon CV" et
   "Sans engagement · 2 minutes · PDF ou Word" (ne jamais ecrire "gratuit").
 - Demonstration animee en CSS (CV scanne -> competences -> offres avec niveau), sans compteur
@@ -210,7 +210,16 @@ avec trois cartes flottantes (offre, entretien vocal, note) ; inscription "Bienv
 avec trois avantages coches qui arrivent l'un apres l'autre ; etiquettes flottantes dans les
 champs, oeil pour voir le mot de passe, barre de solidite, verification de la confirmation, bouton
 qui tourne pendant l'envoi, carte qui secoue en cas d'erreur. Message apres connexion :
-"Bon retour, Prenom." Proposition : connecter automatiquement apres l'inscription.
+"Bon retour, Prenom." Accepte par l'apprenant : connexion automatique apres l'inscription, puis
+arrivee sur l'envoi du CV avec "Bienvenue sur CVBoost, Prenom."
+Propositions pour l'envoi du CV (maquettes/envoi.html) : "Deposez votre CV." et 3 conseils pour un
+CV bien lu (fichier cree sur ordinateur, competences en toutes lettres, experiences avec resultats) ;
+zone de depot en pointilles qui defilent (glisser-deposer sur ordinateur, "Touchez pour choisir
+votre CV" sur telephone) ; verification du type et des 5 Mo avant l'envoi ; carte du fichier
+(PDF rouge, Word bleu, taille, "Pret a etre analyse", Changer) ; pendant l'envoi, faisceau de
+l'accueil sur la carte et etapes (Envoi, Lecture, Recherche de vos competences). Sur telephone, la
+zone passe avant les conseils. Messages flash en bulle de verre ; en-tete d'un utilisateur connecte :
+Accueil, Deposer un CV, Historique, Deconnexion (barre du bas : Accueil, Deposer, Historique, Quitter).
 
 ### Partie 5 : FastAPI, Docker et deploiement Render
 

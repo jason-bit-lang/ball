@@ -17,12 +17,15 @@ const ICONES = `<svg width="0" height="0" style="position:absolute">
   <symbol id="i-fleche" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
   <symbol id="i-fichier" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></symbol>
   <symbol id="i-oeil" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-sortie" viewBox="0 0 24 24"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 17l5-5-5-5M15 12H4"/></symbol>
   <symbol id="i-coche" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
 </svg>`;
 document.body.insertAdjacentHTML('afterbegin', ICONES);
 
-// Page active (attribut data-page de <body>) pour mettre le bon lien en surbrillance
+// Page active (attribut data-page de <body>) pour mettre le bon lien en surbrillance.
+// data-connecte sur <body> : menu d'un utilisateur connecte (dans base.html : current_user.is_authenticated)
 const page = document.body.dataset.page;
+const connecte = 'connecte' in document.body.dataset;
 const actif = nom => (nom === page ? 'actif' : '');
 const lienBas = (nom, icone, texte, adresse) =>
   `<a href="${adresse}" class="${actif(nom)}"><svg class="icone"><use href="#i-${icone}"/></svg>${texte}</a>`;
@@ -30,6 +33,13 @@ const lienBas = (nom, icone, texte, adresse) =>
 document.body.insertAdjacentHTML('afterbegin', `
 <header class="entete"><nav class="verre">
   <a class="logo" href="accueil.html"><span>CV<em>Boost</em></span></a>
+  ${connecte ? `
+  <div class="liens">
+    <a class="${actif('accueil')}" href="accueil.html">Accueil</a>
+    <a class="${actif('depot')}" href="envoi.html">Déposer un CV</a>
+    <a class="${actif('historique')}" href="#">Historique</a>
+  </div>
+  <div class="menu"><a class="btn clair cache-mobile" href="accueil.html">Déconnexion</a></div>` : `
   <div class="liens">
     <a class="${actif('accueil')}" href="accueil.html">Accueil</a>
     <a href="accueil.html#etapes">Comment ça marche</a>
@@ -38,13 +48,17 @@ document.body.insertAdjacentHTML('afterbegin', `
   <div class="menu">
     <a class="cache-mobile ${actif('inscription')}" href="inscription.html">Inscription</a>
     <a class="btn" href="connexion.html">Connexion</a>
-  </div>
+  </div>`}
 </nav></header>
-<nav class="barre-bas verre">
+<nav class="barre-bas verre">${connecte ? `
+  ${lienBas('accueil', 'maison', 'Accueil', 'accueil.html')}
+  ${lienBas('depot', 'depot', 'Déposer', 'envoi.html')}
+  ${lienBas('historique', 'horloge', 'Historique', '#')}
+  ${lienBas('sortie', 'sortie', 'Quitter', 'accueil.html')}` : `
   ${lienBas('accueil', 'maison', 'Accueil', 'accueil.html')}
   ${lienBas('fonctions', 'grille', 'Fonctions', 'accueil.html#fonctions')}
   ${lienBas('connexion', 'personne', 'Connexion', 'connexion.html')}
-  ${lienBas('inscription', 'cle', 'Inscription', 'inscription.html')}
+  ${lienBas('inscription', 'cle', 'Inscription', 'inscription.html')}`}
 </nav>`);
 
 document.body.insertAdjacentHTML('beforeend', `
