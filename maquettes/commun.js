@@ -20,6 +20,7 @@ const ICONES = `<svg width="0" height="0" style="position:absolute">
   <symbol id="i-sortie" viewBox="0 0 24 24"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 17l5-5-5-5M15 12H4"/></symbol>
   <symbol id="i-lieu" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-12a7 7 0 0 1 14 0c0 5.8-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/></symbol>
   <symbol id="i-calendrier" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></symbol>
+  <symbol id="i-coeur" viewBox="0 0 24 24"><path d="M12 20s-7.5-4.6-9.3-9.2C1.4 7.4 3.6 4.5 6.8 4.5c2.1 0 3.5 1.2 5.2 3.1 1.7-1.9 3.1-3.1 5.2-3.1 3.2 0 5.4 2.9 4.1 6.3C19.5 15.4 12 20 12 20z"/></symbol>
   <symbol id="i-coche" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
 </svg>`;
 document.body.insertAdjacentHTML('afterbegin', ICONES);
@@ -39,7 +40,7 @@ document.body.insertAdjacentHTML('afterbegin', `
   <div class="liens">
     <a class="${actif('accueil')}" href="accueil.html">Accueil</a>
     <a class="${actif('depot')}" href="envoi.html">Propulser votre CV</a>
-    <a class="${actif('historique')}" href="#">Historique</a>
+    <a class="${actif('historique')}" href="historique.html">Historique</a>
   </div>
   <div class="menu"><a class="btn clair cache-mobile" href="accueil.html">Déconnexion</a></div>` : `
   <div class="liens">
@@ -55,7 +56,7 @@ document.body.insertAdjacentHTML('afterbegin', `
 <nav class="barre-bas verre">${connecte ? `
   ${lienBas('accueil', 'maison', 'Accueil', 'accueil.html')}
   ${lienBas('depot', 'depot', 'Propulser', 'envoi.html')}
-  ${lienBas('historique', 'horloge', 'Historique', '#')}
+  ${lienBas('historique', 'horloge', 'Historique', 'historique.html')}
   ${lienBas('sortie', 'sortie', 'Quitter', 'accueil.html')}` : `
   ${lienBas('accueil', 'maison', 'Accueil', 'accueil.html')}
   ${lienBas('fonctions', 'grille', 'Fonctions', 'accueil.html#fonctions')}
@@ -71,7 +72,7 @@ document.body.insertAdjacentHTML('beforeend', `
       <p>Votre prochaine opportunité prend vie ici.</p>
     </div>
     <div><h4>Découvrir</h4><a href="accueil.html#etapes">Comment ça marche</a><a href="accueil.html#fonctions">Fonctionnalités</a><a href="accueil.html#fonctions">Entretien vocal</a></div>
-    <div><h4>Votre espace</h4><a href="connexion.html">Connexion</a><a href="inscription.html">Créer un compte</a><a href="#">Historique</a></div>
+    <div><h4>Votre espace</h4><a href="connexion.html">Connexion</a><a href="inscription.html">Créer un compte</a><a href="historique.html">Historique</a></div>
     <div><h4>Confiance</h4><span>CV traités en toute sécurité</span><span>Offres mises à jour chaque jour</span></div>
   </div>
   <div class="pied-bas"><span>© 2026 CVBoost</span><span>Projet capstone Kadea Academy</span></div>

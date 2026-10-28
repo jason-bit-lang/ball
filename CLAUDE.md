@@ -188,7 +188,7 @@ Methode choisie : une maquette par page, captures et videos envoyees, puis integ
 site. L'apprenant valide TOUT en une fois, a la fin, apres avoir choisi le theme (couleurs).
 Maquettes enregistrees dans le depot, dossier `maquettes/` (a ouvrir dans un navigateur) :
 commun.css et commun.js (en-tete, pied de page, icones : ce que fera base.html), formulaire.js,
-accueil.html, connexion.html, inscription.html, envoi.html, resultats.html. A supprimer une fois le design integre au site. Decisions pour l'accueil :
+accueil.html, connexion.html, inscription.html, envoi.html, resultats.html, historique.html. A supprimer une fois le design integre au site. Decisions pour l'accueil :
 - Titre : "Votre prochaine opportunite prend vie ici." ; bouton "Deposer mon CV" et
   "Sans engagement · 2 minutes · PDF ou Word" (ne jamais ecrire "gratuit").
 - Demonstration animee en CSS (CV scanne -> competences -> offres avec niveau), sans compteur
@@ -247,6 +247,16 @@ Regle de l'apprenant : la page des opportunites n'est jamais vide. S'il n'y a pa
 propose quand meme les plus proches (niveau "A explorer") avec le message "Pas encore d'offre tres proche
 de votre profil. Voici celles qui s'en rapprochent le plus..." (si aucune offre n'a de point commun avec
 le CV, proposer les offres les plus recentes).
+Historique (demande de l'apprenant, maquettes/historique.html) : "Votre historique." avec deux onglets
+(pilule qui glisse) : "Offres favorites" et "Mes CV". On met une offre en favori depuis la page de
+l'offre (bouton coeur) ; elle part dans l'historique. Carte d'un favori : coeur pour retirer, entreprise,
+lieu, "Cloture le ..." avec badge ("19 jours restants" vert, "Plus que 3 jours" jaune, "Cloturee" gris,
+"Date limite non precisee") et barre du temps ecoule, dernier entretien (note en anneau) et boutons
+"Lancer l'entretien" (mauve) / "Voir l'offre". Carte d'un CV : type, nom, date, competences reperees,
+"Voir mes opportunites". Etat vide avec invitation. A faire a l'integration : table Favori (user_id,
+offre_id, date), route pour ajouter/retirer, et colonne date_limite extraite des descriptions dans le
+nettoyage (premier essai : 58 offres sur 117 avec une date lisible, "au plus tard le", "Date limite",
+"cloture"...). Les notes d'entretien viennent de l'evaluation (a enregistrer en base).
 
 ### Partie 5 : FastAPI, Docker et deploiement Render
 
