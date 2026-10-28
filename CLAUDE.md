@@ -174,6 +174,16 @@ Choix faits pendant la partie 3 :
 Claude propose plusieurs themes fluides et dynamiques ; l'apprenant choisit ou propose le sien.
 Aucun emoji ni emoticone. Beau et sobre, sans exces.
 
+En cours (28/10) : `style.css` reecrit avec des variables de couleur (theme A clair par defaut,
+provisoire). L'apprenant veut plus qu'un changement de couleurs : chaque page belle, authentique et
+dynamique, inspiree du style Liquid Glass d'Apple Music (iOS 27 : verre depoli, barre de navigation
+flottante, pages d'artistes teintees par leur photo, icone noir et blanc, bleu pour l'element actif).
+Proposition de Claude en attente de discussion : fond d'ondes soyeuses, verre, barre flottante en bas
+sur telephone, zone de depot du CV, niveau de correspondance en barre, page d'offre facon page
+d'artiste, onde sonore reagissant a la voix pendant l'entretien, anneau pour la note. Palettes
+proposees : Sable et encre, Fleuve (clin d'oeil RDC), Nuit de Kinshasa. Les couleurs seront choisies
+avec l'apprenant. Captures dans le scratchpad (dossier design/).
+
 ### Partie 5 : FastAPI, Docker et deploiement Render
 
 - Orchestrateur FastAPI (`/speak-smart`) :
