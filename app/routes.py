@@ -2,6 +2,7 @@ import re
 import uuid
 from datetime import timedelta
 import requests
+from sqlalchemy import text
 from flask import Response, render_template, request, redirect, url_for, flash, jsonify
 from flask_login import login_required, current_user, login_user, logout_user
 from werkzeug.utils import secure_filename
@@ -200,6 +201,36 @@ def upload():
         return redirect(adresse)
 
     return render_template('upload.html')
+
+
+@app.route('/health')
+def health():
+    """Route de sante : Render et UptimeRobot l'appellent pour savoir si le site va bien (et le garder eveille)."""
+    try:
+        db.session.execute(text('SELECT 1'))
+        base = 'ok'
+    except Exception:
+        db.session.rollback()
+        base = 'erreur'
+    try:
+        api = 'ok' if requests.get(ADRESSE_API + '/health', timeout=2).ok else 'erreur'
+    except requests.RequestException:
+        api = 'erreur'
+    # Sans base de donnees, le site ne peut pas fonctionner : code 503 pour que Render le signale
+    return jsonify(site='ok', base=base, api=api), 200 if base == 'ok' else 503
+
+
+@app.errorhandler(404)
+def page_introuvable(erreur):
+    return render_template('erreur.html', titre='Page introuvable.',
+                           message="Cette page n'existe pas ou a été déplacée."), 404
+
+
+@app.errorhandler(500)
+def erreur_serveur(erreur):
+    # Flask a deja ecrit le detail de l'erreur dans le journal (console de Render)
+    return render_template('erreur.html', titre='Un problème est survenu.',
+                           message="L'erreur a été enregistrée. Réessayez dans un instant."), 500
 
 
 @app.errorhandler(413)

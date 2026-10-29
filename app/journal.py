@@ -10,11 +10,13 @@ from pipeline.config import LOG_FILE  # meme chemin pour le site et pour le scri
 
 logger = logging.getLogger('cvboost.evenements')
 logger.setLevel(logging.INFO)
-logger.propagate = False  # n'ecrit pas aussi dans la console
+logger.propagate = False
 if not logger.handlers:
-    handler = logging.FileHandler(LOG_FILE, encoding='utf-8')
-    handler.setFormatter(logging.Formatter('%(asctime)s | %(message)s', '%Y-%m-%d %H:%M:%S'))
-    logger.addHandler(handler)
+    # Fichier lu par le script d'audit, et console : sur Render, le disque est efface a chaque redemarrage,
+    # la console reste lisible dans l'onglet "Logs"
+    for handler in [logging.FileHandler(LOG_FILE, encoding='utf-8'), logging.StreamHandler()]:
+        handler.setFormatter(logging.Formatter('%(asctime)s | %(message)s', '%Y-%m-%d %H:%M:%S'))
+        logger.addHandler(handler)
 
 
 def clean(value):

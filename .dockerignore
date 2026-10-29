@@ -1,0 +1,17 @@
+# Ce qui n'entre pas dans l'image Docker : secrets, environnements virtuels, donnees locales,
+# et ce que le site n'utilise pas (modele LoRA, notebook, jeu de donnees d'entrainement)
+.git
+.github
+.env
+venv/
+env/
+.venv/
+__pycache__/
+*.pyc
+database/
+uploads/
+logs/
+modele/
+notebooks/
+data/ia/
+data/analytics.db

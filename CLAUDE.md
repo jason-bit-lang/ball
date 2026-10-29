@@ -327,7 +327,16 @@ Decisions de l'apprenant (28/10) : le pitch sert de modele de reponse a "Present
 question d'un entretien). Il est fait a partir du CV seulement (pas adapte a chaque offre), avec la
 voix `sage` (la meme que la recruteuse) ; en secours, une voix feminine francaise d'edge-tts.
 Bouton "Ecouter mon pitch" dans le bandeau de la page des opportunites et sur les cartes "Mes CV".
-L'apprenant a deja un compte Render.
+L'apprenant a deja un compte Render. Render publie la BRANCHE DE TRAVAIL (claude/capstone-github-setup-g24r7p),
+pas main (choix de l'apprenant : pas de fusion pour l'instant). GitHub Actions (deploiement.yml) fait un
+TEST DE DEMARRAGE avant chaque deploiement (aucun fichier de tests dans le depot) : construit l'image Docker,
+lance site + API, verifie /health, l'accueil, l'inscription et l'envoi d'un petit CV Word, puis appelle le
+Deploy Hook (secret GitHub RENDER_DEPLOY_HOOK ; sans ce secret, le deploiement est saute).
+Fait (29/10) : config.py (ADRESSE_BASE, ADRESSE_API) ; Document.contenu et Document.texte ; api/main.py
+(pitch 50 a 60 mots, voix sage avec heure limite reelle, secours edge-tts fr-FR-DeniseNeural) ; route Flask
+/pitch/<id> ; /health (site, base, api) ; pages erreur.html (404, 500) ; journal aussi dans la console ;
+Dockerfile, .dockerignore, docker-compose.yml (db, api, web), demarrer.sh (Render : uvicorn 127.0.0.1:8000
++ gunicorn 1 processus 4 fils). Mesures : pitch 6,4 a 7,5 s ; image 184 Mo ; site + API 265 Mo de memoire.
 Ordre de travail : 1) CV et texte du CV enregistres dans la base, DATABASE_URL ; 2) API FastAPI du
 pitch, route Flask et bouton ; 3) Docker, Render, GitHub Actions, sante et journal ; 4) tests, rapport.
 

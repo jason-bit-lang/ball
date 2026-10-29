@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% from "macros.html" import icone %}
+{% block title %}{{ titre }} - CVBoost{% endblock %}
+{% block content %}
+<main class="page">
+    <div class="vide verre">{{ icone('info') }}
+        <h1>{{ titre }}</h1>
+        <p>{{ message }}</p>
+        <a class="btn" href="{{ url_for('index') }}">Retour à l'accueil</a>
+    </div>
+</main>
+{% endblock %}

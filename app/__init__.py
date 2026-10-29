@@ -1,3 +1,4 @@
+import logging
 import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
@@ -5,6 +6,9 @@ from flask_login import LoginManager
 from flask_wtf.csrf import CSRFProtect
 from werkzeug.middleware.proxy_fix import ProxyFix
 from config import ADRESSE_BASE, DOSSIER  # config.py charge aussi le fichier .env
+
+# Journal des erreurs : ecrit dans la console, que Render affiche dans l'onglet "Logs"
+logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(name)s : %(message)s')
 
 # La base SQLite locale est rangee dans database/
 app = Flask(__name__, instance_path=os.path.join(DOSSIER, 'database'))

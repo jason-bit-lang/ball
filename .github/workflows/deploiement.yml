@@ -1,0 +1,78 @@
+# A chaque envoi sur la branche publiee par Render : construit l'image Docker (comme Render),
+# verifie que le site demarre et fonctionne, puis demande a Render de publier la nouvelle version.
+# Le lien de deploiement (Deploy Hook) est un secret GitHub : RENDER_DEPLOY_HOOK.
+name: Tests puis deploiement sur Render
+
+on:
+  push:
+    branches: [claude/capstone-github-setup-g24r7p]
+  workflow_dispatch:       # bouton "Run workflow" pour le lancer a la main
+
+concurrency: deploiement   # jamais deux deploiements en meme temps
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Construire l'image Docker
+        run: docker build -t cvboost .
+
+      - name: Demarrer le site et l'API dans un conteneur
+        run: |
+          docker run -d --name cvboost -p 5000:5000 -e SECRET_KEY=cle-de-test -e PORT=5000 cvboost
+          for i in $(seq 1 30); do
+            curl -fs http://127.0.0.1:5000/health && exit 0
+            sleep 2
+          done
+          exit 1
+
+      # Test de demarrage (sans OpenAI) : sante, accueil, inscription et envoi d'un petit CV Word
+      - name: Verifier les pages principales
+        run: |
+          docker exec -i cvboost python - <<'EOF'
+          import io, re, zipfile, requests
+          SITE = 'http://127.0.0.1:5000'
+          s = requests.Session()
+          sante = s.get(SITE + '/health').json()
+          assert sante == {'site': 'ok', 'base': 'ok', 'api': 'ok'}, sante
+          assert 'prend vie ici' in s.get(SITE + '/').text
+          def jeton(page):  # jeton anti-CSRF ecrit dans la page
+              return re.search(r'name="csrf-token" content="([^"]+)"', page).group(1)
+          r = s.post(SITE + '/register', data={'csrf_token': jeton(s.get(SITE + '/register').text), 'nom': 'Test',
+                     'prenom': 'Robot', 'email': 'robot@test.cd', 'password': 'MotDePasse2026',
+                     'confirmation_mot_secret': 'MotDePasse2026'})
+          assert r.url.endswith('/upload'), r.url
+          # Petit CV au format Word : un DOCX est une archive zip qui contient word/document.xml
+          texte = 'Comptable a Kinshasa. Comptabilite generale, fiscalite, tresorerie, Excel et anglais. ' * 4
+          fichier = io.BytesIO()
+          with zipfile.ZipFile(fichier, 'w') as archive:
+              archive.writestr('word/document.xml', '<w:document xmlns:w="http://schemas.openxmlformats.org/'
+                               'wordprocessingml/2006/main"><w:body><w:p><w:r><w:t>' + texte + '</w:t></w:r></w:p></w:body></w:document>')
+          r = s.post(SITE + '/upload', data={'csrf_token': jeton(r.text)}, files={'cv': ('cv.docx', fichier.getvalue())},
+                     headers={'X-Requested-With': 'fetch'})
+          assert r.ok, r.text
+          assert 'carte-offre' in s.get(SITE + r.json()['adresse']).text
+          print('Test de demarrage reussi : sante, accueil, inscription, envoi du CV, opportunites')
+          EOF
+
+      - name: Journal du conteneur (affiche seulement en cas d'echec)
+        if: failure()
+        run: docker logs cvboost
+
+  deploiement:
+    needs: tests            # seulement si les tests ont reussi
+    runs-on: ubuntu-latest
+    steps:
+      - name: Demander a Render de publier la nouvelle version
+        env:
+          RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
+        run: |
+          if [ -z "$RENDER_DEPLOY_HOOK" ]; then
+            echo "Secret RENDER_DEPLOY_HOOK pas encore ajoute dans GitHub : deploiement saute."
+            exit 0
+          fi
+          curl -fsS -X POST "$RENDER_DEPLOY_HOOK" > /dev/null
+          echo "Render a recu la demande de deploiement."
