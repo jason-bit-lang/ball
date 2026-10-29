@@ -321,10 +321,10 @@ Hebergement gratuit sur Render (offre Free : environ 512 Mo de RAM, mise en veil
 - Une route `/health` est appelee toutes les 10 minutes par UptimeRobot ou cron-job.org pour
   garder le site eveille et respecter la limite des 10 secondes.
 
-Rien n'existe encore pour cette partie. A reprendre du depot module 3 (tin-mzl) : le prompt du pitch
-(coach professionnel, texte continu a la premiere personne, sans puces ni symboles, phrases courtes
-pour la voix ; ramener a environ 60 mots) et la suppression du fichier audio temporaire apres
-l'envoi (`BackgroundTasks` de FastAPI).
+TERMINEE le 29/10 (rapport PDF de 13 pages livre). Repris du depot module 3 (tin-mzl) : le prompt du
+pitch (coach professionnel, texte continu a la premiere personne, sans puces ni symboles, phrases
+courtes pour la voix, ramene a 50-60 mots) et la suppression du mp3 temporaire apres l'envoi
+(`BackgroundTasks` de FastAPI).
 
 Decisions de l'apprenant (28/10) : le pitch sert de modele de reponse a "Presentez-vous" (premiere
 question d'un entretien). Il est fait a partir du CV seulement (pas adapte a chaque offre).
@@ -340,8 +340,9 @@ Fait (29/10) : app_web/config.py (ADRESSE_BASE, ADRESSE_API) ; Document.contenu 
 /pitch/<id> ; /health (site, base, api) ; pages erreur.html (404, 500) ; journal aussi dans la console ;
 Dockerfile, .dockerignore, docker-compose.yml (db, api, web), demarrer.sh (Render : uvicorn 127.0.0.1:8000
 + gunicorn 1 processus 4 fils). Mesures : pitch 3,3 a 4,2 s avec Denise (6,4 a 7,5 s avec sage) ; image
-184 Mo ; site + API 265 Mo de memoire. api_service/metriques_audio.py : WER sage 3,8 %, Denise 4,6 % (erreurs
-surtout sur les noms congolais) ; CER 1,7 % et 1,2 % ; MOS a noter par l'apprenant (data/audio/notes_mos.csv).
+184 Mo ; site + API 265 Mo de memoire. api_service/metriques_audio.py (resultats finaux, 5 pitchs, data/metriques_audio.csv) :
+WER sage 4,2 %, Denise 6,1 %, VITS 7,3 % ; CER 1,7 %, 2,1 %, 2,0 % ; temps par extrait 4,1 s, 0,9 s, 1,1 s
+(erreurs surtout sur les noms congolais) ; MOS a noter par l'apprenant (data/audio/notes_mos.csv).
 Cookie de session Secure sur Render (variable RENDER).
 EN LIGNE depuis le 29/10 : https://cvboost-kfyi.onrender.com (service "cvboost" srv-dbha4h0473hc739coqdg,
 base "cvboost-db" dpg-dbha41u1egvs73evnfb0-a, Postgres 16 gratuit, expire le 28/11/2026, region frankfurt,
@@ -352,21 +353,15 @@ d'animation), pitch 5,3 s (60 mots, mp3 137 Ko), page d'offre 1,4 s, analyse DRH
 utilise et mauvais mot de passe refuses, 404, aucune erreur JavaScript. En HTTPS, Flask-WTF exige l'en-tete Referer :
 une requete POST sans Referer recoit 400 (normal, le navigateur l'envoie). Deux comptes test.render.*@example.com
 crees dans la base en ligne pendant ce test. Entretien vocal WebRTC encore a tester dans un vrai navigateur.
-DEPLOIEMENT A FAIRE PAR CLAUDE (demande de l'apprenant, 29/10 ; cle et domaines ajoutes le 29/10) dans une NOUVELLE session, avec la cle d'API
-Render rangee par l'apprenant dans les reglages de l'environnement (variable RENDER_API_KEY, jamais dans la
-conversation) et les domaines api.render.com, render.com, onrender.com autorises. Etapes : API Render
-(https://api.render.com/v1, en-tete "Authorization: Bearer $RENDER_API_KEY") -> owner (GET /owners) ;
-base Postgres gratuite "cvboost-db", region frankfurt ; service web "cvboost" : depot public
-https://github.com/jason-bit-lang/cvboost_enterprise (ancien nom : ball), branche claude/capstone-github-setup-g24r7p, runtime docker, offre
-free, region frankfurt, healthCheckPath /health, autoDeploy non ; variables SECRET_KEY (generee, jamais
-affichee), OPENAI_API_KEY (celle de l'environnement), DATABASE_URL (adresse interne de cvboost-db). Attendre le
-deploiement, verifier /health, l'accueil, l'inscription, l'envoi d'un CV et le pitch sur le site en ligne.
-Reste a l'apprenant : copier le Deploy Hook (Settings du service) dans le secret GitHub RENDER_DEPLOY_HOOK,
-puis supprimer la cle d'API Render s'il le souhaite. Ensuite : rapport PDF de la partie 5.
-MOS : 15 extraits anonymes a noter de 1 a 5 (sage, Denise, VITS) ; les regenerer avec
-python -m api_service.metriques_audio si besoin, puis les envoyer a l'apprenant.
-Ordre de travail : 1) CV et texte du CV enregistres dans la base, DATABASE_URL ; 2) API FastAPI du
-pitch, route Flask et bouton ; 3) Docker, Render, GitHub Actions, sante et journal ; 4) tests, rapport.
+Deploiement FAIT par Claude le 29/10 (session "Cvboost Render deployment") avec l'API Render
+(https://api.render.com/v1, en-tete "Authorization: Bearer $RENDER_API_KEY", cle rangee par l'apprenant dans
+les reglages de l'environnement, jamais dans la conversation) : service web "cvboost" (depot
+https://github.com/jason-bit-lang/cvboost_enterprise, branche de travail, runtime docker, offre free, region
+frankfurt, healthCheckPath /health, autoDeploy non) ; variables SECRET_KEY (generee, jamais affichee),
+OPENAI_API_KEY, DATABASE_URL (adresse interne de cvboost-db). Les secrets GitHub ne peuvent pas etre ecrits
+par Claude (aucun outil) et UptimeRobot demande le compte de l'apprenant : ces deux points lui reviennent.
+MOS : 15 extraits anonymes a noter de 1 a 5 (sage, Denise, VITS), envoyes dans extraits_mos.zip ; les
+regenerer avec python -m api_service.metriques_audio si besoin.
 
 ### Partie 6 : Tests, bugs et documentation
 
@@ -417,15 +412,9 @@ Avant la partie 6 (rapport de la partie 5, section 9, livre le 29/10) :
 - MOS : noter les 15 extraits (extraits_mos.zip envoye le 29/10, correspondance dans data/metriques_audio.csv).
 - Decider de la fusion dans main (scraping quotidien, branche publiee par Render).
 - Facultatif : supprimer les comptes test.render.*@example.com de la base en ligne (sur demande).
-
-
-- Deplacer `instance/cvboost.db` vers `database/`, puis `pip install -r requirements.txt`.
-- Cle OpenAI dans `.env` et credit sur le compte OpenAI.
-- Entretien vocal dans un vrai navigateur (Chrome ou Edge) : entendre la recruteuse, etre compris,
-  evaluation affichee en moins de 10 s.
-- Notebook LoRA sur Colab : facultatif (l'essai complet est deja fait), utile pour la demonstration.
-- Partie 4 : `git pull`, relancer `python run.py` (les nouvelles colonnes sont ajoutees toutes seules
-  a la base existante), parcourir chaque page en clair et en sombre, sur ordinateur et sur telephone.
+- Toujours valables (parties 3 et 4) : cle OpenAI dans `.env` et credit OpenAI ; entretien vocal : entendre
+  la recruteuse, etre compris, evaluation en moins de 10 s ; ancienne base `instance/cvboost.db` a deplacer
+  dans `database/` ; notebook LoRA sur Colab facultatif (demonstration).
 
 ## Etat du projet et environnement de travail (mis a jour le 29/10)
 
@@ -439,16 +428,37 @@ Avant la partie 6 (rapport de la partie 5, section 9, livre le 29/10) :
   (envoi du CV et bulle), `offre.js` (favori, Postuler, annonce), `entretien.js` (assistante DRH) ;
   `app_web/affichage.py` (dates en francais, echeance, annonce en sections, maniere de postuler) ;
   `run.py` ajoute les colonnes manquantes a une base existante.
-- Les rapports (HTML sources + PDF) et les tests (test_partie1_v2.py, test_partie2_*.py,
-  test_partie3.py, p4test/test_partie4.py, p4test/navigateur_partie4.js) sont dans le dossier scratchpad de la session, pas dans le
-  depot. PDF generes depuis le HTML avec Playwright (page.pdf). Les tests de la partie 3 remplacent
+- Les rapports (HTML sources + PDF) et les tests sont dans le dossier scratchpad de la session, pas dans
+  le depot (le scratchpad peut disparaitre avec le conteneur : le code du depot fait foi).
+  Rapports : rapport/CVBoost_rapport_partie1.pdf a partie5.pdf (+ rapport_partieN.html). Tests :
+  test_partie1_v2.py, test_partie2_*.py, test_partie3.py, p4test/ (test_partie4.py, navigateur_partie4.js),
+  serveur_p4.py, p5test/ (test_partie5.py, test_pitch.py, mesure_pitch.py, lancer_api.py, api.sh,
+  navigateur_pitch.js, verifie_commentaires.py, lancer_metriques.py, captures_p5.js, smoke.py).
+  Derniers resultats : 75/75 tests Python (SQLite), 72/72 sur Postgres, 78/78 navigateur, pitch 9/9.
+  PDF generes depuis le HTML avec Playwright (page.pdf). Les tests de la partie 3 remplacent
   OpenAI par un faux client ; activer l'assistante a l'execution (rt.ASSISTANTE_ACTIVE = True).
-- Environnement cloud : cle OpenAI dans la variable `OPENAI_API_KEY` (visible seulement dans les
-  sessions demarrees apres son ajout). Domaines autorises ajoutes par l'apprenant : mediacongo.net,
+- Environnements virtuels du scratchpad : app-venv (site + API), ia-venv (LoRA : torch CPU +
+  requirements-ia), coqui-venv (VITS, `coqui-tts[codec]==0.28.0`).
+- Environnement cloud : cles dans les variables `OPENAI_API_KEY` et `RENDER_API_KEY` (visibles seulement
+  dans les sessions demarrees apres leur ajout). Domaines autorises ajoutes par l'apprenant : mediacongo.net,
   api.openai.com, huggingface.co, cdn-lfs.huggingface.co, cas-bridge.xethub.hf.co,
-  cas-server.xethub.hf.co, us.aws.cdn.hf.co, download.pytorch.org, download-r2.pytorch.org.
+  cas-server.xethub.hf.co, us.aws.cdn.hf.co, download.pytorch.org, download-r2.pytorch.org,
+  api.render.com, render.com, onrender.com, cvboost-kfyi.onrender.com (speech.platform.bing.com joignable).
+- Outils du conteneur : Docker se lance avec `dockerd` (Docker Hub limite les telechargements : pour les
+  tests, `mirror.gcr.io/library/postgres:16-alpine`) ; Postgres local dans /usr/lib/postgresql/16/bin ;
+  edge-tts et Playwright doivent passer par le proxy (`HTTPS_PROXY`) dans le conteneur.
 - Entrainement LoRA sur processeur : venv Python 3.12, `pip install torch --index-url
   https://download.pytorch.org/whl/cpu` (PyTorch de PyPI impose 2,5 Go de bibliotheques NVIDIA),
   puis `pip install -r requirements-ia.txt pandas==2.2.3`. Environ 25 min pour 20 epoques.
 - Le workflow de scraping quotidien n'est actif qu'une fois la branche fusionnee dans `main`
   (pas de pull request sans demande de l'apprenant).
+
+## Reprise apres /compact (demande de l'apprenant, 29/10)
+
+1. Relire ce fichier en entier avant de repondre, pour etre de nouveau a la page.
+2. Etat : parties 1 a 5 terminees, site en ligne (https://cvboost-kfyi.onrender.com), rapport de la partie 5
+   livre. L'apprenant fait les verifications de la section "Verifications en attente cote apprenant".
+3. Quand l'apprenant annonce que le Deploy Hook est dans le secret GitHub RENDER_DEPLOY_HOOK : verifier une
+   execution du workflow deploy.yml (etape "Deploy Hook" non sautee) et le site en ligne apres le deploiement.
+4. Ensuite, partie 6 (tests hors depot, bugs, regle des 10 s avec connexion lente, documentation complete),
+   en suivant la methode : analyser, comprendre, agir, verifier, rapport PDF.
