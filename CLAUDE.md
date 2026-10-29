@@ -339,8 +339,20 @@ Dockerfile, .dockerignore, docker-compose.yml (db, api, web), demarrer.sh (Rende
 + gunicorn 1 processus 4 fils). Mesures : pitch 3,3 a 4,2 s avec Denise (6,4 a 7,5 s avec sage) ; image
 184 Mo ; site + API 265 Mo de memoire. pipeline/metriques_audio.py : WER sage 3,8 %, Denise 4,6 % (erreurs
 surtout sur les noms congolais) ; CER 1,7 % et 1,2 % ; MOS a noter par l'apprenant (data/audio/notes_mos.csv).
-Cookie de session Secure sur Render (variable RENDER). Le site n'est PAS encore en ligne : l'apprenant
-cree la base et le service Render, puis le secret GitHub RENDER_DEPLOY_HOOK (guide dans la conversation).
+Cookie de session Secure sur Render (variable RENDER). Le site n'est PAS encore en ligne.
+DEPLOIEMENT A FAIRE PAR CLAUDE (demande de l'apprenant, 29/10) dans une NOUVELLE session, avec la cle d'API
+Render rangee par l'apprenant dans les reglages de l'environnement (variable RENDER_API_KEY, jamais dans la
+conversation) et les domaines api.render.com, render.com, onrender.com autorises. Etapes : API Render
+(https://api.render.com/v1, en-tete "Authorization: Bearer $RENDER_API_KEY") -> owner (GET /owners) ;
+base Postgres gratuite "cvboost-db", region frankfurt ; service web "cvboost" : depot public
+https://github.com/jason-bit-lang/ball, branche claude/capstone-github-setup-g24r7p, runtime docker, offre
+free, region frankfurt, healthCheckPath /health, autoDeploy non ; variables SECRET_KEY (generee, jamais
+affichee), OPENAI_API_KEY (celle de l'environnement), DATABASE_URL (adresse interne de cvboost-db). Attendre le
+deploiement, verifier /health, l'accueil, l'inscription, l'envoi d'un CV et le pitch sur le site en ligne.
+Reste a l'apprenant : copier le Deploy Hook (Settings du service) dans le secret GitHub RENDER_DEPLOY_HOOK,
+puis supprimer la cle d'API Render s'il le souhaite. Ensuite : rapport PDF de la partie 5.
+MOS : 15 extraits anonymes a noter de 1 a 5 (sage, Denise, VITS) ; les regenerer avec
+python -m pipeline.metriques_audio si besoin, puis les envoyer a l'apprenant.
 Ordre de travail : 1) CV et texte du CV enregistres dans la base, DATABASE_URL ; 2) API FastAPI du
 pitch, route Flask et bouton ; 3) Docker, Render, GitHub Actions, sante et journal ; 4) tests, rapport.
 
