@@ -6,7 +6,7 @@ elle ecoute seulement sur la machine (127.0.0.1), ou dans le reseau prive de doc
 POST /speak-smart  {"document_id": 3}
   1. lit le texte du CV dans la base de donnees ;
   2. gpt-4o-mini le transforme en pitch oral d'environ 60 mots (reponse a "Presentez-vous") ;
-  3. la voix est creee par OpenAI (gpt-4o-mini-tts, voix sage) ou, en secours, par edge-tts (gratuit) ;
+  3. la voix Denise (edge-tts, gratuit, environ 1,5 s) le lit et l'enregistre en mp3 ;
   4. le fichier mp3 est envoye, puis supprime (BackgroundTasks).
 GET /health : l'API repond.
 
@@ -26,13 +26,10 @@ from sqlalchemy import create_engine, text
 from config import ADRESSE_BASE  # config.py charge aussi le fichier .env (cle OpenAI)
 
 MODELE_TEXTE = 'gpt-4o-mini'
-MODELE_VOIX = 'gpt-4o-mini-tts'
-VOIX = 'sage'                        # la meme voix que la recruteuse (choix de l'apprenant)
-VOIX_SECOURS = 'fr-FR-DeniseNeural'  # voix feminine francaise d'edge-tts
-BUDGET = 9.5    # secondes : le site doit repondre en moins de 10 s
-VOIX_MAX = 7    # secondes accordees au plus a la voix OpenAI (environ 5 s pour 60 mots)
-SECOURS = 2     # secondes toujours gardees pour la voix de secours (edge-tts met environ 2 s)
-CV_MAX = 6000   # caracteres du CV envoyes a OpenAI
+VOIX = 'fr-FR-DeniseNeural'  # voix feminine francaise d'edge-tts, choisie par l'apprenant apres ecoute
+DELAI_TEXTE = 6              # secondes au plus pour ecrire le pitch (environ 1,5 s)
+DELAI_VOIX = 3               # secondes d'attente au plus pour la voix (le site doit repondre en moins de 10 s)
+CV_MAX = 6000                # caracteres du CV envoyes a OpenAI
 
 # Consignes reprises du module 3 (coach professionnel), ramenees a environ 60 mots
 CONSIGNES = """Tu es un coach professionnel.
@@ -44,7 +41,6 @@ Contraintes :
 - Entre 50 et 60 mots, en 4 ou 5 phrases courtes.
 - N'invente rien : utilise seulement ce qui figure dans le CV.
 - Reponds en francais."""
-TON = "Parle en français, d'une voix posée, chaleureuse et assurée."
 
 # Les erreurs sont ecrites dans la console : Render les affiche dans l'onglet "Logs"
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(name)s : %(message)s')
@@ -72,30 +68,9 @@ def ecrire_pitch(client, texte_cv):
     return reponse.choices[0].message.content.strip()
 
 
-def voix_openai(client, pitch, chemin, limite):
-    """Le son arrive morceau par morceau : on l'ecrit dans le fichier et on abandonne si l'heure limite est passee.
-    (Le "timeout" d'OpenAI ne suffit pas : il limite l'attente de chaque morceau, pas la duree totale.)"""
-    with client.audio.speech.with_streaming_response.create(
-            model=MODELE_VOIX, voice=VOIX, input=pitch, instructions=TON, response_format='mp3',
-            timeout=limite - time.time()) as reponse:
-        with open(chemin, 'wb') as fichier:
-            for morceau in reponse.iter_bytes():
-                if time.time() > limite:
-                    raise TimeoutError('voix OpenAI trop lente')
-                fichier.write(morceau)
-
-
-def creer_voix(client, pitch, chemin, limite):
-    """Etape 3 : voix OpenAI si elle est prete avant l'heure limite, sinon voix de secours edge-tts.
-    Renvoie le nom du moteur utilise."""
-    if limite - time.time() >= 1:
-        try:
-            voix_openai(client, pitch, chemin, limite)
-            return 'openai'
-        except Exception as erreur:  # heure limite depassee, credit epuise, reseau coupe...
-            journal.warning('Voix OpenAI indisponible (%s) : voix de secours', type(erreur).__name__)
-    edge_tts.Communicate(pitch, VOIX_SECOURS, connect_timeout=SECOURS, receive_timeout=SECOURS).save_sync(chemin)
-    return 'edge-tts'
+def creer_voix(pitch, chemin):
+    """Etape 3 : la voix Denise lit le pitch et l'enregistre dans le fichier mp3."""
+    edge_tts.Communicate(pitch, VOIX, connect_timeout=DELAI_VOIX, receive_timeout=DELAI_VOIX).save_sync(chemin)
 
 
 @app.post('/speak-smart')
@@ -105,7 +80,7 @@ def speak_smart(demande: Demande, taches: BackgroundTasks):
     if not texte_cv:
         raise HTTPException(404, 'CV introuvable.')
     try:
-        client = OpenAI(timeout=BUDGET - SECOURS, max_retries=0)  # la cle vient de OPENAI_API_KEY
+        client = OpenAI(timeout=DELAI_TEXTE, max_retries=0)  # la cle vient de OPENAI_API_KEY
         pitch = ecrire_pitch(client, texte_cv)
     except Exception as erreur:
         journal.error('Pitch non ecrit (%s)', type(erreur).__name__)
@@ -114,20 +89,16 @@ def speak_smart(demande: Demande, taches: BackgroundTasks):
     # Fichier temporaire : il est supprime juste apres l'envoi
     descripteur, chemin = tempfile.mkstemp(suffix='.mp3')
     os.close(descripteur)
-    # Heure limite de la voix OpenAI : 7 s au plus, et toujours 2 s de marge pour la voix de secours
-    limite = min(time.time() + VOIX_MAX, debut + BUDGET - SECOURS)
     try:
-        moteur_voix = creer_voix(client, pitch, chemin, limite)
-    except Exception as erreur:
+        creer_voix(pitch, chemin)
+    except Exception as erreur:  # service de la voix injoignable ou trop lent
         os.remove(chemin)
         journal.error('Voix non creee (%s)', type(erreur).__name__)
         raise HTTPException(503, "La voix du pitch n'a pas pu être créée.")
     taches.add_task(os.remove, chemin)
-    journal.info('Pitch du CV %s : %s mots, voix %s, %.1f s', demande.document_id, len(pitch.split()),
-                 moteur_voix, time.time() - debut)
+    journal.info('Pitch du CV %s : %s mots, %.1f s', demande.document_id, len(pitch.split()), time.time() - debut)
     # Le texte du pitch accompagne le son dans un en-tete HTTP (accents encodes avec quote)
-    return FileResponse(chemin, media_type='audio/mpeg',
-                        headers={'X-Pitch-Texte': quote(pitch), 'X-Voix': moteur_voix})
+    return FileResponse(chemin, media_type='audio/mpeg', headers={'X-Pitch-Texte': quote(pitch)})
 
 
 @app.get('/health')

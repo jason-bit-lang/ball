@@ -307,7 +307,7 @@ def pitch(id):
     except requests.RequestException as erreur:
         log_event('PITCH_ERREUR', cv=document.id, erreur=type(erreur).__name__)
         return jsonify(erreur="Votre pitch n'est pas disponible pour le moment. Réessayez dans un instant."), 503
-    log_event('PITCH', cv=document.id, voix=reponse.headers.get('X-Voix', ''))
+    log_event('PITCH', cv=document.id)
     return Response(reponse.content, mimetype='audio/mpeg',
                     headers={'X-Pitch-Texte': reponse.headers.get('X-Pitch-Texte', '')})
 

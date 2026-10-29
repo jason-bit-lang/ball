@@ -17,7 +17,7 @@ Le detail des objectifs et des etapes du projet se trouve dans `CLAUDE.md`.
 | Frontend             | HTML5 / CSS3 / Jinja2 / JavaScript                 |
 | Matching CV / offres | TF-IDF (scikit-learn)                              |
 | Assistante DRH       | OpenAI (gpt-4o-mini, gpt-live-1)                   |
-| Pitch vocal          | FastAPI, OpenAI gpt-4o-mini-tts, secours edge-tts  |
+| Pitch vocal          | FastAPI, OpenAI gpt-4o-mini, voix Denise (edge-tts)|
 | Deploiement          | Docker, docker-compose, GitHub Actions, Render     |
 
 ## Structure
@@ -111,7 +111,9 @@ python -m pipeline.dataset_ia        # data/offres_propres.csv -> data/ia/*.json
   (gpt-4o-mini), entretien vocal en direct (gpt-live-1, micro necessaire) puis evaluation.
   La cle `OPENAI_API_KEY` doit etre dans `.env`.
 - **Pitch vocal** (partie 5) : reponse modele a "Presentez-vous", faite a partir du CV (50 a 60 mots),
-  lue avec la voix sage d'OpenAI, ou par edge-tts en secours.
+  ecrite par gpt-4o-mini et lue par la voix Denise d'edge-tts (environ 4 s au total).
+- **Qualite des voix** : `python -m pipeline.metriques_audio` compare sage (OpenAI), Denise (edge-tts) et
+  VITS (Coqui TTS, si installe) : WER et CER mesures automatiquement, MOS note a l'ecoute.
 
 Les annonces scannees sont lues par OCR avec Tesseract (optionnel en local) :
 - Windows : installer depuis https://github.com/UB-Mannheim/tesseract/wiki en cochant la langue francaise

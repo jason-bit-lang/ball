@@ -290,10 +290,10 @@ Bug corrige dans les maquettes : la classe "rond" servait deux fois (cercle d'at
 
 - Orchestrateur FastAPI (`/speak-smart`) :
   1. Reformulation du CV brut en discours fluide via un prompt strict envoye a OpenAI.
-  2. Envoi du texte a un modele vocal qui genere une presentation audio. En ligne : OpenAI
-     `gpt-4o-mini-tts` (choix de l'apprenant, environ 7 s, quelques centimes), avec un delai
-     maximum de 7 s. En cas d'erreur, de delai depasse ou de credit epuise, bascule automatique
-     sur `edge-tts` (gratuit, environ 2 s, sortie mp3) pour rester sous les 10 s au total.
+  2. Envoi du texte a un modele vocal qui genere une presentation audio. En ligne : voix Denise
+     d'`edge-tts` (fr-FR-DeniseNeural, gratuit, environ 1,5 s, mp3). Choix de l'apprenant le 29/10
+     apres ecoute : la voix sage d'OpenAI (gpt-4o-mini-tts, environ 5 s) est abandonnee, sans voix
+     de secours ; si edge-tts ne repond pas, un message clair s'affiche.
      Pitch court (environ 60 mots) pour limiter le temps de generation.
      Coqui TTS / VITS est garde pour la demonstration en local ou sur Colab et pour mesurer
      WER, CER et MOS.
@@ -324,8 +324,8 @@ pour la voix ; ramener a environ 60 mots) et la suppression du fichier audio tem
 l'envoi (`BackgroundTasks` de FastAPI).
 
 Decisions de l'apprenant (28/10) : le pitch sert de modele de reponse a "Presentez-vous" (premiere
-question d'un entretien). Il est fait a partir du CV seulement (pas adapte a chaque offre), avec la
-voix `sage` (la meme que la recruteuse) ; en secours, une voix feminine francaise d'edge-tts.
+question d'un entretien). Il est fait a partir du CV seulement (pas adapte a chaque offre).
+Voix : d'abord sage, puis (29/10, apres ecoute des deux) Denise d'edge-tts seule.
 Bouton "Ecouter mon pitch" dans le bandeau de la page des opportunites et sur les cartes "Mes CV".
 L'apprenant a deja un compte Render. Render publie la BRANCHE DE TRAVAIL (claude/capstone-github-setup-g24r7p),
 pas main (choix de l'apprenant : pas de fusion pour l'instant). GitHub Actions (deploiement.yml) fait un
@@ -333,10 +333,14 @@ TEST DE DEMARRAGE avant chaque deploiement (aucun fichier de tests dans le depot
 lance site + API, verifie /health, l'accueil, l'inscription et l'envoi d'un petit CV Word, puis appelle le
 Deploy Hook (secret GitHub RENDER_DEPLOY_HOOK ; sans ce secret, le deploiement est saute).
 Fait (29/10) : config.py (ADRESSE_BASE, ADRESSE_API) ; Document.contenu et Document.texte ; api/main.py
-(pitch 50 a 60 mots, voix sage avec heure limite reelle, secours edge-tts fr-FR-DeniseNeural) ; route Flask
+(pitch 50 a 60 mots, voix Denise d'edge-tts) ; route Flask
 /pitch/<id> ; /health (site, base, api) ; pages erreur.html (404, 500) ; journal aussi dans la console ;
 Dockerfile, .dockerignore, docker-compose.yml (db, api, web), demarrer.sh (Render : uvicorn 127.0.0.1:8000
-+ gunicorn 1 processus 4 fils). Mesures : pitch 6,4 a 7,5 s ; image 184 Mo ; site + API 265 Mo de memoire.
++ gunicorn 1 processus 4 fils). Mesures : pitch 3,3 a 4,2 s avec Denise (6,4 a 7,5 s avec sage) ; image
+184 Mo ; site + API 265 Mo de memoire. pipeline/metriques_audio.py : WER sage 3,8 %, Denise 4,6 % (erreurs
+surtout sur les noms congolais) ; CER 1,7 % et 1,2 % ; MOS a noter par l'apprenant (data/audio/notes_mos.csv).
+Cookie de session Secure sur Render (variable RENDER). Le site n'est PAS encore en ligne : l'apprenant
+cree la base et le service Render, puis le secret GitHub RENDER_DEPLOY_HOOK (guide dans la conversation).
 Ordre de travail : 1) CV et texte du CV enregistres dans la base, DATABASE_URL ; 2) API FastAPI du
 pitch, route Flask et bouton ; 3) Docker, Render, GitHub Actions, sante et journal ; 4) tests, rapport.
 
