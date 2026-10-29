@@ -343,7 +343,7 @@ Dockerfile, .dockerignore, docker-compose.yml (db, api, web), demarrer.sh (Rende
 184 Mo ; site + API 265 Mo de memoire. api_service/metriques_audio.py : WER sage 3,8 %, Denise 4,6 % (erreurs
 surtout sur les noms congolais) ; CER 1,7 % et 1,2 % ; MOS a noter par l'apprenant (data/audio/notes_mos.csv).
 Cookie de session Secure sur Render (variable RENDER). Le site n'est PAS encore en ligne.
-DEPLOIEMENT A FAIRE PAR CLAUDE (demande de l'apprenant, 29/10) dans une NOUVELLE session, avec la cle d'API
+DEPLOIEMENT A FAIRE PAR CLAUDE (demande de l'apprenant, 29/10 ; cle et domaines ajoutes le 29/10) dans une NOUVELLE session, avec la cle d'API
 Render rangee par l'apprenant dans les reglages de l'environnement (variable RENDER_API_KEY, jamais dans la
 conversation) et les domaines api.render.com, render.com, onrender.com autorises. Etapes : API Render
 (https://api.render.com/v1, en-tete "Authorization: Bearer $RENDER_API_KEY") -> owner (GET /owners) ;
@@ -368,7 +368,7 @@ pitch, route Flask et bouton ; 3) Docker, Render, GitHub Actions, sante et journ
 
 ## Architecture du projet (imposee par la formation, mise en place le 29/10)
 
-Depot GitHub a renommer `cvboost_enterprise` (decision de l'apprenant ; ancien nom `ball`, liens redirigees).
+Depot GitHub renomme `cvboost_enterprise` le 29/10 (ancien nom `ball` : les anciens liens sont rediriges).
 - `.github/workflows/` : `deploy.yml` (CI/CD Render) et `scraping.yml` (scraping quotidien).
 - `app_web/` (sprint 1 et assistante DRH) : static/, templates/, models.py, routes.py, ia.py, config.py,
   et en plus __init__.py (cree le site), matching.py, affichage.py, journal.py, offres.py.
