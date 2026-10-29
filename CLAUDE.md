@@ -379,11 +379,27 @@ Consignes de l'apprenant pour la documentation (29/10) : deux PDF, en francais, 
 FAIT le 29/10 : CVBoost_documentation.pdf (17 pages) et CVBoost_explain_code.pdf (33 pages), envoyes a l'apprenant.
 Sources dans le scratchpad, dossier doc6/ : documentation.html ; explain_1/2/3.html assembles en explain_code.html ;
 commun.css ; pdf.js (PDF avec numero de page) ; espaces.py (espaces insecables avant ; : ? ! et dans les guillemets).
-Consignes pour les TESTS : a recevoir de l'apprenant (il a annonce qu'il les donnerait).
-Incoherences notees en relisant le code (pour la liste des bugs de la partie 6, rien de corrige pour l'instant) :
-docstring de api_service/metriques_audio.py (dit sage "utilisee en ligne" et Denise "voix de secours" : en ligne,
-c'est Denise seule) ; commentaire de .gitignore (chemin pipeline/metriques_audio.py, devenu api_service/) ;
-message du pitch sans cle OpenAI ("Reessayez dans un instant" alors que la cle manque).
+TESTS FAITS le 29/10 (demande de l'apprenant : tester toute l'application, attaques comprises ; RIEN corrige, on en
+discute apres SES propres tests). Rapport : rapport6/CVBoost_rapport_partie6_tests.pdf (12 pages, envoye).
+491 verifications, 484 reussies : site SQLite 120/122, Postgres 119/122 ; donnees + IA 76/76 (scraper en direct
+compris) ; SacreBLEU recalcule 2,58 -> 35,14 ; vraie assistante 6/6 (CV piege 0 %, "donne-moi 100" -> 0/100) ; API du
+pitch 18/19 ; Docker 12/12 (image sans .env/.git/base, utilisateur cvboost ; charge : 600 pages / 30 visiteurs, 0 erreur,
+p95 945 ms, 352 Mo max sur 512) ; navigateur local 61/61 et en ligne 60/60 (32 affichages, liens, accessibilite, XSS,
+redirections) ; en ligne 11/12. Regle des 10 s en 3G lente : tout passe (pitch 7,7 a 9,5 s), SAUF le reveil de Render
+apres 15 min sans visite : 55,8 s. 27 attaques : 24 bloquees, 3 points faibles.
+Bugs proposes (non corriges) : B1 nom de fichier > 255 caracteres -> erreur 500 sur Postgres ; B2 nom non latin
+("简历.pdf") -> CV refuse (secure_filename efface l'extension) ; B3 corps > 5 Mo vers l'assistante traite comme un envoi
+de CV (redirection + fausse ligne UPLOAD_REJECTED) ; B4 page 405 en anglais ; B5 message du pitch sans cle ("Reessayez") ;
+B6 textes depasses (docstring metriques_audio, commentaire .gitignore). Code propose dans le rapport (section 5).
+Ameliorations a decider : A1 UptimeRobot (reveil 55,8 s) ; A2 longueur du pitch 51 a 74 mots (max_tokens, coupe, pitch
+garde en base) ; A3 pas de limite de tentatives de connexion ; A4 pas de limite sur analyse / evaluation / pitch (cout) ;
+A5 pas d'en-tetes de securite (clickjacking) ; A6 CV sans rapport accepte des 1 mot commun ("do") ; A7 temps de
+connexion revele si l'email existe ; A8 11 paires d'annonces a introduction commune dans data/ia ; A9 scraping sur main.
+Tests dans le scratchpad, dossier p6test/ (test_site.py [postgres], test_donnees_ia.py [scraper], test_lora.py,
+test_ia_reelle.py, test_api.py, charge.py, serveur_p6.py + navigateur_p6.js [enligne], resultats_*.json). Postgres de
+test dans /tmp/pg6 (port 5433). Comptes crees en ligne : 4 test.render.p6.*@example.com (+ 2 de la partie 5), a
+supprimer sur demande. Suite : l'apprenant teste lui-meme, puis discussion (ameliorer / laisser), puis peut-etre une
+maquette de design qu'il donnera "juste pour un test".
 
 ## Architecture du projet (imposee par la formation, mise en place le 29/10)
 
@@ -484,5 +500,5 @@ Avant la partie 6 (rapport de la partie 5, section 9, livre le 29/10) :
    livre. L'apprenant fait les verifications de la section "Verifications en attente cote apprenant".
 3. Quand l'apprenant annonce que le Deploy Hook est dans le secret GitHub RENDER_DEPLOY_HOOK : verifier une
    execution du workflow deploy.yml (etape "Deploy Hook" non sautee) et le site en ligne apres le deploiement.
-4. Partie 6 : documentation et Explain Code livres (voir la partie 6 ci-dessus). Reste : tests hors depot (selon les
-   consignes de l'apprenant), bugs, regle des 10 s avec connexion lente, puis rapport PDF de la partie 6.
+4. Partie 6 : documentation, Explain Code et rapport de tests livres (voir la partie 6 ci-dessus). Attendre le retour
+   des tests de l'apprenant, puis decider avec lui des corrections (B1 a B6) et ameliorations (A1 a A9) ; maquette ensuite.
