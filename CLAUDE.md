@@ -345,9 +345,13 @@ surtout sur les noms congolais) ; CER 1,7 % et 1,2 % ; MOS a noter par l'apprena
 Cookie de session Secure sur Render (variable RENDER).
 EN LIGNE depuis le 29/10 : https://cvboost-kfyi.onrender.com (service "cvboost" srv-dbha4h0473hc739coqdg,
 base "cvboost-db" dpg-dbha41u1egvs73evnfb0-a, Postgres 16 gratuit, expire le 28/11/2026, region frankfurt,
-autoDeploy non). Premier deploiement en 2 min 30 ; journaux Render : /health 200 et accueil 200. Le conteneur cloud
-ne peut pas ouvrir cvboost-kfyi.onrender.com (seul onrender.com est autorise) : inscription, envoi du CV et pitch
-en ligne restent a verifier (navigateur de l'apprenant, ou domaine ajoute aux domaines autorises).
+autoDeploy non). Premier deploiement en 2 min 30. Domaine cvboost-kfyi.onrender.com autorise dans l'environnement
+(Playwright : chromium.launch({ proxy: { server: process.env.HTTPS_PROXY } })). Test en ligne du 29/10 (Chromium, 15/15) :
+/health 0,5 s, accueil 1 s, inscription 2,2 s, CV illisible refuse 3,5 s, envoi du CV -> 10 offres 5 s (dont 3 s
+d'animation), pitch 5,3 s (60 mots, mp3 137 Ko), page d'offre 1,4 s, analyse DRH 5 s, connexion 2,2 s, email deja
+utilise et mauvais mot de passe refuses, 404, aucune erreur JavaScript. En HTTPS, Flask-WTF exige l'en-tete Referer :
+une requete POST sans Referer recoit 400 (normal, le navigateur l'envoie). Deux comptes test.render.*@example.com
+crees dans la base en ligne pendant ce test. Entretien vocal WebRTC encore a tester dans un vrai navigateur.
 DEPLOIEMENT A FAIRE PAR CLAUDE (demande de l'apprenant, 29/10 ; cle et domaines ajoutes le 29/10) dans une NOUVELLE session, avec la cle d'API
 Render rangee par l'apprenant dans les reglages de l'environnement (variable RENDER_API_KEY, jamais dans la
 conversation) et les domaines api.render.com, render.com, onrender.com autorises. Etapes : API Render
