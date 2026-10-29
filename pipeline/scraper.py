@@ -42,16 +42,18 @@ STATUTS = {'clas1': 'en_cours', 'clas2': 'moins_de_3_jours', 'clas3': 'expiree',
 SALAIRE_REGEX = re.compile(r'(?:salaire|r[ée]mun[ée]ration)[^\n]{0,80}?\d[\d .,]*\s*(?:\$|usd|dollars?|fc|cdf)',
                            re.IGNORECASE)
 
+# Une session garde la meme connexion d'une requete a l'autre (plus rapide, et plus leger pour le site visite)
 session = requests.Session()
 session.headers['User-Agent'] = USER_AGENT
 
 
 def telecharger(url):
-    """Attend DELAI secondes puis telecharge la page. Renvoie la reponse, ou None en cas d'erreur."""
+    """Attend DELAI secondes puis telecharge la page. Renvoie la reponse, ou None en cas d'erreur.
+    Toutes les requetes passent par ici : le delai de courtoisie ne peut jamais etre oublie."""
     time.sleep(DELAI)
     try:
         reponse = session.get(url, timeout=TIMEOUT)
-        reponse.raise_for_status()
+        reponse.raise_for_status()  # code d'erreur (404, 500...) -> exception, attrapee juste en dessous
         return reponse
     except requests.RequestException as erreur:
         print(f'  erreur sur {url} : {erreur}')
@@ -59,27 +61,31 @@ def telecharger(url):
 
 
 def texte_propre(element):
+    """Texte d'un bloc HTML sans lignes vides en trop ni espaces en double."""
     return re.sub(r'[ \t]+', ' ', re.sub(r'\n\s*\n+', '\n', element.get_text('\n'))).strip()
 
 
 def lire_liste(html):
     """Extrait les offres d'une page de liste : titre, entreprise, lieu, date, lien, statut."""
     offres = []
+    # Chaque offre est une ligne du tableau "table_datas" ; la case "tdclas" porte la couleur du statut
     for case in BeautifulSoup(html, 'html.parser').select('table.table_datas td.tdclas'):
-        colonnes = case.find_parent('tr').find_all('td')
+        colonnes = case.find_parent('tr').find_all('td')  # les cases de la ligne : titre, entreprise, lieu, date
+        # Premiere classe connue de la case (clas1, clas2...), sinon 'non_precise'
         statut = next((STATUTS[c] for c in case['class'] if c in STATUTS), 'non_precise')
         offres.append({
             'titre': colonnes[1].find('strong').get_text(strip=True),
             'entreprise': colonnes[2].get_text(strip=True),
             'lieu': colonnes[3].get_text(strip=True),
             'date_publication': colonnes[4].get_text(strip=True),
-            'url': urljoin(BASE_URL, colonnes[1].find('a')['href']),
+            'url': urljoin(BASE_URL, colonnes[1].find('a')['href']),  # lien relatif -> adresse complete
             'statut': statut,
         })
     return offres
 
 
 def lire_pdf(contenu):
+    """Texte de toutes les pages d'un PDF joint a l'annonce."""
     return '\n'.join(page.extract_text() or '' for page in PdfReader(io.BytesIO(contenu)).pages)
 
 
@@ -91,7 +97,7 @@ def lire_image(contenu):
 def texte_du_fichier(url, lire):
     """Telecharge un PDF ou une image puis en extrait le texte avec la fonction `lire`."""
     reponse = telecharger(url)
-    if reponse is None or len(reponse.content) > FICHIER_MAX:
+    if reponse is None or len(reponse.content) > FICHIER_MAX:  # fichier trop gros : on ne le lit pas
         return ''
     try:
         return lire(reponse.content).strip()
@@ -101,6 +107,7 @@ def texte_du_fichier(url, lire):
 
 
 def ocr_disponible():
+    """Vrai si le logiciel Tesseract est installe (pytesseract n'est qu'un intermediaire vers lui)."""
     try:
         pytesseract.get_tesseract_version()
         return True
@@ -108,11 +115,12 @@ def ocr_disponible():
         return False
 
 
-OCR_ACTIF = ocr_disponible()
+OCR_ACTIF = ocr_disponible()  # verifie une seule fois, au lancement du scraper
 
 
 def lire_offre(html):
     """Extrait la description d'une offre. Selon l'annonce, elle est en texte, dans un PDF ou en image."""
+    # La description est le bloc qui suit le titre "Description" dans la colonne de gauche de la page
     bloc = BeautifulSoup(html, 'html.parser').find('div', class_='more_hemploi_left')
     titres = bloc.find_all('div', class_='emploi_section') if bloc else []
     section = next((t for t in titres if t.get_text(strip=True) == 'Description'), None)
@@ -121,6 +129,7 @@ def lire_offre(html):
         return {'description': None, 'source_description': 'vide', 'lien_candidature': None, 'salaire': None}
 
     liens = [a['href'] for a in contenu.find_all('a', href=True)]
+    # Lien de candidature : le premier lien vers un autre site que mediacongo (site de l'employeur)
     lien_externe = next((l for l in liens if l.startswith('http') and 'mediacongo' not in l), None)
     images = [urljoin(BASE_URL, img['src']) for img in contenu.find_all('img', src=True)][:IMAGES_MAX]
 
@@ -141,6 +150,7 @@ def lire_offre(html):
 
 
 def charger_existantes():
+    """Offres deja recuperees lors des lancements precedents (tableau vide la premiere fois)."""
     try:
         return pd.read_csv(OFFRES_BRUTES, dtype=str)  # tout en texte : on peut remplacer n'importe quelle case
     except FileNotFoundError:
@@ -167,8 +177,10 @@ def relire_images(existantes):
 
 
 def main(nombre_pages=5):
+    """Parcourt les pages de la liste des offres, puis chaque nouvelle offre."""
     existantes = charger_existantes()
     relire_images(existantes)
+    # Adresses deja connues : ces offres ne sont pas telechargees une seconde fois
     deja_vues = set(existantes['url']) if 'url' in existantes else set()
     nouvelles = []
     debut = time.time()
@@ -176,7 +188,7 @@ def main(nombre_pages=5):
     for numero in range(1, nombre_pages + 1):
         reponse = telecharger(LISTE_URL.format(numero))
         if reponse is None:
-            break
+            break  # site injoignable : inutile d'essayer les pages suivantes
         offres = [o for o in lire_liste(reponse.text) if o['url'] not in deja_vues]
         print(f'Page {numero} : {len(offres)} nouvelle(s) offre(s)')
         for offre in offres:
@@ -193,5 +205,6 @@ def main(nombre_pages=5):
     print(f'{len(nouvelles)} offre(s) ajoutee(s) en {(time.time() - debut) / 60:.1f} min -> {OFFRES_BRUTES}')
 
 
+# "python -m pipeline.scraper 3" : sys.argv[1] vaut "3" (nombre de pages) ; 5 pages si rien n'est precise
 if __name__ == '__main__':
     main(int(sys.argv[1]) if len(sys.argv) > 1 else 5)

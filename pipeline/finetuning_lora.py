@@ -3,6 +3,8 @@
 Tache apprise : description d'une offre -> "Poste : ... | Competences : ..." (voir pipeline/dataset_ia.py).
 LoRA garde les poids du modele geles et n'entraine que deux petites matrices ajoutees a cote des
 matrices d'attention requete et valeur (appelees `q` et `v` dans T5, `q_proj` et `v_proj` ailleurs).
+Pourquoi LoRA ? Entrainer tout le modele demanderait beaucoup de memoire et produirait un fichier de
+300 Mo ; avec LoRA, moins de 1 % des parametres bougent et l'adaptateur ne pese que 1,4 Mo.
 
 Entrees  : data/ia/train.jsonl, validation.jsonl, test.jsonl ; data/offres_propres.csv
 Sorties  : modele/lora_cvboost/ (adaptateur LoRA + scores.json) ; data/offres_ia.csv
@@ -27,22 +29,23 @@ from .dataset_ia import ENTREE_MAX as DESCRIPTION_MAX, PARTS, PREFIXE
 from .nettoyage_offres import competences_connues
 
 MODELE = 'google/flan-t5-small'
-ENTREE_TOKENS, SORTIE_TOKENS = 512, 64  # longueurs maximales en tokens
+ENTREE_TOKENS, SORTIE_TOKENS = 512, 64  # longueurs maximales en tokens (un token = un morceau de mot)
 EPOQUES = 20                            # peu d'exemples : on les revoit plusieurs fois
-TAILLE_LOT = 8
+TAILLE_LOT = 8                          # exemples traites ensemble a chaque pas d'apprentissage
 
 # Reglages LoRA
 CONFIG_LORA = LoraConfig(
     task_type=TaskType.SEQ_2_SEQ_LM,
     r=8,                        # taille des petites matrices ajoutees
     lora_alpha=16,              # force de l'adaptation
-    lora_dropout=0.05,
+    lora_dropout=0.05,          # coupe au hasard 5 % des liaisons pendant l'entrainement : evite le "par coeur"
     target_modules=['q', 'v'],  # projections requete et valeur (q_proj / v_proj)
 )
 
 
 def charger_jeux():
     """Charge les trois jeux et reverifie qu'aucune offre n'est partagee entre deux jeux."""
+    # load_dataset (Hugging Face) lit les fichiers JSONL crees par pipeline/dataset_ia.py
     jeux = load_dataset('json', data_files={nom: os.path.join(DATASET_DIR, f'{nom}.jsonl') for nom in PARTS})
     empreintes = {nom: set(jeux[nom]['hash']) for nom in jeux}
     for a, b in [('train', 'validation'), ('train', 'test'), ('validation', 'test')]:
@@ -53,19 +56,24 @@ def charger_jeux():
 def tokeniser(tokenizer, jeux):
     """Transforme les textes en suites de nombres (tokens) que le modele sait lire."""
     def lot(exemples):
+        # Entree (description) et sortie attendue ("labels") sont toutes deux transformees en tokens
         entrees = tokenizer(exemples['entree'], max_length=ENTREE_TOKENS, truncation=True)
         entrees['labels'] = tokenizer(text_target=exemples['sortie'], max_length=SORTIE_TOKENS,
                                       truncation=True)['input_ids']
         return entrees
+    # batched=True : les exemples sont traites par paquets (plus rapide) ; les colonnes texte ne servent plus
     return jeux.map(lot, batched=True, remove_columns=jeux['train'].column_names)
 
 
 def creer_trainer(modele, tokenizer, jeux_tokens, dossier, epoques):
+    """Prepare l'entrainement (Seq2SeqTrainer de Hugging Face) et le calcul du score SacreBLEU."""
     def decoder(ids):
+        """Tokens -> textes lisibles."""
         ids = np.where(ids != -100, ids, tokenizer.pad_token_id)  # -100 = case vide a ignorer
         return [texte.strip() for texte in tokenizer.batch_decode(ids, skip_special_tokens=True)]
 
     def calculer_bleu(prediction):
+        """SacreBLEU compare les textes produits aux textes attendus : 0 = rien de commun, 100 = identiques."""
         predictions, references = decoder(prediction.predictions), decoder(prediction.label_ids)
         return {'bleu': sacrebleu.corpus_bleu(predictions, [references]).score}
 
@@ -99,12 +107,12 @@ def creer_trainer(modele, tokenizer, jeux_tokens, dossier, epoques):
 
 def generer(modele, tokenizer, textes):
     """Sorties du modele pour une liste d'entrees, par lots."""
-    modele.eval()
+    modele.eval()  # mode utilisation (et non entrainement)
     sorties = []
     for i in range(0, len(textes), 2 * TAILLE_LOT):
         entrees = tokenizer(textes[i:i + 2 * TAILLE_LOT], max_length=ENTREE_TOKENS, truncation=True,
                             padding=True, return_tensors='pt').to(modele.device)
-        with torch.no_grad():
+        with torch.no_grad():  # pas d'apprentissage ici : PyTorch n'a pas a garder de quoi corriger les poids
             ids = modele.generate(**entrees, max_new_tokens=SORTIE_TOKENS)
         sorties += tokenizer.batch_decode(ids, skip_special_tokens=True)
     return sorties
@@ -114,6 +122,7 @@ def lire_sortie(sortie):
     """'Poste : X | Competences : a, b' -> ('X', 'a, b').
     Seules les competences connues sont gardees, sans doublon : un petit modele invente parfois
     des mots ("sant", "luz") ou repete une competence."""
+    # partition coupe le texte en trois : avant le separateur, le separateur, apres
     poste, _, competences = sortie.partition('| Competences :')
     return poste.replace('Poste :', '').strip(), competences_connues(competences.split(','))
 
@@ -131,6 +140,7 @@ def traiter_offres(modele, tokenizer):
 
 
 def main(epoques=EPOQUES):
+    """Entrainement, evaluation avec et sans LoRA, enregistrement de l'adaptateur, puis traitement par lot."""
     set_seed(42)  # memes resultats d'un lancement a l'autre
     print('Materiel :', 'GPU ' + torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'processeur (CPU)')
     jeux = charger_jeux()
@@ -146,7 +156,7 @@ def main(epoques=EPOQUES):
         trainer.train()
         # Score final sur le jeu de test, jamais vu pendant l'entrainement, avec et sans LoRA
         score_lora = trainer.evaluate(jeux_tokens['test'], metric_key_prefix='test')['test_bleu']
-        with modele.disable_adapter():
+        with modele.disable_adapter():  # meme modele, adaptateur LoRA debranche : le point de comparaison
             score_base = trainer.evaluate(jeux_tokens['test'], metric_key_prefix='test')['test_bleu']
     print(f'SacreBLEU test - modele de base : {score_base:.1f}')
     print(f'SacreBLEU test - avec LoRA      : {score_lora:.1f}')
@@ -168,5 +178,6 @@ def main(epoques=EPOQUES):
     print(f'{traiter_offres(modele, tokenizer)} offres traitees : {OFFRES_IA}')
 
 
+# "python -m pipeline.finetuning_lora 2" : 2 epoques seulement (essai rapide) ; 20 sinon
 if __name__ == '__main__':
     main(int(sys.argv[1]) if len(sys.argv) > 1 else EPOQUES)

@@ -1,5 +1,8 @@
 """Etape 2 : statistiques d'usage calculees en SQL sur analytics.db.
 
+Pourquoi SQL ? La base analytique est separee de celle du site : on peut y faire des calculs lourds
+(regroupements, moyennes) sans jamais ralentir le site.
+
 Lancement : python -m pipeline.kpi   (apres python -m pipeline.audit_logs)
 """
 import sqlite3
@@ -59,21 +62,24 @@ KPI = {
 def calculer_kpi(chemin_db=ANALYTICS_DB):
     """Renvoie {titre: (colonnes, lignes)} pour chaque indicateur."""
     resultats = {}
-    with sqlite3.connect(chemin_db) as conn:
+    with sqlite3.connect(chemin_db) as conn:  # "with" ferme la base tout seul a la fin
         for titre, requete in KPI.items():
             curseur = conn.execute(requete)
-            colonnes = [c[0] for c in curseur.description]
+            colonnes = [c[0] for c in curseur.description]  # noms des colonnes du resultat
             resultats[titre] = (colonnes, curseur.fetchall())
     return resultats
 
 
 def afficher_tableau(colonnes, lignes):
+    """Affiche un resultat en colonnes alignees dans le terminal."""
+    # Largeur de chaque colonne : la plus longue valeur de la colonne (titre compris)
     largeurs = [max(len(str(v)) for v in [col] + [l[i] for l in lignes]) for i, col in enumerate(colonnes)]
     for ligne in [colonnes] + lignes:
         print('  ' + ' | '.join(str(v).ljust(w) for v, w in zip(ligne, largeurs)))
 
 
 def main():
+    """Calcule puis affiche chaque indicateur."""
     for titre, (colonnes, lignes) in calculer_kpi().items():
         print(f'\n{titre}')
         if lignes:

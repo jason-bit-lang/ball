@@ -34,7 +34,8 @@ DOSSIER_AUDIO = os.path.join(DATA_DIR, 'audio')        # extraits a ecouter (non
 RESULTATS = os.path.join(DATA_DIR, 'metriques_audio.csv')
 NOTES_MOS = os.path.join(DOSSIER_AUDIO, 'notes_mos.csv')
 
-# Cinq pitchs de test (personnes fictives), comme ceux produits par l'API du pitch
+# Cinq pitchs de test (personnes fictives), comme ceux produits par l'API du pitch.
+# Textes fixes : les memes phrases pour toutes les voix, sinon la comparaison ne serait pas juste.
 PITCHS = [
     "Je m'appelle Grace Mbuyi, je suis comptable à Kinshasa. Chez Bralima, je gère la comptabilité générale "
     "selon les normes OHADA, les déclarations fiscales et les clôtures mensuelles sur SAGE. Avant cela, j'ai été "
@@ -55,12 +56,14 @@ PITCHS = [
 
 
 def voix_sage(texte, chemin):
+    """Voix sage d'OpenAI (payante, environ 5 s) : celle de la recruteuse de l'entretien."""
     reponse = OpenAI().audio.speech.create(model='gpt-4o-mini-tts', voice='sage', input=texte,
                                            response_format='mp3')
     reponse.write_to_file(chemin)
 
 
 def voix_denise(texte, chemin):
+    """Voix Denise d'edge-tts (gratuite, environ 1 s) : celle du pitch sur le site."""
     edge_tts.Communicate(texte, 'fr-FR-DeniseNeural').save_sync(chemin)
 
 
@@ -75,6 +78,7 @@ def voix_disponibles():
     modele = TTS('tts_models/fr/css10/vits', progress_bar=False)  # modele francais, charge une seule fois
 
     def voix_vits(texte, chemin):
+        """Voix VITS de Coqui TTS : modele libre qui tourne sur l'ordinateur, sans Internet."""
         modele.tts_to_file(text=texte, file_path=chemin)
 
     voix['VITS (Coqui TTS)'] = (voix_vits, 'wav')
@@ -83,12 +87,13 @@ def voix_disponibles():
 
 def normaliser(texte):
     """Minuscules, sans ponctuation : on compare les mots, pas la facon de les ecrire."""
-    texte = re.sub(r"[’'\-]", ' ', texte.lower())
-    texte = re.sub(r'[^\w\s]', '', texte)
+    texte = re.sub(r"[’'\-]", ' ', texte.lower())  # "j'ai" -> "j ai", "Nord-Kivu" -> "nord kivu"
+    texte = re.sub(r'[^\w\s]', '', texte)          # retire la ponctuation restante
     return ' '.join(texte.split())
 
 
 def transcrire(chemin):
+    """Ce que le modele de transcription entend dans l'extrait audio (il joue le role d'un auditeur)."""
     with open(chemin, 'rb') as fichier:
         return OpenAI().audio.transcriptions.create(model='gpt-4o-mini-transcribe', file=fichier, language='fr').text
 
@@ -108,6 +113,7 @@ def mesurer():
         creer(PITCHS[numero], os.path.join(DOSSIER_AUDIO, fichier))
         secondes = time.time() - debut
         transcription = transcrire(os.path.join(DOSSIER_AUDIO, fichier))
+        # reference : ce qui devait etre dit ; hypothese : ce qui a ete compris
         reference, hypothese = normaliser(PITCHS[numero]), normaliser(transcription)
         lignes.append({'fichier': fichier, 'voix': nom, 'pitch': numero + 1, 'secondes': round(secondes, 2),
                        'wer': jiwer.wer(reference, hypothese), 'cer': jiwer.cer(reference, hypothese),
@@ -117,6 +123,7 @@ def mesurer():
     resultats.to_csv(RESULTATS, index=False)
     # Fiche de notes a remplir par les auditeurs (une ligne par auditeur et par extrait)
     pd.DataFrame({'fichier': sorted(resultats['fichier']), 'auditeur': '', 'note': ''}).to_csv(NOTES_MOS, index=False)
+    # Moyenne de chaque mesure par voix (comme un GROUP BY en SQL)
     bilan = resultats.groupby('voix').agg(secondes=('secondes', 'mean'), wer=('wer', 'mean'), cer=('cer', 'mean'))
     print('\nMoyennes par voix (WER et CER : plus c\'est bas, mieux c\'est)')
     print(bilan.round(3).to_string())
@@ -126,7 +133,8 @@ def mesurer():
 
 def mos():
     """MOS de chaque voix : moyenne des notes de 1 a 5 donnees par les auditeurs."""
-    notes = pd.read_csv(NOTES_MOS).dropna(subset=['note'])
+    notes = pd.read_csv(NOTES_MOS).dropna(subset=['note'])  # lignes pas encore notees : ignorees
+    # Les notes ne disent que le nom du fichier : on retrouve la voix grace au fichier des resultats
     notes = notes.merge(pd.read_csv(RESULTATS)[['fichier', 'voix']], on='fichier')
     bilan = notes.groupby('voix').agg(mos=('note', 'mean'), nombre_de_notes=('note', 'count'))
     print(bilan.round(2).to_string())

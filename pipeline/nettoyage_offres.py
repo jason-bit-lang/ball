@@ -3,6 +3,10 @@
 Entree  : data/offres_brutes.csv  (cree par pipeline/scraper.py)
 Sortie  : data/offres_propres.csv
 Lancement : python -m pipeline.nettoyage_offres
+
+Pourquoi nettoyer ? Les offres scrapees contiennent des doublons, des cases vides, des salaires ecrits
+de mille facons et des textes abimes par l'OCR. Une IA entrainee ou interrogee sur ces donnees
+donnerait de mauvais resultats : "garbage in, garbage out".
 """
 import re
 import unicodedata
@@ -10,6 +14,7 @@ from datetime import date
 import pandas as pd
 from .config import OFFRES_BRUTES, OFFRES_PROPRES, TAUX_CDF_USD
 
+# Colonnes attendues dans le fichier brut (celles qui manquent sont creees vides)
 COLONNES = ['titre', 'entreprise', 'lieu', 'description', 'salaire', 'date_publication', 'url',
             'statut', 'source_description', 'lien_candidature']
 
@@ -63,6 +68,7 @@ COMPETENCES = {
 
 def normaliser(texte):
     """Minuscules, sans accents, espaces multiples reduits : 'Développeur  Web' -> 'developpeur web'."""
+    # NFKD separe chaque lettre de son accent ("e" + accent) ; encode('ascii', 'ignore') jette les accents
     texte = unicodedata.normalize('NFKD', str(texte)).encode('ascii', 'ignore').decode()
     return re.sub(r'\s+', ' ', texte).strip().lower()
 
@@ -111,14 +117,16 @@ QUALITE_MIN = 0.75
 
 
 def est_annonce_de_resultats(titre, description):
+    """Vrai si l'annonce publie les resultats d'un recrutement termine (personne ne peut plus y postuler)."""
     debut = normaliser(titre) + ' ' + normaliser(description)[:600]  # le sujet est annonce au debut
     return bool(RESULTATS_REGEX.search(debut))
 
 
 def qualite_texte(texte):
     """Entre 0 et 1. Un texte mal lu par l'OCR contient beaucoup de melanges comme 'a9', 'Arr0s' ou '|=;'."""
-    mots = [m.strip('.,;:!?()[]«»"\'’-') for m in str(texte).split()]
+    mots = [m.strip('.,;:!?()[]«»"\'’-') for m in str(texte).split()]  # mots sans la ponctuation autour
     mots = [m for m in mots if m]
+    # Part des mots "propres" (que des lettres, ou que des chiffres) parmi tous les mots
     return sum(bool(MOT_REGEX.fullmatch(m)) for m in mots) / len(mots) if mots else 0
 
 
@@ -144,7 +152,9 @@ SITE_REGEX = re.compile(r'(?:https?://|www\.)[\w-]+(?:\.[\w-]+)+(?:/\S*)?', re.I
 
 def trouver_date_limite(description):
     """Premiere date limite lisible dans l'annonce, au format AAAA-MM-JJ, sinon None."""
+    # normaliser() retire les accents : "cloture", "fevrier"... s'ecrivent comme dans l'expression reguliere
     for jour, mois, annee in DATE_LIMITE_REGEX.findall(normaliser(description)):
+        # Le mois est ecrit en lettres ("novembre") ou en chiffres ("11")
         numero_mois = MOIS.index(mois) + 1 if mois in MOIS else int(mois)
         try:
             return date(int(annee), numero_mois, int(jour)).isoformat()
@@ -155,13 +165,14 @@ def trouver_date_limite(description):
 
 def trouver_contact(description):
     """Quand l'annonce n'a pas de lien de candidature : une adresse email (mailto:) ou un site cite."""
+    # L'email passe en premier : c'est le moyen de postuler le plus direct
     email = EMAIL_REGEX.search(description)
     if email:
-        return 'mailto:' + email.group(0).rstrip('.')
+        return 'mailto:' + email.group(0).rstrip('.')  # retire un point de fin de phrase colle a l'adresse
     site = SITE_REGEX.search(description)
     if site:
         adresse = site.group(0).rstrip('.,;)')
-        return adresse if adresse.lower().startswith('http') else 'https://' + adresse
+        return adresse if adresse.lower().startswith('http') else 'https://' + adresse  # "www.x.cd" -> lien cliquable
     return None
 
 
@@ -205,6 +216,7 @@ def nettoyer(df):
 
     # 3. Doublons : meme lien, ou meme titre + entreprise + description (sans tenir compte des accents)
     avant = len(df)
+    # "~" veut dire "pas" : on garde les lignes qui ne sont PAS des doublons
     df = df[~(df['url'].notna() & df.duplicated(subset='url'))]
     cle = df['titre'].map(normaliser) + '|' + df['entreprise'].map(normaliser) + '|' + df['description'].map(normaliser)
     df = df[~cle.duplicated()]
@@ -242,6 +254,7 @@ def nettoyer(df):
     # 7. Texte unique donne a l'IA (matching TF-IDF et fine-tuning)
     df['texte_ia'] = (df['titre'] + '. ' + df['description']).map(normaliser)
 
+    # Numerotation des offres propres de 1 a N, dans une colonne "id" placee en premier
     df = df.reset_index(drop=True)
     df.insert(0, 'id', df.index + 1)
     resume['offres_propres'] = len(df)
@@ -249,6 +262,7 @@ def nettoyer(df):
 
 
 def main():
+    """Lit les offres brutes, les nettoie, enregistre le resultat et affiche le resume de chaque etape."""
     try:
         brutes = pd.read_csv(OFFRES_BRUTES)
     except FileNotFoundError:

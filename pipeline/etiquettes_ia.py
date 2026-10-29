@@ -35,23 +35,27 @@ Reponds uniquement avec ce JSON : {{"competences": ["nom1", "nom2"]}}"""
 
 def etiqueter(client, titre, description):
     """Competences choisies par gpt-4o-mini, filtrees (noms connus seulement, sans doublon)."""
+    # temperature=0 : la meme offre recoit toujours les memes competences (etiquettes stables)
     reponse = client.chat.completions.create(
         model=MODELE, temperature=0, max_tokens=100, response_format={'type': 'json_object'},
         messages=[{'role': 'system', 'content': CONSIGNE},
                   {'role': 'user', 'content': f'TITRE : {titre}\n\nDESCRIPTION :\n{description[:DESCRIPTION_MAX]}'}])
     choisies = json.loads(reponse.choices[0].message.content).get('competences', [])
+    # Le modele peut inventer un nom de competence : on ne garde que ceux de la liste
     return competences_connues([str(nom) for nom in choisies])
 
 
 def main():
+    """Etiquette les offres pas encore faites, en sauvegardant regulierement (une coupure ne perd presque rien)."""
     load_dotenv()
     if not os.environ.get('OPENAI_API_KEY'):
         print('Cle OpenAI manquante : ajoutez OPENAI_API_KEY dans .env')
         return
+    # Ici on peut attendre (script lance a la main, pas un visiteur du site) : 30 s et 2 nouvelles tentatives
     client = OpenAI(timeout=30, max_retries=2)
     offres = pd.read_csv(OFFRES_PROPRES).dropna(subset=['url', 'description'])
     deja = pd.read_csv(COMPETENCES_GPT) if os.path.exists(COMPETENCES_GPT) else pd.DataFrame(columns=['url', 'competences_gpt'])
-    a_faire = offres[~offres['url'].isin(deja['url'])]
+    a_faire = offres[~offres['url'].isin(deja['url'])]  # offres dont l'url n'est pas encore dans le fichier
     print(f'{len(deja)} offres deja etiquetees, {len(a_faire)} a etiqueter')
 
     lignes = deja.to_dict('records')
@@ -60,6 +64,7 @@ def main():
             lignes.append({'url': url, 'competences_gpt': etiqueter(client, titre, description)})
         except (OpenAIError, json.JSONDecodeError) as erreur:
             print(f'  offre ignoree ({type(erreur).__name__}) : {titre[:60]}')
+        # "%" donne le reste de la division : vrai toutes les 25 offres, et a la derniere
         if numero % SAUVEGARDE == 0 or numero == len(a_faire):
             pd.DataFrame(lignes).to_csv(COMPETENCES_GPT, index=False)
             print(f'  {numero} / {len(a_faire)}')

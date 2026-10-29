@@ -60,6 +60,9 @@ fait, ce qui fonctionne, ce qui ne fonctionne pas encore. Delai total : 3 jours.
 
 Attentes de l'apprenant (a respecter dans toutes les parties) :
 - Avancer partie par partie, sans se presser ; expliquer simplement, en francais.
+- Commentaires (demande de l'apprenant, 29/10) : chaque fichier Python commence par son role dans le projet ;
+  chaque fonction a une docstring qui dit ce qu'elle fait ET pourquoi ; un commentaire court avant chaque
+  etape non evidente (le "pourquoi" plutot que le "quoi"). Fait pour les 21 fichiers Python le 29/10.
 - Code court et peu abondant : l'apprenant doit le comprendre et le maitriser entierement.
   Pas d'ecritures "astucieuses" (`**{...}`, `zip(*map(...))`, index croises...) : ecrire en clair.
 - Chaque rapport PDF contient une section "Problemes rencontres et solutions" (probleme, cause,
