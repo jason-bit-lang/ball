@@ -7,11 +7,11 @@
    entre le navigateur et OpenAI (WebRTC) : le serveur ne fait que creer la session.
 4. evaluer_entretien (gpt-4o-mini) : note l'entretien a partir de sa transcription.
 """
+import io
 import json
 import os
 import re
 import zipfile
-from functools import lru_cache
 from xml.etree import ElementTree
 from openai import OpenAI, OpenAIError
 from pypdf import PdfReader
@@ -85,17 +85,16 @@ class IAIndisponible(Exception):
     """Erreur dont le message peut etre affiche tel quel a l'utilisateur."""
 
 
-@lru_cache(maxsize=64)
-def extraire_texte(chemin):
-    """Texte du CV, ou une chaine vide si le fichier est absent ou illisible.
-    Le resultat est garde en memoire : un meme CV n'est lu qu'une fois."""
+def extraire_texte(contenu, extension):
+    """Texte du CV a partir du contenu du fichier (octets), ou une chaine vide s'il est illisible."""
+    fichier = io.BytesIO(contenu)  # les octets sont lus comme un fichier ouvert
     try:
-        if chemin.endswith('.pdf'):
-            pages = PdfReader(chemin).pages[:PAGES_MAX]
+        if extension == 'pdf':
+            pages = PdfReader(fichier).pages[:PAGES_MAX]
             texte = '\n'.join(page.extract_text() or '' for page in pages)
         else:
             # Un DOCX est une archive zip : le texte est dans word/document.xml
-            with zipfile.ZipFile(chemin) as archive:
+            with zipfile.ZipFile(fichier) as archive:
                 if archive.getinfo('word/document.xml').file_size > XML_MAX:
                     return ''  # fichier anormal (bombe zip)
                 racine = ElementTree.fromstring(archive.read('word/document.xml'))

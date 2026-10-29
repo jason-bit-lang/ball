@@ -1,4 +1,3 @@
-import os
 import re
 import uuid
 from datetime import timedelta
@@ -19,8 +18,8 @@ from .models import Document, EntretienVocal, Favori, Offre, User, now_utc
 SIGNATURES = {'pdf': b'%PDF', 'docx': b'PK\x03\x04'}
 EMAIL_REGEX = r'[^@\s]+@[^@\s]+\.[^@\s]+'
 PASSWORD_MIN_LENGTH = 8
+NOM_MAX, EMAIL_MAX = 100, 150  # tailles des colonnes de la table User
 STATUT_ANALYSE = 'CV analysé'
-STATUT_ILLISIBLE = 'CV illisible (scanné ou abîmé)'
 # Assistante DRH : passer a False pour la masquer (par exemple si le credit OpenAI est epuise)
 ASSISTANTE_ACTIVE = True
 ENTRETIENS_PAR_JOUR = 5   # chaque entretien vocal est payant : limite par utilisateur sur 24 h
@@ -62,17 +61,6 @@ def document_du_user(id):
     return Document.query.filter_by(id=id, user_id=current_user.id).first_or_404()
 
 
-def texte_du_cv(document):
-    """Lit le texte du CV et met a jour son statut. Les deux IA (matching et assistante DRH) l'utilisent.
-    Renvoie une chaine vide si le CV est illisible."""
-    texte = extraire_texte(os.path.join(app.config['UPLOAD_FOLDER'], document.stored_filename))
-    statut = STATUT_ANALYSE if len(texte) >= TEXTE_MIN else STATUT_ILLISIBLE
-    if document.status != statut:
-        document.status = statut
-        db.session.commit()
-    return texte if statut == STATUT_ANALYSE else ''
-
-
 def demande_du_script():
     """Vrai si la demande vient du script de la page d'envoi (envoi.js) : on lui repond en JSON."""
     return request.headers.get('X-Requested-With') == 'fetch'
@@ -91,15 +79,6 @@ def reject_upload(reason, message, filename=''):
     log_event('UPLOAD_REJECTED', reason=reason, file=filename,
               ext=file_extension(filename), size=request.content_length or 0)
     return refuser_envoi(message)
-
-
-def supprimer_document(document):
-    """Retire un CV inutilisable : le fichier du dossier uploads/ et sa ligne dans la base."""
-    chemin = os.path.join(app.config['UPLOAD_FOLDER'], document.stored_filename)
-    if os.path.exists(chemin):
-        os.remove(chemin)
-    db.session.delete(document)
-    db.session.commit()
 
 
 @app.route('/')
@@ -122,6 +101,8 @@ def register():
         # Une seule erreur est affichee a la fois, la premiere trouvee
         if not (nom and prenom and email and password):
             error = 'Veuillez remplir tous les champs.'
+        elif len(nom) > NOM_MAX or len(prenom) > NOM_MAX or len(email) > EMAIL_MAX:
+            error = f'Nom et prénom : {NOM_MAX} caractères maximum ; email : {EMAIL_MAX} caractères maximum.'
         elif not re.fullmatch(EMAIL_REGEX, email):
             error = 'Adresse email invalide.'
         elif len(password) < PASSWORD_MIN_LENGTH:
@@ -194,26 +175,22 @@ def upload():
             return reject_upload(error, 'Fichier invalide : seuls les vrais fichiers PDF ou DOCX sont acceptés.',
                                  original_filename)
 
-        # Le fichier est renomme avec un identifiant unique (UUID) :
-        # deux CV portant le meme nom ne s'ecrasent jamais
-        stored_filename = f'{uuid.uuid4()}.{file_extension(original_filename)}'
-        path = os.path.join(app.config['UPLOAD_FOLDER'], stored_filename)
-        file.save(path)
-        log_event('UPLOAD_OK', file=original_filename, ext=file_extension(original_filename),
-                  size=os.path.getsize(path), stored=stored_filename)
-
-        document = Document(original_filename=original_filename,
-                            stored_filename=stored_filename,
-                            user_id=current_user.id)
-        db.session.add(document)
-        db.session.commit()
         # Le CV est lu tout de suite. Il est refuse seulement si rien n'y est reconnu
         # (scan sans texte, ou texte sans aucune competence ni aucun mot en commun avec les offres).
-        texte = texte_du_cv(document)
-        if not texte or not cv_reconnu(texte):
+        extension = file_extension(original_filename)
+        contenu = file.read()
+        texte = extraire_texte(contenu, extension)
+        log_event('UPLOAD_OK', file=original_filename, ext=extension, size=len(contenu))
+        if len(texte) < TEXTE_MIN or not cv_reconnu(texte):
             log_event('CV_ILLISIBLE', file=original_filename)
-            supprimer_document(document)
             return refuser_envoi(CV_ILLISIBLE)
+
+        # Le fichier et son texte sont enregistres dans la base. Le nom unique (UUID) evite toute
+        # confusion entre deux CV qui portent le meme nom.
+        document = Document(original_filename=original_filename, stored_filename=f'{uuid.uuid4()}.{extension}',
+                            contenu=contenu, texte=texte, status=STATUT_ANALYSE, user_id=current_user.id)
+        db.session.add(document)
+        db.session.commit()
         adresse = url_for('recherche', id=document.id)
         if demande_du_script():
             return jsonify(adresse=adresse)
@@ -241,7 +218,7 @@ def history():
     """Historique : offres favorites (avec leur date de cloture et la derniere note) et CV lisibles."""
     documents = (Document.query.filter_by(user_id=current_user.id, status=STATUT_ANALYSE)
                  .order_by(Document.upload_date.desc()).all())
-    cvs = [{'document': document, 'competences': trouver_competences(texte_du_cv(document))} for document in documents]
+    cvs = [{'document': document, 'competences': trouver_competences(document.texte)} for document in documents]
     favoris = Favori.query.filter_by(user_id=current_user.id).order_by(Favori.date.desc()).all()
     cartes = [{'offre': favori.offre, 'echeance': echeance(favori.offre), 'note': derniere_note(favori.offre_id)}
               for favori in favoris]
@@ -255,7 +232,7 @@ def recherche(id):
     """Page des opportunites : offres ouvertes les plus proches du CV (matching TF-IDF).
     Elle n'est jamais vide : sans offre en commun avec le CV, on propose les plus recentes."""
     document = document_du_user(id)
-    texte = texte_du_cv(document)
+    texte = document.texte
     if not texte:
         flash(CV_ILLISIBLE, 'erreur')
         return redirect(url_for('upload'))
@@ -272,7 +249,7 @@ def offre(offre_id, id):
     """Detail d'une offre, avec l'assistante DRH a cote."""
     offre = db.get_or_404(Offre, offre_id)
     document = document_du_user(id)
-    texte = texte_du_cv(document)
+    texte = document.texte
     # Niveau de l'offre si elle fait partie des resultats du CV, sinon "a explorer"
     resultat = next((r for r in rechercher(texte) if r['offre'].id == offre.id), None) if texte else None
     if resultat is None:
@@ -322,7 +299,7 @@ def entretien(offre_id, id, etape):
     if not ASSISTANTE_ACTIVE or etape not in ('analyse', 'vocal', 'evaluation'):
         return jsonify(erreur="L'assistante DRH n'est pas disponible."), 404
     offre = db.get_or_404(Offre, offre_id)
-    texte = texte_du_cv(document_du_user(id))
+    texte = document_du_user(id).texte
     if not texte:
         return jsonify(erreur='Le texte de ce CV est illisible : envoyez une autre version.'), 400
     donnees = request.get_json(silent=True) or {}

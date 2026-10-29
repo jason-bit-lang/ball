@@ -31,6 +31,9 @@ class Document(db.Model):
     stored_filename = db.Column(db.String(255), nullable=False)
     upload_date = db.Column(db.DateTime, default=now_utc)
     status = db.Column(db.String(50), default="En attente d'analyse")
+    # Le fichier est garde dans la base, pas sur le disque : sur Render, le disque est efface a chaque redemarrage
+    contenu = db.Column(db.LargeBinary)
+    texte = db.Column(db.Text)  # texte lu une seule fois a l'envoi ; utilise par le matching, l'assistante et le pitch
 
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
@@ -39,16 +42,18 @@ class Offre(db.Model):
     """Offre d'emploi scrapee, copiee depuis data/offres_propres.csv (voir app/offres.py)."""
     id = db.Column(db.Integer, primary_key=True)
     url = db.Column(db.String(500), unique=True, nullable=False)
-    titre = db.Column(db.String(300), nullable=False)
-    entreprise = db.Column(db.String(200))
-    lieu = db.Column(db.String(200))
+    # Textes lus par OCR ou produits par l'IA : leur longueur n'est pas garantie, d'ou db.Text (sans limite).
+    # Postgres refuse un texte plus long que la taille d'un db.String ; SQLite, lui, l'accepte sans rien dire.
+    titre = db.Column(db.Text, nullable=False)
+    entreprise = db.Column(db.Text)
+    lieu = db.Column(db.Text)
     description = db.Column(db.Text, nullable=False)
     date_publication = db.Column(db.String(10))  # AAAA-MM-JJ
     date_limite = db.Column(db.String(10))       # AAAA-MM-JJ, lue dans l'annonce (vide si non precisee)
-    lien_candidature = db.Column(db.String(500))  # site de candidature, ou "mailto:adresse" 
-    competences = db.Column(db.String(500))      # trouvees par le nettoyage Pandas
-    titre_ia = db.Column(db.String(300))         # trouves par le modele LoRA (traitement par lot sur Colab)
-    competences_ia = db.Column(db.String(500))
+    lien_candidature = db.Column(db.Text)        # site de candidature, ou "mailto:adresse"
+    competences = db.Column(db.Text)             # trouvees par le nettoyage Pandas
+    titre_ia = db.Column(db.Text)                # trouves par le modele LoRA (traitement par lot sur Colab)
+    competences_ia = db.Column(db.Text)
 
 
 class EntretienVocal(db.Model):

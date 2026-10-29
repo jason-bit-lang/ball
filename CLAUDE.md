@@ -323,6 +323,14 @@ Rien n'existe encore pour cette partie. A reprendre du depot module 3 (tin-mzl) 
 pour la voix ; ramener a environ 60 mots) et la suppression du fichier audio temporaire apres
 l'envoi (`BackgroundTasks` de FastAPI).
 
+Decisions de l'apprenant (28/10) : le pitch sert de modele de reponse a "Presentez-vous" (premiere
+question d'un entretien). Il est fait a partir du CV seulement (pas adapte a chaque offre), avec la
+voix `sage` (la meme que la recruteuse) ; en secours, une voix feminine francaise d'edge-tts.
+Bouton "Ecouter mon pitch" dans le bandeau de la page des opportunites et sur les cartes "Mes CV".
+L'apprenant a deja un compte Render.
+Ordre de travail : 1) CV et texte du CV enregistres dans la base, DATABASE_URL ; 2) API FastAPI du
+pitch, route Flask et bouton ; 3) Docker, Render, GitHub Actions, sante et journal ; 4) tests, rapport.
+
 ### Partie 6 : Tests, bugs et documentation
 
 - Ecrire et executer des tests adaptes au projet, sans les ajouter au depot.

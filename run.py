@@ -1,7 +1,10 @@
 import os
 from sqlalchemy import inspect, text
 from app import app, db
+from app.ia import extraire_texte
+from app.models import Document
 from app.offres import synchroniser_offres
+from config import DOSSIER
 
 
 def ajouter_colonnes_manquantes():
@@ -17,10 +20,26 @@ def ajouter_colonnes_manquantes():
     db.session.commit()
 
 
+def reprendre_anciens_cv():
+    """CV envoyes avant la partie 5 : leur fichier etait dans le dossier uploads/.
+    On copie le fichier et son texte dans la base (texte vide si le fichier a disparu)."""
+    for document in Document.query.filter(Document.texte.is_(None)):
+        chemin = os.path.join(DOSSIER, 'uploads', document.stored_filename)
+        if os.path.exists(chemin):
+            with open(chemin, 'rb') as fichier:
+                document.contenu = fichier.read()
+        else:
+            document.status = 'Fichier introuvable'  # le CV n'apparait plus dans l'historique
+        extension = document.stored_filename.rsplit('.', 1)[-1]
+        document.texte = extraire_texte(document.contenu or b'', extension)
+    db.session.commit()
+
+
 # Cree les tables si elles n'existent pas encore, puis copie les offres du dossier data/ dans la base
 with app.app_context():
     db.create_all()
     ajouter_colonnes_manquantes()
+    reprendre_anciens_cv()
     synchroniser_offres()
 
 if __name__ == '__main__':

@@ -1,17 +1,13 @@
 import os
-from dotenv import load_dotenv
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_wtf.csrf import CSRFProtect
 from werkzeug.middleware.proxy_fix import ProxyFix
+from config import ADRESSE_BASE, DOSSIER  # config.py charge aussi le fichier .env
 
-# Charge les variables du fichier .env (SECRET_KEY, OPENAI_API_KEY...)
-load_dotenv()
-
-# Dossier racine du projet ; la base SQLite locale est rangee dans database/
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-app = Flask(__name__, instance_path=os.path.join(BASE_DIR, 'database'))
+# La base SQLite locale est rangee dans database/
+app = Flask(__name__, instance_path=os.path.join(DOSSIER, 'database'))
 
 # Sur Render, le site est derriere un proxy : on lit la vraie adresse IP du visiteur
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1)
@@ -21,14 +17,11 @@ app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 if not app.config['SECRET_KEY']:
     raise RuntimeError("SECRET_KEY manquante : copiez .env.example en .env et remplissez-la.")
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(app.instance_path, 'cvboost.db')
+app.config['SQLALCHEMY_DATABASE_URI'] = ADRESSE_BASE
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {'pool_pre_ping': True}  # reconnexion si Postgres a coupe la liaison
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024  # 5 Mo maximum par fichier
-
-# Chemins absolus : le site fonctionne quel que soit le dossier d'ou on le lance
-app.config['UPLOAD_FOLDER'] = os.path.join(BASE_DIR, 'uploads')
 os.makedirs(app.instance_path, exist_ok=True)
-os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 db = SQLAlchemy(app)
 csrf = CSRFProtect(app)  # bloque les formulaires envoyes depuis un autre site
