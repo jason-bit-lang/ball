@@ -370,6 +370,21 @@ regenerer avec python -m api_service.metriques_audio si besoin.
 - Verifier que chaque fonctionnalite repond en moins de 10 secondes, meme avec une connexion lente.
 - Rediger une documentation complete qui explique chaque partie et chaque etape de CVBoost.
 
+Consignes de l'apprenant pour la documentation (29/10) : deux PDF, en francais, simples.
+1. "Documentation du projet" : pour que l'apprenant explique CVBoost a d'autres ; globale, "comme un README pour
+   humain" ; front-end survole ; back-end partie par partie (ce que fait la partie, comment on l'a faite, ce qu'elle
+   cree, son impact sur les autres parties) ; une section "problemes rencontres et solutions".
+2. "Explain Code (explication du code)" : l'architecture, le role de chaque dossier, puis chaque fichier Python :
+   ce qu'il fait, ses fonctions, POURQUOI ce code et QUEL PROBLEME il resout ; surtout le back-end.
+FAIT le 29/10 : CVBoost_documentation.pdf (17 pages) et CVBoost_explain_code.pdf (33 pages), envoyes a l'apprenant.
+Sources dans le scratchpad, dossier doc6/ : documentation.html ; explain_1/2/3.html assembles en explain_code.html ;
+commun.css ; pdf.js (PDF avec numero de page) ; espaces.py (espaces insecables avant ; : ? ! et dans les guillemets).
+Consignes pour les TESTS : a recevoir de l'apprenant (il a annonce qu'il les donnerait).
+Incoherences notees en relisant le code (pour la liste des bugs de la partie 6, rien de corrige pour l'instant) :
+docstring de api_service/metriques_audio.py (dit sage "utilisee en ligne" et Denise "voix de secours" : en ligne,
+c'est Denise seule) ; commentaire de .gitignore (chemin pipeline/metriques_audio.py, devenu api_service/) ;
+message du pitch sans cle OpenAI ("Reessayez dans un instant" alors que la cle manque).
+
 ## Architecture du projet (imposee par la formation, mise en place le 29/10)
 
 Depot GitHub renomme `cvboost_enterprise` le 29/10 (ancien nom `ball` : les anciens liens sont rediriges).
@@ -419,7 +434,8 @@ Avant la partie 6 (rapport de la partie 5, section 9, livre le 29/10) :
 
 ## Etat du projet et environnement de travail (mis a jour le 29/10)
 
-- Partie 5 terminee le 29/10 : site en ligne, rapport PDF livre (13 pages). Prochaine etape : partie 6.
+- Partie 6 en cours : documentation et Explain Code livres le 29/10 ; tests et liste des bugs a faire ensuite.
+- Partie 5 terminee le 29/10 : site en ligne, rapport PDF livre (13 pages).
 - Parties 1, 2, 3 et 4 terminees, rapports PDF livres (partie 2 : section 7 problemes/solutions ;
   partie 3 : sections 2 bis resultats LoRA, 3 assistante DRH, 4 bis problemes, 4 ter taille du code ;
   partie 4 : design page par page, code, tests, problemes et solutions).
@@ -468,5 +484,5 @@ Avant la partie 6 (rapport de la partie 5, section 9, livre le 29/10) :
    livre. L'apprenant fait les verifications de la section "Verifications en attente cote apprenant".
 3. Quand l'apprenant annonce que le Deploy Hook est dans le secret GitHub RENDER_DEPLOY_HOOK : verifier une
    execution du workflow deploy.yml (etape "Deploy Hook" non sautee) et le site en ligne apres le deploiement.
-4. Ensuite, partie 6 (tests hors depot, bugs, regle des 10 s avec connexion lente, documentation complete),
-   en suivant la methode : analyser, comprendre, agir, verifier, rapport PDF.
+4. Partie 6 : documentation et Explain Code livres (voir la partie 6 ci-dessus). Reste : tests hors depot (selon les
+   consignes de l'apprenant), bugs, regle des 10 s avec connexion lente, puis rapport PDF de la partie 6.
