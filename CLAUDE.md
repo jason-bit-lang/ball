@@ -342,7 +342,12 @@ Dockerfile, .dockerignore, docker-compose.yml (db, api, web), demarrer.sh (Rende
 + gunicorn 1 processus 4 fils). Mesures : pitch 3,3 a 4,2 s avec Denise (6,4 a 7,5 s avec sage) ; image
 184 Mo ; site + API 265 Mo de memoire. api_service/metriques_audio.py : WER sage 3,8 %, Denise 4,6 % (erreurs
 surtout sur les noms congolais) ; CER 1,7 % et 1,2 % ; MOS a noter par l'apprenant (data/audio/notes_mos.csv).
-Cookie de session Secure sur Render (variable RENDER). Le site n'est PAS encore en ligne.
+Cookie de session Secure sur Render (variable RENDER).
+EN LIGNE depuis le 29/10 : https://cvboost-kfyi.onrender.com (service "cvboost" srv-dbha4h0473hc739coqdg,
+base "cvboost-db" dpg-dbha41u1egvs73evnfb0-a, Postgres 16 gratuit, expire le 28/11/2026, region frankfurt,
+autoDeploy non). Premier deploiement en 2 min 30 ; journaux Render : /health 200 et accueil 200. Le conteneur cloud
+ne peut pas ouvrir cvboost-kfyi.onrender.com (seul onrender.com est autorise) : inscription, envoi du CV et pitch
+en ligne restent a verifier (navigateur de l'apprenant, ou domaine ajoute aux domaines autorises).
 DEPLOIEMENT A FAIRE PAR CLAUDE (demande de l'apprenant, 29/10 ; cle et domaines ajoutes le 29/10) dans une NOUVELLE session, avec la cle d'API
 Render rangee par l'apprenant dans les reglages de l'environnement (variable RENDER_API_KEY, jamais dans la
 conversation) et les domaines api.render.com, render.com, onrender.com autorises. Etapes : API Render
