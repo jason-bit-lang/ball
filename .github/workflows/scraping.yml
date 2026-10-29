@@ -1,6 +1,6 @@
 # Recupere chaque jour les nouvelles offres de mediacongo.net, les nettoie et les enregistre dans le depot.
-# GitHub ne lance les taches planifiees que sur la branche principale (main) :
-# ce fichier sera actif une fois la branche fusionnee dans main.
+# GitHub ne lance les taches planifiees que sur la branche par defaut du depot : ce fichier est actif
+# quand la branche de travail est choisie comme branche par defaut (Settings > General sur GitHub).
 name: Scraping quotidien des offres
 
 on:

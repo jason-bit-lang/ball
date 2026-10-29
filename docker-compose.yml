@@ -1,12 +1,15 @@
 # En local : trois services separes (le site, l'API du pitch et la base Postgres).
 # Lancement : docker compose up --build   puis ouvrir http://localhost:5000
 # Les cles (SECRET_KEY, OPENAI_API_KEY) sont lues dans le fichier .env, jamais ecrites ici.
+# Le fichier .env est facultatif : sans lui, le site demarre quand meme (voir README).
 
 # Reglages communs au site et a l'API, repris plus bas avec "<<: *commun"
 x-commun: &commun
   build: .
   image: cvboost
-  env_file: .env
+  env_file:
+    - path: .env
+      required: false   # sans .env : cle de session temporaire, assistante DRH et pitch sans OpenAI
   environment:
     DATABASE_URL: postgresql://cvboost:${POSTGRES_PASSWORD:-cvboost_local}@db:5432/cvboost
     API_URL: http://api:8000

@@ -28,7 +28,7 @@ Le detail des objectifs et des etapes du projet se trouve dans `CLAUDE.md`.
 cvboost_enterprise/
 ├── .github/workflows/
 │   ├── deploy.yml           CI/CD : construit l'image Docker, test de demarrage, puis deploiement Render
-│   └── scraping.yml         scraping quotidien des offres (actif une fois le code fusionne dans main)
+│   └── scraping.yml         scraping quotidien des offres (actif si cette branche est la branche par defaut)
 ├── app_web/                 application Flask (sprint 1 et assistante DRH)
 │   ├── static/              style.css, site.js, envoi.js, offre.js, entretien.js
 │   ├── templates/           base, macros, icones, index, register, login, upload, resultats, offre, history, erreur
@@ -76,11 +76,45 @@ cvboost_enterprise/
 
 ## Lancer le projet en local
 
+### 1. Recuperer le projet (toujours la branche de travail)
+
+Le projet est sur la branche `claude/capstone-github-setup-g24r7p`, celle que Render publie.
+La branche `main` contient une ancienne version (avant le design et le pitch) : ne pas l'utiliser.
+
+```bash
+git clone -b claude/capstone-github-setup-g24r7p https://github.com/jason-bit-lang/cvboost_enterprise
+cd cvboost_enterprise
+```
+
+Copie deja clonee : `git checkout claude/capstone-github-setup-g24r7p` puis `git pull`.
+
+### 2. Le fichier .env (facultatif)
+
+Le site demarre meme sans fichier `.env`, avec Docker comme sans Docker. Dans ce cas :
+- une cle de session temporaire est creee : les visiteurs sont deconnectes a chaque redemarrage ;
+- sans cle OpenAI, l'assistante DRH et le pitch affichent un message au lieu de repondre.
+
+Pour tout activer, creer le fichier `.env` a partir du modele, puis remplir `SECRET_KEY`
+(`python -c "import secrets; print(secrets.token_hex(32))"`) et `OPENAI_API_KEY` :
+
+```bash
+cp .env.example .env      # Windows : copy .env.example .env
+```
+
+### 3. Lancer avec Docker (site, API et base Postgres, chacun dans son conteneur)
+
+Docker Desktop doit etre ouvert.
+
+```bash
+docker compose up --build      # puis ouvrir http://localhost:5000 ; arret : docker compose down
+```
+
+### 3 bis. Ou lancer sans Docker
+
 ```bash
 python -m venv venv
 # Windows : venv\Scripts\activate    Linux/Mac : source venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env    # puis remplir SECRET_KEY (python -c "import secrets; print(secrets.token_hex(32))")
 python run.py
 ```
 
@@ -89,12 +123,6 @@ Pour le pitch vocal, lancer aussi l'API dans un second terminal (meme dossier, m
 
 ```bash
 uvicorn api_service.main:app --port 8000
-```
-
-Avec Docker (site, API et base Postgres, chacun dans son conteneur) :
-
-```bash
-docker compose up --build      # puis ouvrir http://localhost:5000 ; arret : docker compose down
 ```
 
 ## Mise en ligne (Render)

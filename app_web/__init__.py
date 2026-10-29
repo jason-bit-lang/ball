@@ -5,6 +5,7 @@ Ce fichier est lu en premier quand on importe le dossier app_web/ : il cree `app
 """
 import logging
 import os
+import secrets
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
@@ -24,10 +25,13 @@ app = Flask(__name__, instance_path=os.path.join(DOSSIER, 'database'))
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1)
 
 # La cle secrete protege les sessions : elle ne doit jamais etre ecrite dans le code.
-# Sans elle, n'importe qui pourrait fabriquer un faux cookie de connexion : le site refuse de demarrer.
+# Elle vient du fichier .env (en local) ou des variables de Render. Sans .env (premier lancement sur un
+# autre ordinateur), une cle au hasard est creee : le site demarre et reste protege, mais la cle change
+# a chaque redemarrage, ce qui deconnecte les visiteurs.
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 if not app.config['SECRET_KEY']:
-    raise RuntimeError("SECRET_KEY manquante : copiez .env.example en .env et remplissez-la.")
+    app.config['SECRET_KEY'] = secrets.token_hex(32)
+    logging.warning("SECRET_KEY absente : cle temporaire creee. Copiez .env.example en .env pour la garder.")
 
 # Cookie de session : jamais lisible par JavaScript, jamais envoye depuis un autre site, et en ligne
 # (Render ajoute la variable RENDER=true) seulement sur une connexion chiffree HTTPS.

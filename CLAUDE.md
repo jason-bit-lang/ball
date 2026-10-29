@@ -410,7 +410,8 @@ Avant la partie 6 (rapport de la partie 5, section 9, livre le 29/10) :
 - Sur le PC : git pull, supprimer les anciens dossiers vides (app, pipeline, api, modele, notebooks),
   pip install -r requirements.txt, python run.py + uvicorn api_service.main:app --port 8000.
 - MOS : noter les 15 extraits (extraits_mos.zip envoye le 29/10, correspondance dans data/metriques_audio.csv).
-- Decider de la fusion dans main (scraping quotidien, branche publiee par Render).
+- Facultatif : choisir la branche de travail comme branche par defaut sur GitHub (Settings > General), pour
+  qu'un simple `git clone` la donne et que le scraping quotidien tourne dessus (voir "Branche unique").
 - Facultatif : supprimer les comptes test.render.*@example.com de la base en ligne (sur demande).
 - Toujours valables (parties 3 et 4) : cle OpenAI dans `.env` et credit OpenAI ; entretien vocal : entendre
   la recruteuse, etre compris, evaluation en moins de 10 s ; ancienne base `instance/cvboost.db` a deplacer
@@ -450,8 +451,15 @@ Avant la partie 6 (rapport de la partie 5, section 9, livre le 29/10) :
 - Entrainement LoRA sur processeur : venv Python 3.12, `pip install torch --index-url
   https://download.pytorch.org/whl/cpu` (PyTorch de PyPI impose 2,5 Go de bibliotheques NVIDIA),
   puis `pip install -r requirements-ia.txt pandas==2.2.3`. Environ 25 min pour 20 epoques.
-- Le workflow de scraping quotidien n'est actif qu'une fois la branche fusionnee dans `main`
-  (pas de pull request sans demande de l'apprenant).
+- Branche unique (decision de l'apprenant, 29/10) : `main` est abandonnee, seule la branche de travail
+  `claude/capstone-github-setup-g24r7p` est utilisee (commits, clone, Render). Ne pas fusionner dans main.
+  Raison : un `git clone` donnait main (version du 27/10, ancien design noir) chez un ami de l'apprenant.
+  Le README indique `git clone -b claude/capstone-github-setup-g24r7p ...`. main recoit encore le scraping
+  quotidien de l'ancien code (GitHub ne planifie que sur la branche par defaut).
+- Demarrage sans `.env` (demande de l'apprenant, 29/10) : docker-compose.yml lit `.env` seulement s'il existe
+  (`required: false`) et le site cree une SECRET_KEY temporaire au hasard si elle manque (avertissement dans le
+  journal). Sans cle OpenAI, l'assistante DRH et le pitch affichent un message. `.env.example` reste versionne
+  (choix de l'apprenant). Teste : docker compose sans .env, parcours navigateur 7/7, python run.py, 75/75 tests.
 
 ## Reprise apres /compact (demande de l'apprenant, 29/10)
 
