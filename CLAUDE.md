@@ -403,7 +403,21 @@ Depot GitHub renomme `cvboost_enterprise` le 29/10 (ancien nom `ball` : les anci
 - OpenAI : cle placee par l'apprenant dans `.env` (local) et dans les variables Render.
   Ne jamais la copier dans un fichier versionne ni dans un message.
 
-## Verifications en attente cote apprenant (rappelees dans les rapports des parties 3 et 4)
+## Verifications en attente cote apprenant (rappelees dans les rapports des parties 3, 4 et 5)
+
+Avant la partie 6 (rapport de la partie 5, section 9, livre le 29/10) :
+- Deploy Hook de Render dans le secret GitHub RENDER_DEPLOY_HOOK (puis prevenir Claude, qui verifie un deploiement).
+- Surveillance UptimeRobot de https://cvboost-kfyi.onrender.com/health toutes les 5 ou 10 minutes.
+- Supprimer la cle d'API Render (Render et reglages de l'environnement) apres le Deploy Hook.
+- Base Postgres gratuite : expire le 28/11/2026 (comptes et CV en ligne perdus ensuite).
+- Sur le site en ligne (Chrome ou Edge) : entretien vocal, pitch (ordinateur et telephone), parcours complet clair/sombre,
+  credit OpenAI.
+- Sur le PC : git pull, supprimer les anciens dossiers vides (app, pipeline, api, modele, notebooks),
+  pip install -r requirements.txt, python run.py + uvicorn api_service.main:app --port 8000.
+- MOS : noter les 15 extraits (extraits_mos.zip envoye le 29/10, correspondance dans data/metriques_audio.csv).
+- Decider de la fusion dans main (scraping quotidien, branche publiee par Render).
+- Facultatif : supprimer les comptes test.render.*@example.com de la base en ligne (sur demande).
+
 
 - Deplacer `instance/cvboost.db` vers `database/`, puis `pip install -r requirements.txt`.
 - Cle OpenAI dans `.env` et credit sur le compte OpenAI.
@@ -413,12 +427,12 @@ Depot GitHub renomme `cvboost_enterprise` le 29/10 (ancien nom `ball` : les anci
 - Partie 4 : `git pull`, relancer `python run.py` (les nouvelles colonnes sont ajoutees toutes seules
   a la base existante), parcourir chaque page en clair et en sombre, sur ordinateur et sur telephone.
 
-## Etat du projet et environnement de travail (mis a jour le 28/10)
+## Etat du projet et environnement de travail (mis a jour le 29/10)
 
+- Partie 5 terminee le 29/10 : site en ligne, rapport PDF livre (13 pages). Prochaine etape : partie 6.
 - Parties 1, 2, 3 et 4 terminees, rapports PDF livres (partie 2 : section 7 problemes/solutions ;
   partie 3 : sections 2 bis resultats LoRA, 3 assistante DRH, 4 bis problemes, 4 ter taille du code ;
   partie 4 : design page par page, code, tests, problemes et solutions).
-  Prochaine etape : partie 5 (FastAPI, Docker, Render), puis 6.
 - Fichiers du design (partie 4) : `app_web/templates/base.html` (en-tete, barre du bas, pied de page,
   theme), `macros.html` (icone, anneau), `icones.html` (icones SVG), une page par ecran ;
   `app_web/static/style.css` (12 sections, variables clair / sombre), `site.js` (commun), `envoi.js`
