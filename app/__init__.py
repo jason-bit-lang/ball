@@ -21,6 +21,12 @@ app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 if not app.config['SECRET_KEY']:
     raise RuntimeError("SECRET_KEY manquante : copiez .env.example en .env et remplissez-la.")
 
+# Cookie de session : jamais lisible par JavaScript, jamais envoye depuis un autre site, et en ligne
+# (Render ajoute la variable RENDER=true) seulement sur une connexion chiffree HTTPS
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+app.config['SESSION_COOKIE_SECURE'] = os.environ.get('RENDER') == 'true'
+
 app.config['SQLALCHEMY_DATABASE_URI'] = ADRESSE_BASE
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {'pool_pre_ping': True}  # reconnexion si Postgres a coupe la liaison
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False

@@ -29,3 +29,6 @@ logs/
 .idea/
 .DS_Store
 Thumbs.db
+
+# Extraits audio des mesures WER / CER / MOS (pipeline/metriques_audio.py)
+data/audio/
