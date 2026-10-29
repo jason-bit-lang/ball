@@ -1,9 +1,11 @@
 import re
 import uuid
 from datetime import timedelta
-from flask import render_template, request, redirect, url_for, flash, jsonify
+import requests
+from flask import Response, render_template, request, redirect, url_for, flash, jsonify
 from flask_login import login_required, current_user, login_user, logout_user
 from werkzeug.utils import secure_filename
+from config import ADRESSE_API
 from pipeline.nettoyage_offres import trouver_competences
 from . import app, db
 from .affichage import decouper_description, echeance, maniere_de_postuler
@@ -23,6 +25,7 @@ STATUT_ANALYSE = 'CV analysé'
 # Assistante DRH : passer a False pour la masquer (par exemple si le credit OpenAI est epuise)
 ASSISTANTE_ACTIVE = True
 ENTRETIENS_PAR_JOUR = 5   # chaque entretien vocal est payant : limite par utilisateur sur 24 h
+PITCH_DELAI = 10          # secondes laissees a l'API du pitch (elle repond en moins de 9,5 s)
 SDP_MAX = 20000           # taille maximale de l'offre WebRTC envoyee par le navigateur
 ROLES = {'recruteur', 'candidat'}
 CV_ILLISIBLE = ("Nous n'avons pas pu analyser correctement votre CV. Veuillez envoyer un autre CV, "
@@ -260,6 +263,22 @@ def offre(offre_id, id):
     return render_template('offre.html', offre=offre, document=document, resultat=resultat, sections=sections,
                            dossier=dossier, favori=favori, echeance=echeance(offre),
                            postuler=maniere_de_postuler(offre), assistante=ASSISTANTE_ACTIVE)
+
+
+@app.route('/pitch/<int:id>', methods=['POST'])
+@login_required
+def pitch(id):
+    """Pitch vocal du CV : le site demande le son a l'API FastAPI (api/main.py) puis le renvoie au navigateur."""
+    document = document_du_user(id)  # un utilisateur n'ecoute que le pitch de ses propres CV
+    try:
+        reponse = requests.post(ADRESSE_API + '/speak-smart', json={'document_id': document.id}, timeout=PITCH_DELAI)
+        reponse.raise_for_status()
+    except requests.RequestException as erreur:
+        log_event('PITCH_ERREUR', cv=document.id, erreur=type(erreur).__name__)
+        return jsonify(erreur="Votre pitch n'est pas disponible pour le moment. Réessayez dans un instant."), 503
+    log_event('PITCH', cv=document.id, voix=reponse.headers.get('X-Voix', ''))
+    return Response(reponse.content, mimetype='audio/mpeg',
+                    headers={'X-Pitch-Texte': reponse.headers.get('X-Pitch-Texte', '')})
 
 
 @app.route('/favori/<int:offre_id>', methods=['POST'])

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "macros.html" import icone %}
+{% from "macros.html" import icone, pitch %}
 {% block title %}Vos opportunités - CVBoost{% endblock %}
 {% block content %}
 {% set NIVEAUX = {'tres-proche': 'Très proche', 'proche': 'Proche', 'explorer': 'À explorer'} %}
@@ -14,6 +14,8 @@
                 {% for nom in competences %}<span class="puce blanche" style="--i: {{ loop.index0 }}">{{ nom | competence }}</span>{% endfor %}
             </div>
         {% endif %}
+        {# Modele de reponse a "Presentez-vous", fait a partir du CV #}
+        {{ pitch(document) }}
     </section>
 
     {# La page n'est jamais vide : sans offre proche, on propose quand meme les plus proches #}

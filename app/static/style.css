@@ -182,6 +182,11 @@ h2 { font-size: clamp(1.8rem, 4vw, 2.6rem); }
 .vague.deux { opacity: .35; border-radius: 35%; animation-duration: 4.5s; }
 .bulle.en-cours .vague { top: 22%; }
 .bulle.termine .vague { top: -40%; background: var(--accent); transition: top .7s ease-out, background .5s; }
+/* Pitch vocal du CV (page des opportunites et Mes CV) : bouton + bulle, puis lecteur audio et texte */
+.pitch { margin-top: 18px; }
+.pitch .lecteur audio { width: 100%; max-width: 440px; display: block; }
+.texte-pitch { color: var(--doux); font-style: italic; line-height: 1.55; margin: 10px 0 0; max-width: 62ch; }
+
 /* Elements des cartes d'offres et de favoris */
 .infos { display: flex; flex-wrap: wrap; gap: 6px 16px; color: var(--doux); font-size: .92rem; }
 .infos span { display: inline-flex; align-items: center; gap: 5px; }

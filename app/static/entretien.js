@@ -1,9 +1,8 @@
 // Assistante DRH : analyse du CV, entretien vocal en direct (gpt-live-1 via WebRTC) puis evaluation.
 // Le son passe directement entre le navigateur et OpenAI ; Flask cree seulement la session.
-// Utilise envoyerAuServeur() de site.js.
+// Utilise envoyerAuServeur(), avecBulle() et attendre() de site.js.
 const panneau = document.getElementById('assistante');
 const statut = document.getElementById('statut');
-const DUREE_MIN = 3000;       // millisecondes : la bulle d'analyse a toujours le temps de se remplir
 const DUREE_MAX = 10 * 60;    // secondes : l'entretien s'arrete tout seul (il est paye a la minute)
 const CONNEXION_MAX = 7000;   // millisecondes pour etablir la liaison audio (total sous 10 s)
 const SEUIL_VOIX = 18;        // volume moyen (0 a 255) au-dessus duquel on considere que quelqu'un parle
@@ -64,33 +63,6 @@ function ajouterListe(bloc, titre, textes) {
     const liste = element('ol', '', 'liste-conseils');
     textes.forEach(texte => liste.appendChild(element('li', texte)));
     bloc.append(element('p', titre, 'etiquette-puces'), liste);
-}
-
-function attendre(millisecondes) {
-    return new Promise(fin => setTimeout(fin, millisecondes));
-}
-
-// Bouton mauve + bulle qui se remplit, puis bleu "terminee" (comme sur la page d'envoi du CV)
-async function avecBulle(bouton, bulle, texteEnCours, travail) {
-    bouton.disabled = true;
-    bouton.classList.add('en-cours');
-    bouton.textContent = texteEnCours;
-    bulle.hidden = false;
-    setTimeout(() => bulle.classList.add('en-cours'), 50);
-    const debut = Date.now();
-    try {
-        const resultat = await travail();
-        await attendre(Math.max(0, DUREE_MIN - (Date.now() - debut)));
-        bouton.classList.replace('en-cours', 'termine');
-        bulle.classList.replace('en-cours', 'termine');
-        return resultat;
-    } catch (erreur) {
-        bouton.classList.remove('en-cours');
-        bulle.classList.remove('en-cours');
-        bulle.hidden = true;
-        bouton.disabled = false;
-        throw erreur;
-    }
 }
 
 // ---------- 1. Analyse ecrite du CV ----------

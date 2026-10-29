@@ -1,4 +1,4 @@
-{# Petits morceaux de page reutilises. Import : {% from "macros.html" import icone, anneau %} #}
+{# Petits morceaux de page reutilises. Import : {% from "macros.html" import icone, anneau, pitch %} #}
 
 {# Icone dessinee (voir icones.html) #}
 {% macro icone(nom, classe='') -%}
@@ -10,6 +10,21 @@
 <div class="anneau {{ classe }}" style="--n: {{ note }}">
     <svg viewBox="0 0 100 100"><circle class="piste" cx="50" cy="50" r="45"/><circle class="valeur" cx="50" cy="50" r="45"/></svg>
     <b>{{ note }}</b>
+</div>
+{%- endmacro %}
+
+{# Pitch vocal d'un CV : le texte et la voix sont prepares par le serveur au premier clic (site.js, section 6) #}
+{% macro pitch(document) -%}
+<div class="pitch" data-url="{{ url_for('pitch', id=document.id) }}">
+    <div class="ligne-envoi">
+        <button type="button" class="btn clair">{{ icone('ecouter') }} Écouter mon pitch</button>
+        <div class="bulle" hidden><div class="vague deux"></div><div class="vague"></div></div>
+    </div>
+    <div class="lecteur" hidden>
+        <audio controls></audio>
+        <p class="texte-pitch"></p>
+    </div>
+    <p class="statut" role="alert"></p>
 </div>
 {%- endmacro %}
 

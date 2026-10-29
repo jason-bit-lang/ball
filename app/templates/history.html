@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "macros.html" import icone, anneau %}
+{% from "macros.html" import icone, anneau, pitch %}
 {% block title %}Historique - CVBoost{% endblock %}
 {% block content %}
 <main class="page">
@@ -59,7 +59,8 @@
                 <div class="infos"><span>Déposé le {{ cv.document.upload_date | date_fr }}</span></div>
                 {% if cv.competences %}
                     <div class="puces">{% for nom in cv.competences %}<span class="puce">{{ nom | competence }}</span>{% endfor %}</div>
-                {% endif %}</div>
+                {% endif %}
+                {{ pitch(cv.document) }}</div>
             <a class="btn" href="{{ url_for('recherche', id=cv.document.id) }}">Voir mes opportunités {{ icone('fleche', 'fleche') }}</a>
         </article>
         {% else %}
