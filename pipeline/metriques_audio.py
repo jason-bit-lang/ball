@@ -10,6 +10,11 @@
 Voix comparees : sage (OpenAI, utilisee en ligne), Denise (edge-tts, voix de secours en ligne) et VITS
 (Coqui TTS, modele libre qui tourne en local ; mesure seulement si la bibliotheque TTS est installee).
 
+Installation (a part, hors du site) : pip install -r requirements.txt jiwer==4.0.0
+et, pour VITS, dans un environnement separe (PyTorch) : pip install "coqui-tts[codec]==0.28.0"
+Resultats du 29/10 (5 pitchs par voix) : WER sage 4,2 %, Denise 6,1 %, VITS 7,3 % ; CER 1,7 %, 2,1 %, 2,0 %.
+Les erreurs viennent surtout des noms congolais (Kongo entendu "Congo", Nsimba, Mukendi, Ngaliema).
+
 Utilisation (hors du site, sur un PC ou sur Colab) :
   python -m pipeline.metriques_audio        cree les extraits dans data/audio/, mesure WER et CER
   python -m pipeline.metriques_audio mos    moyenne des notes ecrites dans data/audio/notes_mos.csv
