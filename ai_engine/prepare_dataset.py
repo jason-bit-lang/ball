@@ -12,15 +12,15 @@ Anti-fuite :
 4. Des assertions verifient automatiquement qu'aucune offre n'est dans deux jeux a la fois.
 
 Entree  : data/offres_propres.csv (+ data/competences_gpt.csv s'il existe : competences relues par
-          gpt-4o-mini, plus justes que celles des mots-cles ; voir pipeline/etiquettes_ia.py)
+          gpt-4o-mini, plus justes que celles des mots-cles ; voir ai_engine/etiquettes_ia.py)
 Sorties : data/ia/train.jsonl, data/ia/validation.jsonl, data/ia/test.jsonl
-Lancement : python -m pipeline.dataset_ia
+Lancement : python -m ai_engine.prepare_dataset
 """
 import hashlib
 import os
 import pandas as pd
-from .config import COMPETENCES_GPT, DATASET_DIR, OFFRES_PROPRES
-from .nettoyage_offres import normaliser
+from data_pipeline.config import COMPETENCES_GPT, DATASET_DIR, OFFRES_PROPRES
+from data_pipeline.pandas_cleaning import normaliser
 
 PREFIXE = 'Extraire le poste et les competences : '
 ENTREE_MAX = 2000        # caracteres gardes (flan-t5-small lit au plus 512 tokens)
@@ -129,7 +129,7 @@ def main():
     try:
         offres = pd.read_csv(OFFRES_PROPRES)
     except FileNotFoundError:
-        print(f'Fichier introuvable : {OFFRES_PROPRES}. Lancez d\'abord : python -m pipeline.nettoyage_offres')
+        print(f'Fichier introuvable : {OFFRES_PROPRES}. Lancez d\'abord : python -m data_pipeline.pandas_cleaning')
         return
     jeux, resume = preparer(offres)
     os.makedirs(DATASET_DIR, exist_ok=True)

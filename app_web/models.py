@@ -51,7 +51,7 @@ class Document(db.Model):
 
 
 class Offre(db.Model):
-    """Offre d'emploi scrapee, copiee depuis data/offres_propres.csv (voir app/offres.py)."""
+    """Offre d'emploi scrapee, copiee depuis data/offres_propres.csv (voir app_web/offres.py)."""
     id = db.Column(db.Integer, primary_key=True)
     url = db.Column(db.String(500), unique=True, nullable=False)  # adresse de l'annonce : identifie l'offre
     # Textes lus par OCR ou produits par l'IA : leur longueur n'est pas garantie, d'ou db.Text (sans limite).

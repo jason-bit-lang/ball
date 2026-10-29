@@ -9,11 +9,11 @@ reprendre les anciens CV et copier les offres d'emploi du dossier data/.
 """
 import os
 from sqlalchemy import inspect, text
-from app import app, db
-from app.ia import extraire_texte
-from app.models import Document
-from app.offres import synchroniser_offres
-from config import DOSSIER
+from app_web import app, db
+from app_web.ia import extraire_texte
+from app_web.models import Document
+from app_web.offres import synchroniser_offres
+from app_web.config import DOSSIER
 
 
 def ajouter_colonnes_manquantes():
@@ -22,7 +22,7 @@ def ajouter_colonnes_manquantes():
 
     Pourquoi ? Sans cela, il faudrait supprimer la base (et perdre les comptes) a chaque nouvelle colonne."""
     inspecteur = inspect(db.engine)  # outil de SQLAlchemy qui lit la structure de la base reelle
-    for table in db.metadata.sorted_tables:  # les tables decrites dans app/models.py
+    for table in db.metadata.sorted_tables:  # les tables decrites dans app_web/models.py
         existantes = [colonne['name'] for colonne in inspecteur.get_columns(table.name)]
         for colonne in table.columns:
             if colonne.name not in existantes:

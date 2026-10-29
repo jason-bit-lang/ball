@@ -1,8 +1,8 @@
 """Etape 4 : nettoie les offres scrapees pour les rendre utilisables par l'IA ("IA-Ready").
 
-Entree  : data/offres_brutes.csv  (cree par pipeline/scraper.py)
+Entree  : data/offres_brutes.csv  (cree par data_pipeline/scraper_jobs.py)
 Sortie  : data/offres_propres.csv
-Lancement : python -m pipeline.nettoyage_offres
+Lancement : python -m data_pipeline.pandas_cleaning
 
 Pourquoi nettoyer ? Les offres scrapees contiennent des doublons, des cases vides, des salaires ecrits
 de mille facons et des textes abimes par l'OCR. Une IA entrainee ou interrogee sur ces donnees
@@ -266,7 +266,7 @@ def main():
     try:
         brutes = pd.read_csv(OFFRES_BRUTES)
     except FileNotFoundError:
-        print(f'Fichier introuvable : {OFFRES_BRUTES}. Lancez d\'abord : python -m pipeline.scraper')
+        print(f'Fichier introuvable : {OFFRES_BRUTES}. Lancez d\'abord : python -m data_pipeline.scraper_jobs')
         return
     propres, resume = nettoyer(brutes)
     propres.to_csv(OFFRES_PROPRES, index=False)

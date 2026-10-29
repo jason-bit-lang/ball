@@ -3,17 +3,17 @@ que les regles de mots-cles du nettoyage (distillation : un gros modele prepare 
 qui servent a entrainer le petit modele LoRA).
 
 Entree  : data/offres_propres.csv
-Sortie  : data/competences_gpt.csv (url, competences_gpt), utilise par pipeline/dataset_ia.py
+Sortie  : data/competences_gpt.csv (url, competences_gpt), utilise par ai_engine/prepare_dataset.py
 Seules les offres pas encore etiquetees sont envoyees : relancer le script ne coute presque rien.
-Lancement : python -m pipeline.etiquettes_ia (cle OPENAI_API_KEY dans .env)
+Lancement : python -m ai_engine.etiquettes_ia (cle OPENAI_API_KEY dans .env)
 """
 import json
 import os
 import pandas as pd
 from dotenv import load_dotenv
 from openai import OpenAI, OpenAIError
-from .config import COMPETENCES_GPT, OFFRES_PROPRES
-from .nettoyage_offres import COMPETENCES, competences_connues
+from data_pipeline.config import COMPETENCES_GPT, OFFRES_PROPRES
+from data_pipeline.pandas_cleaning import COMPETENCES, competences_connues
 
 MODELE = 'gpt-4o-mini'
 DESCRIPTION_MAX = 4000   # caracteres envoyes par offre

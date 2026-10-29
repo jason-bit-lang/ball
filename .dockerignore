@@ -1,5 +1,5 @@
 # Ce qui n'entre pas dans l'image Docker : secrets, environnements virtuels, donnees locales,
-# et ce que le site n'utilise pas (modele LoRA, notebook, jeu de donnees d'entrainement)
+# et ce que le site n'utilise pas (adaptateur LoRA, notebook, jeux d'entrainement, extraits audio)
 .git
 .github
 .env
@@ -11,7 +11,8 @@ __pycache__/
 database/
 uploads/
 logs/
-modele/
-notebooks/
+ai_engine/lora_cvboost/
+ai_engine/*.ipynb
+api_service/temp_audio/*
 data/ia/
-data/analytics.db
+data/audio/

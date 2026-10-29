@@ -3,7 +3,7 @@
 Pourquoi SQL ? La base analytique est separee de celle du site : on peut y faire des calculs lourds
 (regroupements, moyennes) sans jamais ralentir le site.
 
-Lancement : python -m pipeline.kpi   (apres python -m pipeline.audit_logs)
+Lancement : python -m data_pipeline.kpi   (apres python -m data_pipeline.logs_parser)
 """
 import sqlite3
 from .config import ANALYTICS_DB

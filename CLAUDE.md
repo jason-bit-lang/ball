@@ -23,7 +23,7 @@ et peut lui faire passer un entretien sur ce poste.
 - Aucun secret dans le depot : la cle OpenAI, la SECRET_KEY et les acces sont lus depuis `.env`
   (python-dotenv) en local et depuis les variables d'environnement sur Render. `.env` est dans
   `.gitignore` ; seul `.env.example` (sans vraies valeurs) est versionne.
-- Ne jamais pousser `venv/`, `env/`, `__pycache__/`, la base `database/*.db` ni le contenu de `uploads/`.
+- Ne jamais pousser `venv/`, `env/`, `__pycache__/`, les bases `database/*.db`, le dossier `uploads/` (ancien) ni les mp3 de `api_service/temp_audio/`.
 - La base SQLite locale est rangee dans le dossier `database/` (fichier `database/cvboost.db`),
   jamais dans `instance/` : ne pas utiliser le nom `instance` pour ce dossier.
 - Toute fonctionnalite doit repondre en moins de 10 secondes, meme avec une connexion lente :
@@ -123,7 +123,7 @@ Un premier travail existe : l'adapter a ces instructions.
   Option si le temps le permet : version ONNX quantifiee du modele chargee en ligne.
 - Assistante DRH (module `ia.py`) :
   - Bouton "Simulation d'entretien" sur l'interface.
-  - Extraction propre du texte du CV televerse (pypdf) depuis `uploads/`.
+  - Extraction propre du texte du CV televerse (pypdf), garde dans la base depuis la partie 5.
   - Envoi du texte du CV et de l'offre ciblee a l'API OpenAI (gpt-4o-mini).
   - Le LLM joue le recruteur : resume du profil, pourcentage de compatibilite avec l'offre et
     premiere question d'entretien, le tout affiche sur l'interface.
@@ -133,26 +133,26 @@ Un premier travail existe mais doit etre revu et adapte.
 
 Choix faits pendant la partie 3 :
 - Tache du modele LoRA : description d'une offre -> "Poste : ... | Competences : ...".
-  Jeu de donnees cree par `python -m pipeline.dataset_ia` (doublons exacts par SHA-256 et
+  Jeu de donnees cree par `python -m ai_engine.prepare_dataset` (doublons exacts par SHA-256 et
   quasi-doublons retires, separation 80/10/10 par ordre d'empreinte, assertions anti-fuite).
 - Dans flan-t5-small, les matrices `q_proj` et `v_proj` s'appellent `q` et `v` : ce sont elles qui
   sont ciblees par LoRA. Modele facebook/nllb-200 (depot module 3) ecarte : fait pour traduire,
   8 fois plus gros.
-- Code du fine-tuning dans un vrai fichier Python, `pipeline/finetuning_lora.py` (choix de
+- Code du fine-tuning dans un vrai fichier Python, `ai_engine/train_lora.py` et `ai_engine/evaluate_model.py` (choix de
   l'apprenant) ; le notebook Colab ne fait que l'installer et le lancer. Bibliotheques dans
   `requirements-ia.txt`, separees de `requirements.txt` (le site n'utilise jamais PyTorch).
 - Resultats LoRA (essai complet du 27/10 sur processeur, 20 epoques, 24 min ; ~5 min sur GPU Colab) :
   SacreBLEU test 3,0 sans LoRA -> 30,9 avec LoRA, 0,45 % des parametres entraines, adaptateur 1,4 Mo.
-  `data/offres_ia.csv` (titre_ia, competences_ia, 116 offres) et `modele/lora_cvboost/` sont dans
+  `data/offres_ia.csv` (titre_ia, competences_ia, 116 offres) et `ai_engine/lora_cvboost/` sont dans
   le depot. Les competences produites par le modele sont filtrees (seulement les noms connus, sans
   doublon). Le matching donne le meme classement avec ou sans ces colonnes.
 - Second entrainement (27/10, version en place) : competences cibles relues par gpt-4o-mini
-  (`pipeline/etiquettes_ia.py`, `data/competences_gpt.csv`), 118 offres (83/10/11). SacreBLEU test
+  (`ai_engine/etiquettes_ia.py`, `data/competences_gpt.csv`), 118 offres (83/10/11). SacreBLEU test
   2,6 -> 35,3. Justesse des competences sur le test (F1 contre gpt-4o-mini) : 0,24 -> 0,35 ; les
   mots-cles du nettoyage restent a 0,49. mediacongo n'a pas d'archives (6 pages d'offres ouvertes).
   Un "avis d'infructuosite" est ensuite ajoute au filtre des annonces de resultats (117 offres).
-- Table `Offre` dans la base du site, remplie au demarrage par `app/offres.py` (cle = url).
-- Assistante DRH reactivee (`ASSISTANTE_ACTIVE = True` dans `app/routes.py`) apres un test avec la
+- Table `Offre` dans la base du site, remplie au demarrage par `app_web/offres.py` (cle = url).
+- Assistante DRH reactivee (`ASSISTANTE_ACTIVE = True` dans `app_web/routes.py`) apres un test avec la
   vraie API le 27/10 : analyse 6,4 s, creation de la session vocale 1 a 2 s, premier mot de la
   recruteuse 0,7 s apres le demarrage, evaluation 3,4 a 4,5 s. Le son WebRTC n'a pas pu etre teste
   depuis le conteneur cloud (pas d'UDP) : a valider dans un vrai navigateur (PC ou Render).
@@ -167,7 +167,7 @@ Choix faits pendant la partie 3 :
   Le serveur cree seulement la session (le son passe directement entre le navigateur et OpenAI,
   Render n'est pas charge) ; le navigateur ne peut envoyer que l'accueil et le raccrochage.
   Limites : 5 entretiens vocaux par utilisateur sur 24 h (table `EntretienVocal`), 10 minutes
-  par entretien. Voix : `sage` (VOIX dans `app/ia.py`), choisie par l'apprenant apres ecoute
+  par entretien. Voix : `sage` (VOIX dans `app_web/ia.py`), choisie par l'apprenant apres ecoute
   d'extraits gpt-4o-mini-tts de sage, cedar et marin.
 - Deroulement : analyse ecrite du CV (gpt-4o-mini), entretien vocal, puis evaluation de la
   transcription (gpt-4o-mini). Paquet `openai==3.36.1` (version qui contient l'API Live).
@@ -331,16 +331,16 @@ question d'un entretien). Il est fait a partir du CV seulement (pas adapte a cha
 Voix : d'abord sage, puis (29/10, apres ecoute des deux) Denise d'edge-tts seule.
 Bouton "Ecouter mon pitch" dans le bandeau de la page des opportunites et sur les cartes "Mes CV".
 L'apprenant a deja un compte Render. Render publie la BRANCHE DE TRAVAIL (claude/capstone-github-setup-g24r7p),
-pas main (choix de l'apprenant : pas de fusion pour l'instant). GitHub Actions (deploiement.yml) fait un
+pas main (choix de l'apprenant : pas de fusion pour l'instant). GitHub Actions (deploy.yml) fait un
 TEST DE DEMARRAGE avant chaque deploiement (aucun fichier de tests dans le depot) : construit l'image Docker,
 lance site + API, verifie /health, l'accueil, l'inscription et l'envoi d'un petit CV Word, puis appelle le
 Deploy Hook (secret GitHub RENDER_DEPLOY_HOOK ; sans ce secret, le deploiement est saute).
-Fait (29/10) : config.py (ADRESSE_BASE, ADRESSE_API) ; Document.contenu et Document.texte ; api/main.py
+Fait (29/10) : app_web/config.py (ADRESSE_BASE, ADRESSE_API) ; Document.contenu et Document.texte ; api_service/
 (pitch 50 a 60 mots, voix Denise d'edge-tts) ; route Flask
 /pitch/<id> ; /health (site, base, api) ; pages erreur.html (404, 500) ; journal aussi dans la console ;
 Dockerfile, .dockerignore, docker-compose.yml (db, api, web), demarrer.sh (Render : uvicorn 127.0.0.1:8000
 + gunicorn 1 processus 4 fils). Mesures : pitch 3,3 a 4,2 s avec Denise (6,4 a 7,5 s avec sage) ; image
-184 Mo ; site + API 265 Mo de memoire. pipeline/metriques_audio.py : WER sage 3,8 %, Denise 4,6 % (erreurs
+184 Mo ; site + API 265 Mo de memoire. api_service/metriques_audio.py : WER sage 3,8 %, Denise 4,6 % (erreurs
 surtout sur les noms congolais) ; CER 1,7 % et 1,2 % ; MOS a noter par l'apprenant (data/audio/notes_mos.csv).
 Cookie de session Secure sur Render (variable RENDER). Le site n'est PAS encore en ligne.
 DEPLOIEMENT A FAIRE PAR CLAUDE (demande de l'apprenant, 29/10) dans une NOUVELLE session, avec la cle d'API
@@ -348,14 +348,14 @@ Render rangee par l'apprenant dans les reglages de l'environnement (variable REN
 conversation) et les domaines api.render.com, render.com, onrender.com autorises. Etapes : API Render
 (https://api.render.com/v1, en-tete "Authorization: Bearer $RENDER_API_KEY") -> owner (GET /owners) ;
 base Postgres gratuite "cvboost-db", region frankfurt ; service web "cvboost" : depot public
-https://github.com/jason-bit-lang/ball, branche claude/capstone-github-setup-g24r7p, runtime docker, offre
+https://github.com/jason-bit-lang/cvboost_enterprise (ancien nom : ball), branche claude/capstone-github-setup-g24r7p, runtime docker, offre
 free, region frankfurt, healthCheckPath /health, autoDeploy non ; variables SECRET_KEY (generee, jamais
 affichee), OPENAI_API_KEY (celle de l'environnement), DATABASE_URL (adresse interne de cvboost-db). Attendre le
 deploiement, verifier /health, l'accueil, l'inscription, l'envoi d'un CV et le pitch sur le site en ligne.
 Reste a l'apprenant : copier le Deploy Hook (Settings du service) dans le secret GitHub RENDER_DEPLOY_HOOK,
 puis supprimer la cle d'API Render s'il le souhaite. Ensuite : rapport PDF de la partie 5.
 MOS : 15 extraits anonymes a noter de 1 a 5 (sage, Denise, VITS) ; les regenerer avec
-python -m pipeline.metriques_audio si besoin, puis les envoyer a l'apprenant.
+python -m api_service.metriques_audio si besoin, puis les envoyer a l'apprenant.
 Ordre de travail : 1) CV et texte du CV enregistres dans la base, DATABASE_URL ; 2) API FastAPI du
 pitch, route Flask et bouton ; 3) Docker, Render, GitHub Actions, sante et journal ; 4) tests, rapport.
 
@@ -365,6 +365,26 @@ pitch, route Flask et bouton ; 3) Docker, Render, GitHub Actions, sante et journ
 - Documenter les bugs trouves et proposer des corrections.
 - Verifier que chaque fonctionnalite repond en moins de 10 secondes, meme avec une connexion lente.
 - Rediger une documentation complete qui explique chaque partie et chaque etape de CVBoost.
+
+## Architecture du projet (imposee par la formation, mise en place le 29/10)
+
+Depot GitHub a renommer `cvboost_enterprise` (decision de l'apprenant ; ancien nom `ball`, liens redirigees).
+- `.github/workflows/` : `deploy.yml` (CI/CD Render) et `scraping.yml` (scraping quotidien).
+- `app_web/` (sprint 1 et assistante DRH) : static/, templates/, models.py, routes.py, ia.py, config.py,
+  et en plus __init__.py (cree le site), matching.py, affichage.py, journal.py, offres.py.
+- `data_pipeline/` (sprint 2) : logs_parser.py (ancien audit_logs), scraper_jobs.py (scraper),
+  pandas_cleaning.py (nettoyage_offres), et en plus kpi.py et config.py (chemins partages).
+- `ai_engine/` (sprint 3) : prepare_dataset.py (dataset_ia), train_lora.py (entrainement seul),
+  evaluate_model.py (SacreBLEU avec et sans LoRA + traitement par lot -> data/offres_ia.csv), et en plus
+  etiquettes_ia.py, finetuning_lora.ipynb, lora_cvboost/ (adaptateur).
+- `api_service/` (sprint 4) : main.py (/speak-smart, /health), services/llm_reformulator.py,
+  services/tts_engine.py, temp_audio/ (mp3 supprimes apres l'envoi), et en plus metriques_audio.py.
+  L'API n'importe pas app_web (charger le site doublerait la memoire) : elle lit DATABASE_URL elle-meme.
+- `database/` : cvboost.db et analytics.db (crees automatiquement, jamais pousses).
+- Racine : Dockerfile, docker-compose.yml, requirements.txt, .env.example, README.md, et en plus run.py,
+  demarrer.sh, requirements-ia.txt, data/, CLAUDE.md. Les trois `__init__.py` sont gardes (accord de l'apprenant).
+- `data/ia/*.jsonl` correspond a l'entrainement du 27/10 (118 offres) : ne pas le regenerer sans reentrainer
+  (sinon une offre vue a l'entrainement pourrait passer dans le jeu de test).
 
 ## Acces et secrets
 
@@ -390,11 +410,11 @@ pitch, route Flask et bouton ; 3) Docker, Render, GitHub Actions, sante et journ
   partie 3 : sections 2 bis resultats LoRA, 3 assistante DRH, 4 bis problemes, 4 ter taille du code ;
   partie 4 : design page par page, code, tests, problemes et solutions).
   Prochaine etape : partie 5 (FastAPI, Docker, Render), puis 6.
-- Fichiers du design (partie 4) : `app/templates/base.html` (en-tete, barre du bas, pied de page,
+- Fichiers du design (partie 4) : `app_web/templates/base.html` (en-tete, barre du bas, pied de page,
   theme), `macros.html` (icone, anneau), `icones.html` (icones SVG), une page par ecran ;
-  `app/static/style.css` (12 sections, variables clair / sombre), `site.js` (commun), `envoi.js`
+  `app_web/static/style.css` (12 sections, variables clair / sombre), `site.js` (commun), `envoi.js`
   (envoi du CV et bulle), `offre.js` (favori, Postuler, annonce), `entretien.js` (assistante DRH) ;
-  `app/affichage.py` (dates en francais, echeance, annonce en sections, maniere de postuler) ;
+  `app_web/affichage.py` (dates en francais, echeance, annonce en sections, maniere de postuler) ;
   `run.py` ajoute les colonnes manquantes a une base existante.
 - Les rapports (HTML sources + PDF) et les tests (test_partie1_v2.py, test_partie2_*.py,
   test_partie3.py, p4test/test_partie4.py, p4test/navigateur_partie4.js) sont dans le dossier scratchpad de la session, pas dans le

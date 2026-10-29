@@ -1,15 +1,15 @@
-"""Etape 6 : fine-tuning LoRA de flan-t5-small, evaluation SacreBLEU et traitement par lot des offres.
+"""Etape 3 de ai_engine/ : fine-tuning LoRA de flan-t5-small (l'evaluation est dans evaluate_model.py).
 
-Tache apprise : description d'une offre -> "Poste : ... | Competences : ..." (voir pipeline/dataset_ia.py).
+Tache apprise : description d'une offre -> "Poste : ... | Competences : ..." (voir ai_engine/prepare_dataset.py).
 LoRA garde les poids du modele geles et n'entraine que deux petites matrices ajoutees a cote des
 matrices d'attention requete et valeur (appelees `q` et `v` dans T5, `q_proj` et `v_proj` ailleurs).
 Pourquoi LoRA ? Entrainer tout le modele demanderait beaucoup de memoire et produirait un fichier de
 300 Mo ; avec LoRA, moins de 1 % des parametres bougent et l'adaptateur ne pese que 1,4 Mo.
 
-Entrees  : data/ia/train.jsonl, validation.jsonl, test.jsonl ; data/offres_propres.csv
-Sorties  : modele/lora_cvboost/ (adaptateur LoRA + scores.json) ; data/offres_ia.csv
-Lancement : pip install -r requirements-ia.txt puis python -m pipeline.finetuning_lora
-            (GPU conseille : Google Colab, voir notebooks/finetuning_lora.ipynb)
+Entrees  : data/ia/train.jsonl, validation.jsonl, test.jsonl
+Sortie   : ai_engine/lora_cvboost/ (adaptateur LoRA + scores.json)
+Lancement : pip install -r requirements-ia.txt puis python -m ai_engine.train_lora
+            (GPU conseille : Google Colab, voir ai_engine/finetuning_lora.ipynb)
 Ce script n'est jamais charge par le site : PyTorch n'est pas necessaire sur Render.
 """
 import json
@@ -17,16 +17,14 @@ import os
 import sys
 import tempfile
 import numpy as np
-import pandas as pd
 import sacrebleu
 import torch
 from datasets import load_dataset
 from peft import LoraConfig, TaskType, get_peft_model
 from transformers import (AutoModelForSeq2SeqLM, AutoTokenizer, DataCollatorForSeq2Seq, Seq2SeqTrainer,
                           Seq2SeqTrainingArguments, set_seed)
-from .config import ADAPTATEUR_DIR, DATASET_DIR, OFFRES_IA, OFFRES_PROPRES
-from .dataset_ia import ENTREE_MAX as DESCRIPTION_MAX, PARTS, PREFIXE
-from .nettoyage_offres import competences_connues
+from data_pipeline.config import ADAPTATEUR_DIR, DATASET_DIR
+from .prepare_dataset import PARTS
 
 MODELE = 'google/flan-t5-small'
 ENTREE_TOKENS, SORTIE_TOKENS = 512, 64  # longueurs maximales en tokens (un token = un morceau de mot)
@@ -45,7 +43,7 @@ CONFIG_LORA = LoraConfig(
 
 def charger_jeux():
     """Charge les trois jeux et reverifie qu'aucune offre n'est partagee entre deux jeux."""
-    # load_dataset (Hugging Face) lit les fichiers JSONL crees par pipeline/dataset_ia.py
+    # load_dataset (Hugging Face) lit les fichiers JSONL crees par ai_engine/prepare_dataset.py
     jeux = load_dataset('json', data_files={nom: os.path.join(DATASET_DIR, f'{nom}.jsonl') for nom in PARTS})
     empreintes = {nom: set(jeux[nom]['hash']) for nom in jeux}
     for a, b in [('train', 'validation'), ('train', 'test'), ('validation', 'test')]:
@@ -105,42 +103,9 @@ def creer_trainer(modele, tokenizer, jeux_tokens, dossier, epoques):
     )
 
 
-def generer(modele, tokenizer, textes):
-    """Sorties du modele pour une liste d'entrees, par lots."""
-    modele.eval()  # mode utilisation (et non entrainement)
-    sorties = []
-    for i in range(0, len(textes), 2 * TAILLE_LOT):
-        entrees = tokenizer(textes[i:i + 2 * TAILLE_LOT], max_length=ENTREE_TOKENS, truncation=True,
-                            padding=True, return_tensors='pt').to(modele.device)
-        with torch.no_grad():  # pas d'apprentissage ici : PyTorch n'a pas a garder de quoi corriger les poids
-            ids = modele.generate(**entrees, max_new_tokens=SORTIE_TOKENS)
-        sorties += tokenizer.batch_decode(ids, skip_special_tokens=True)
-    return sorties
-
-
-def lire_sortie(sortie):
-    """'Poste : X | Competences : a, b' -> ('X', 'a, b').
-    Seules les competences connues sont gardees, sans doublon : un petit modele invente parfois
-    des mots ("sant", "luz") ou repete une competence."""
-    # partition coupe le texte en trois : avant le separateur, le separateur, apres
-    poste, _, competences = sortie.partition('| Competences :')
-    return poste.replace('Poste :', '').strip(), competences_connues(competences.split(','))
-
-
-def traiter_offres(modele, tokenizer):
-    """Traitement par lot : le modele lit toutes les offres. Le site lira ensuite data/offres_ia.csv."""
-    offres = pd.read_csv(OFFRES_PROPRES).dropna(subset=['url', 'description'])
-    sorties = generer(modele, tokenizer, [PREFIXE + d[:DESCRIPTION_MAX] for d in offres['description']])
-    resultats = [lire_sortie(sortie) for sortie in sorties]
-    offres_ia = pd.DataFrame({'url': offres['url'],
-                              'titre_ia': [titre for titre, _ in resultats],
-                              'competences_ia': [competences for _, competences in resultats]})
-    offres_ia.to_csv(OFFRES_IA, index=False)
-    return len(offres_ia)
-
-
 def main(epoques=EPOQUES):
-    """Entrainement, evaluation avec et sans LoRA, enregistrement de l'adaptateur, puis traitement par lot."""
+    """Entrainement, puis enregistrement de l'adaptateur. L'evaluation sur le jeu de test et le traitement
+    des offres sont faits ensuite par evaluate_model.py."""
     set_seed(42)  # memes resultats d'un lancement a l'autre
     print('Materiel :', 'GPU ' + torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'processeur (CPU)')
     jeux = charger_jeux()
@@ -154,30 +119,20 @@ def main(epoques=EPOQUES):
     with tempfile.TemporaryDirectory() as dossier:  # sauvegardes intermediaires, effacees a la fin
         trainer = creer_trainer(modele, tokenizer, jeux_tokens, dossier, epoques)
         trainer.train()
-        # Score final sur le jeu de test, jamais vu pendant l'entrainement, avec et sans LoRA
-        score_lora = trainer.evaluate(jeux_tokens['test'], metric_key_prefix='test')['test_bleu']
-        with modele.disable_adapter():  # meme modele, adaptateur LoRA debranche : le point de comparaison
-            score_base = trainer.evaluate(jeux_tokens['test'], metric_key_prefix='test')['test_bleu']
-    print(f'SacreBLEU test - modele de base : {score_base:.1f}')
-    print(f'SacreBLEU test - avec LoRA      : {score_lora:.1f}')
-
-    exemples = jeux['test'].select(range(3))
-    for exemple, sortie in zip(exemples, generer(modele, tokenizer, exemples['entree'])):
-        print('Attendu :', exemple['sortie'])
-        print('Modele  :', sortie, '\n')
+    print(f'Meilleur SacreBLEU en validation : {trainer.state.best_metric:.1f}')
 
     modele.save_pretrained(ADAPTATEUR_DIR)  # enregistre uniquement l'adaptateur LoRA (quelques Mo)
     tokenizer.save_pretrained(ADAPTATEUR_DIR)
-    scores = {'modele': MODELE, 'epoques': epoques,
-              'sacrebleu_base': round(score_base, 2), 'sacrebleu_lora': round(score_lora, 2),
-              'exemples_train': len(jeux['train']), 'exemples_validation': len(jeux['validation']),
-              'exemples_test': len(jeux['test'])}
+    # Informations sur l'entrainement ; evaluate_model.py y ajoutera les scores du jeu de test
+    infos = {'modele': MODELE, 'epoques': epoques, 'sacrebleu_validation': round(trainer.state.best_metric, 2),
+             'exemples_train': len(jeux['train']), 'exemples_validation': len(jeux['validation']),
+             'exemples_test': len(jeux['test'])}
     with open(os.path.join(ADAPTATEUR_DIR, 'scores.json'), 'w') as fichier:
-        json.dump(scores, fichier, indent=2)
+        json.dump(infos, fichier, indent=2)
     print(f'Adaptateur enregistre dans : {ADAPTATEUR_DIR}')
-    print(f'{traiter_offres(modele, tokenizer)} offres traitees : {OFFRES_IA}')
+    print('Etape suivante : python -m ai_engine.evaluate_model')
 
 
-# "python -m pipeline.finetuning_lora 2" : 2 epoques seulement (essai rapide) ; 20 sinon
+# "python -m ai_engine.train_lora 2" : 2 epoques seulement (essai rapide) ; 20 sinon
 if __name__ == '__main__':
     main(int(sys.argv[1]) if len(sys.argv) > 1 else EPOQUES)

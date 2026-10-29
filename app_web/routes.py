@@ -15,8 +15,8 @@ from sqlalchemy import text
 from flask import Response, render_template, request, redirect, url_for, flash, jsonify
 from flask_login import login_required, current_user, login_user, logout_user
 from werkzeug.utils import secure_filename
-from config import ADRESSE_API
-from pipeline.nettoyage_offres import trouver_competences
+from .config import ADRESSE_API
+from data_pipeline.pandas_cleaning import trouver_competences
 from . import app, db
 from .affichage import decouper_description, echeance, maniere_de_postuler
 from .ia import (TEXTE_MIN, IAIndisponible, analyser_candidature, creer_entretien_vocal, evaluer_entretien,
@@ -332,7 +332,7 @@ def offre(offre_id, id):
 @app.route('/pitch/<int:id>', methods=['POST'])
 @login_required
 def pitch(id):
-    """Pitch vocal du CV : le site demande le son a l'API FastAPI (api/main.py) puis le renvoie au navigateur."""
+    """Pitch vocal du CV : le site demande le son a l'API FastAPI (api_service/main.py) puis le renvoie au navigateur."""
     document = document_du_user(id)  # un utilisateur n'ecoute que le pitch de ses propres CV
     try:
         reponse = requests.post(ADRESSE_API + '/speak-smart', json={'document_id': document.id}, timeout=PITCH_DELAI)

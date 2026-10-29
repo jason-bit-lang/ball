@@ -1,12 +1,12 @@
-"""Reglages communs au site (Flask, dossier app/) et a l'API du pitch (FastAPI, dossier api/).
-
-Pourquoi un fichier commun ? Le site et l'API lisent la meme base de donnees : l'adresse de la base
-est donc ecrite une seule fois, ici, et les deux programmes l'importent.
+"""Reglages du site (application Flask, dossier app_web/).
 
 Les valeurs secretes ou propres a chaque machine ne sont jamais ecrites dans le code :
 - en local, elles viennent du fichier .env (copie de .env.example, jamais envoye sur GitHub) ;
 - sur Render, il n'y a pas de fichier .env : elles sont saisies dans l'onglet "Environment" du service.
 Dans les deux cas, le programme les lit de la meme facon avec os.environ.get().
+
+L'API du pitch (api_service/) lit la meme base de donnees, mais n'importe pas ce fichier : importer
+app_web.config chargerait tout le site Flask (voir api_service/main.py).
 """
 import os
 from dotenv import load_dotenv
@@ -16,9 +16,9 @@ from dotenv import load_dotenv
 # saisies dans Render sont deja la.
 load_dotenv()
 
-# Dossier racine du projet : sert a construire des chemins qui marchent quel que soit
-# le dossier depuis lequel on lance le site
-DOSSIER = os.path.dirname(os.path.abspath(__file__))
+# Dossier racine du projet (le dossier au-dessus de app_web/) : sert a construire des chemins
+# qui marchent quel que soit le dossier depuis lequel on lance le site
+DOSSIER = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Base de donnees : Postgres sur Render (adresse donnee par DATABASE_URL), fichier SQLite en local.
 # Si DATABASE_URL est absente ou vide, "or" choisit la base SQLite du dossier database/.

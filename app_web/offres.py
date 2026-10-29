@@ -7,7 +7,7 @@ Cette copie est faite a chaque demarrage du site (run.py).
 """
 import os
 import pandas as pd
-from pipeline.config import OFFRES_IA, OFFRES_PROPRES
+from data_pipeline.config import OFFRES_IA, OFFRES_PROPRES
 from . import db
 from .models import Offre
 

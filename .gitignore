@@ -17,9 +17,12 @@ database/*
 !database/.gitkeep
 *.db
 
-# CV televerses par les utilisateurs (donnees personnelles)
-uploads/*
-!uploads/.gitkeep
+# Ancien dossier des CV (avant la partie 5, les CV sont maintenant dans la base) : donnees personnelles
+uploads/
+
+# Fichiers audio temporaires du pitch (supprimes apres l'envoi)
+api_service/temp_audio/*
+!api_service/temp_audio/.gitkeep
 
 # Journal du site (contient des adresses IP et des emails)
 logs/

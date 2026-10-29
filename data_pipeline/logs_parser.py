@@ -1,11 +1,11 @@
 """Etape 1 : lit le journal du site, detecte les tentatives de fraude et charge le tout dans analytics.db.
 
 C'est un petit pipeline ETL en trois temps (sections ci-dessous) :
-- Extraction : lire le fichier logs/evenements.log ecrit par le site (app/journal.py) ;
+- Extraction : lire le fichier logs/evenements.log ecrit par le site (app_web/journal.py) ;
 - Transformation : reperer les comportements suspects (faux fichiers, connexions en rafale...) ;
 - Chargement : ecrire evenements et alertes dans analytics.db, ou kpi.py fait ses calculs.
 
-Lancement : python -m pipeline.audit_logs
+Lancement : python -m data_pipeline.logs_parser
 """
 import re
 import sqlite3

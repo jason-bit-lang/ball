@@ -1,55 +1,46 @@
-"""API du pitch vocal de CVBoost (FastAPI).
+"""API du pitch vocal de CVBoost (FastAPI) : l'orchestrateur qui enchaine les deux services.
 
-Le site Flask l'appelle (route /pitch/<id> dans app/routes.py). Elle n'est pas ouverte au public :
+Le site Flask l'appelle (route /pitch/<id> dans app_web/routes.py). Elle n'est pas ouverte au public :
 elle ecoute seulement sur la machine (127.0.0.1), ou dans le reseau prive de docker-compose.
 Pourquoi ? Chaque pitch coute un appel a OpenAI : seul le site, qui verifie que le CV appartient bien
 a l'utilisateur connecte, peut la declencher.
 
 POST /speak-smart  {"document_id": 3}
   1. lit le texte du CV dans la base de donnees ;
-  2. gpt-4o-mini le transforme en pitch oral d'environ 60 mots (reponse a "Presentez-vous") ;
-  3. la voix Denise (edge-tts, gratuit, environ 1,5 s) le lit et l'enregistre en mp3 ;
+  2. services/llm_reformulator.py : gpt-4o-mini en fait un pitch oral d'environ 60 mots ("Presentez-vous") ;
+  3. services/tts_engine.py : la voix Denise (edge-tts) le lit et l'enregistre en mp3 dans temp_audio/ ;
   4. le fichier mp3 est envoye, puis supprime (BackgroundTasks).
 GET /health : l'API repond.
 
-Lancement en local, depuis la racine du projet : uvicorn api.main:app --port 8000
+Lancement en local, depuis la racine du projet : uvicorn api_service.main:app --port 8000
 """
 import logging
 import os
 import tempfile
 import time
 from urllib.parse import quote
-import edge_tts
+from dotenv import load_dotenv
 from fastapi import BackgroundTasks, FastAPI, HTTPException
 from fastapi.responses import FileResponse
-from openai import OpenAI
 from pydantic import BaseModel
 from sqlalchemy import create_engine, text
-from config import ADRESSE_BASE  # config.py charge aussi le fichier .env (cle OpenAI)
+from .services.llm_reformulator import ecrire_pitch
+from .services.tts_engine import creer_voix
 
-MODELE_TEXTE = 'gpt-4o-mini'
-VOIX = 'fr-FR-DeniseNeural'  # voix feminine francaise d'edge-tts, choisie par l'apprenant apres ecoute
-DELAI_TEXTE = 6              # secondes au plus pour ecrire le pitch (environ 1,5 s)
-DELAI_VOIX = 3               # secondes d'attente au plus pour la voix (le site doit repondre en moins de 10 s)
-CV_MAX = 6000                # caracteres du CV envoyes a OpenAI (un CV plus long est coupe : cout et delai limites)
+load_dotenv()  # en local : lit la cle OpenAI et l'adresse de la base dans le fichier .env
 
-# Consignes reprises du module 3 (coach professionnel), ramenees a environ 60 mots.
-# Un texte court se lit en 20 a 30 secondes : c'est la duree d'une bonne reponse a "Presentez-vous".
-CONSIGNES = """Tu es un coach professionnel.
-Tache : transforme le texte du CV fourni en un pitch oral captivant, a la premiere personne, qui repond
-a la question d'entretien "Presentez-vous".
-Contraintes :
-- Redige un texte continu, sans puces, sans titres ni symboles speciaux.
-- Utilise des phrases courtes et fluides, faciles a lire a voix haute.
-- Entre 50 et 60 mots, en 4 ou 5 phrases courtes.
-- N'invente rien : utilise seulement ce qui figure dans le CV.
-- Reponds en francais."""
+RACINE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # dossier au-dessus de api_service/
+# Meme base que le site, avec la meme regle que app_web/config.py : DATABASE_URL sur Render, SQLite en local.
+# L'API n'importe pas app_web/config.py : Python executerait d'abord app_web/__init__.py, qui cree tout
+# le site Flask (pandas, scikit-learn...) et doublerait la memoire utilisee sur Render.
+ADRESSE_BASE = os.environ.get('DATABASE_URL') or 'sqlite:///' + os.path.join(RACINE, 'database', 'cvboost.db')
+DOSSIER_AUDIO = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'temp_audio')  # mp3 temporaires
+os.makedirs(DOSSIER_AUDIO, exist_ok=True)
 
 # Les erreurs sont ecrites dans la console : Render les affiche dans l'onglet "Logs"
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(name)s : %(message)s')
-journal = logging.getLogger('api.pitch')
-# Connexion a la meme base que le site. L'API n'importe pas le site Flask : elle reste legere en memoire.
-moteur = create_engine(ADRESSE_BASE, pool_pre_ping=True)
+journal = logging.getLogger('api_service.pitch')
+moteur = create_engine(ADRESSE_BASE, pool_pre_ping=True)  # pool_pre_ping : reconnexion si Postgres a coupe
 app = FastAPI(title='CVBoost - pitch vocal')
 
 
@@ -67,21 +58,6 @@ def texte_du_cv(document_id):
     return ligne[0] if ligne else None
 
 
-def ecrire_pitch(client, texte_cv):
-    """Etape 2 : le CV brut devient un discours fluide."""
-    # max_tokens=200 : de la marge pour 60 mots, mais pas de quoi ecrire un long texte (cout et delai)
-    reponse = client.chat.completions.create(model=MODELE_TEXTE, max_tokens=200, messages=[
-        {'role': 'system', 'content': CONSIGNES},
-        {'role': 'user', 'content': texte_cv[:CV_MAX]}])
-    return reponse.choices[0].message.content.strip()
-
-
-def creer_voix(pitch, chemin):
-    """Etape 3 : la voix Denise lit le pitch et l'enregistre dans le fichier mp3.
-    Les deux delais evitent d'attendre indefiniment si le service de la voix ne repond pas."""
-    edge_tts.Communicate(pitch, VOIX, connect_timeout=DELAI_VOIX, receive_timeout=DELAI_VOIX).save_sync(chemin)
-
-
 @app.post('/speak-smart')
 def speak_smart(demande: Demande, taches: BackgroundTasks):
     """Les quatre etapes du pitch (voir en haut du fichier). En cas d'erreur, le site recoit un code
@@ -93,14 +69,13 @@ def speak_smart(demande: Demande, taches: BackgroundTasks):
         raise HTTPException(404, 'CV introuvable.')
     # Etape 2 : le pitch ecrit par gpt-4o-mini
     try:
-        client = OpenAI(timeout=DELAI_TEXTE, max_retries=0)  # la cle vient de OPENAI_API_KEY
-        pitch = ecrire_pitch(client, texte_cv)
+        pitch = ecrire_pitch(texte_cv)
     except Exception as erreur:  # cle absente, credit epuise, OpenAI trop lent...
         journal.error('Pitch non ecrit (%s)', type(erreur).__name__)
         raise HTTPException(503, "Le pitch n'a pas pu être préparé.")
 
-    # Etape 3 : la voix, dans un fichier temporaire (mkstemp lui donne un nom unique)
-    descripteur, chemin = tempfile.mkstemp(suffix='.mp3')
+    # Etape 3 : la voix, dans un fichier temporaire de temp_audio/ (mkstemp lui donne un nom unique)
+    descripteur, chemin = tempfile.mkstemp(suffix='.mp3', dir=DOSSIER_AUDIO)
     os.close(descripteur)  # on ferme ce fichier vide : edge-tts va l'ouvrir et l'ecrire lui-meme
     try:
         creer_voix(pitch, chemin)

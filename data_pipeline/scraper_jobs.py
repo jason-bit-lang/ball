@@ -5,7 +5,7 @@ Courtoisie web :
 - le robot s'identifie clairement (User-Agent) ;
 - il tourne a part du site CVBoost, jamais pendant la visite d'un utilisateur.
 
-Lancement : python -m pipeline.scraper [nombre_de_pages]   (30 offres par page, 5 pages par defaut)
+Lancement : python -m data_pipeline.scraper_jobs [nombre_de_pages]   (30 offres par page, 5 pages par defaut)
 Les offres deja presentes dans data/offres_brutes.csv ne sont pas telechargees une seconde fois,
 sauf les annonces en image, relues par OCR si Tesseract est installe.
 
@@ -205,6 +205,6 @@ def main(nombre_pages=5):
     print(f'{len(nouvelles)} offre(s) ajoutee(s) en {(time.time() - debut) / 60:.1f} min -> {OFFRES_BRUTES}')
 
 
-# "python -m pipeline.scraper 3" : sys.argv[1] vaut "3" (nombre de pages) ; 5 pages si rien n'est precise
+# "python -m data_pipeline.scraper_jobs 3" : sys.argv[1] vaut "3" (nombre de pages) ; 5 pages si rien n'est precise
 if __name__ == '__main__':
     main(int(sys.argv[1]) if len(sys.argv) > 1 else 5)

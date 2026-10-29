@@ -1,6 +1,6 @@
 """Creation de l'application Flask et de ses outils (base de donnees, connexion, protection CSRF).
 
-Ce fichier est lu en premier quand on importe le dossier app/ : il cree `app` (le site) et `db`
+Ce fichier est lu en premier quand on importe le dossier app_web/ : il cree `app` (le site) et `db`
 (la base), que tous les autres fichiers importent ensuite.
 """
 import logging
@@ -10,7 +10,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_wtf.csrf import CSRFProtect
 from werkzeug.middleware.proxy_fix import ProxyFix
-from config import ADRESSE_BASE, DOSSIER  # config.py charge aussi le fichier .env
+from .config import ADRESSE_BASE, DOSSIER  # config.py charge aussi le fichier .env
 
 # Journal des erreurs : ecrit dans la console, que Render affiche dans l'onglet "Logs".
 # Chaque ligne commence par la date et le niveau (INFO, WARNING, ERROR) pour retrouver un probleme.

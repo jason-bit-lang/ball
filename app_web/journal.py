@@ -1,4 +1,4 @@
-"""Journal des evenements (connexions, envois de CV) lu ensuite par pipeline/audit_logs.py.
+"""Journal des evenements (connexions, envois de CV) lu ensuite par data_pipeline/logs_parser.py.
 
 Pourquoi un journal ? Il permet de compter l'usage du site (statistiques de la partie 2) et de reperer
 les tentatives de fraude (par exemple, beaucoup d'envois refuses en peu de temps).
@@ -9,7 +9,7 @@ Une ligne par evenement, par exemple :
 import logging
 from flask import request
 from flask_login import current_user
-from pipeline.config import LOG_FILE  # meme chemin pour le site et pour le script d'audit
+from data_pipeline.config import LOG_FILE  # meme chemin pour le site et pour le script d'audit
 
 logger = logging.getLogger('cvboost.evenements')
 logger.setLevel(logging.INFO)

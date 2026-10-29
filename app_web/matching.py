@@ -10,7 +10,7 @@ et leger, ce qui convient a l'offre gratuite de Render.
 """
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-from pipeline.nettoyage_offres import normaliser, trouver_competences
+from data_pipeline.pandas_cleaning import normaliser, trouver_competences
 from . import db
 from .affichage import est_close
 from .models import Offre

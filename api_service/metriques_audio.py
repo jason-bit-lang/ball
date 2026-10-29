@@ -16,8 +16,8 @@ Resultats du 29/10 (5 pitchs par voix) : WER sage 4,2 %, Denise 6,1 %, VITS 7,3 
 Les erreurs viennent surtout des noms congolais (Kongo entendu "Congo", Nsimba, Mukendi, Ngaliema).
 
 Utilisation (hors du site, sur un PC ou sur Colab) :
-  python -m pipeline.metriques_audio        cree les extraits dans data/audio/, mesure WER et CER
-  python -m pipeline.metriques_audio mos    moyenne des notes ecrites dans data/audio/notes_mos.csv
+  python -m api_service.metriques_audio        cree les extraits dans data/audio/, mesure WER et CER
+  python -m api_service.metriques_audio mos    moyenne des notes ecrites dans data/audio/notes_mos.csv
 """
 import os
 import random
@@ -28,7 +28,7 @@ import edge_tts
 import jiwer
 import pandas as pd
 from openai import OpenAI
-from .config import DATA_DIR
+from data_pipeline.config import DATA_DIR
 
 DOSSIER_AUDIO = os.path.join(DATA_DIR, 'audio')        # extraits a ecouter (non versionnes)
 RESULTATS = os.path.join(DATA_DIR, 'metriques_audio.csv')
@@ -128,7 +128,7 @@ def mesurer():
     print('\nMoyennes par voix (WER et CER : plus c\'est bas, mieux c\'est)')
     print(bilan.round(3).to_string())
     print(f'\nPour le MOS : ecouter les extraits de {DOSSIER_AUDIO}, noter de 1 a 5 dans {NOTES_MOS},'
-          ' puis lancer : python -m pipeline.metriques_audio mos')
+          ' puis lancer : python -m api_service.metriques_audio mos')
 
 
 def mos():
