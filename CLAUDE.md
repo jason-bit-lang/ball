@@ -422,9 +422,14 @@ Retour des tests de l'apprenant (30/10), CORRIGE le jour meme :
    documents (lot v4 : releves bancaires, RIB, M-Pesa, bulletins de paie, fiche KYC, biographies, modeles vides) :
    263/263 non-CV refuses, 124/126 CV acceptes (regle seule : 247/263), environ 1 s. Tests : test_correctifs.py 69/69
    (vraie API, sans cle, panne, document piege), navigateur 14/14, ancienne suite 119/122 (memes echecs attendus).
-   Commits d111a6e et 1959c6a pousses, tests GitHub verts. PAS ENCORE EN LIGNE : le Deploy Hook manque toujours
-   (etape sautee) et le deploiement par l'API Render a ete bloque par les permissions de la session. A publier quand
-   l'apprenant le demande (ou bouton Manual Deploy sur Render), puis lancer navigateur_correctifs.js enligne.
+   Commits d111a6e et 1959c6a pousses, tests GitHub verts. Le Deploy Hook manque toujours (etape sautee) ; le
+   deploiement par l'API Render est bloque par les permissions de la session. L'apprenant a publie lui-meme fc4e559
+   (Manual Deploy, 30/10 13 h 49) : EN LIGNE = regle seule (page d'arrivee + est_un_cv). Test en ligne :
+   navigateur_correctifs.js enligne 14/14 ; enligne_banque.py : releve, RIB, attestation, M-Pesa, bulletin de paie
+   refuses, mais demande de pret, fiche KYC, biographie et modele vide ACCEPTES tant que 1959c6a (confirmer_cv) n'est
+   pas publie. A faire apres la prochaine publication : relancer enligne_banque.py (attendu : seul le vrai CV accepte).
+   Comptes de test ajoutes en ligne : test.render.p6.correctif.ordinateur/telephone.* et test.render.p6.banque.*
+   (avec 5 documents de test), a supprimer sur demande.
    Documentation (19 pages) et Explain Code (36 pages) mis a jour le 30/10 avec ces deux problemes et leurs solutions
    (sources doc6/ ; copies d'avant dans doc6/*.avant30.html et doc6/ancien30/) ; l'apprenant gere la suite des PDF.
 
