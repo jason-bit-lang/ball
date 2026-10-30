@@ -19,8 +19,8 @@ from .config import ADRESSE_API
 from data_pipeline.pandas_cleaning import trouver_competences
 from . import app, db
 from .affichage import decouper_description, echeance, maniere_de_postuler
-from .ia import (TEXTE_MIN, IAIndisponible, analyser_candidature, creer_entretien_vocal, evaluer_entretien,
-                 extraire_texte)
+from .ia import (TEXTE_MIN, IAIndisponible, analyser_candidature, confirmer_cv, creer_entretien_vocal,
+                 evaluer_entretien, extraire_texte)
 from .journal import log_event
 from .matching import comparer, cv_reconnu, est_un_cv, offres_recentes, rechercher
 from .models import Document, EntretienVocal, Favori, Offre, User, now_utc
@@ -221,7 +221,9 @@ def upload():
         if len(texte) < TEXTE_MIN or not cv_reconnu(texte):
             log_event('CV_ILLISIBLE', file=original_filename)
             return refuser_envoi(CV_ILLISIBLE)
-        if not est_un_cv(texte):
+        # Deux controles : la forme d'un CV (regle de matching.py), puis le contenu (gpt-4o-mini).
+        # confirmer_cv renvoie None si OpenAI ne repond pas : seule la regle decide alors.
+        if not est_un_cv(texte) or confirmer_cv(texte) is False:
             log_event('PAS_UN_CV', file=original_filename)
             return refuser_envoi(PAS_UN_CV)
 

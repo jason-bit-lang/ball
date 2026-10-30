@@ -172,8 +172,8 @@ def est_un_cv(texte):
     et au plus une formule d'offre d'emploi (sauf pour un CV tres complet, voir INDICES_DOSSIER).
     Pourquoi : l'analyseur ne doit lire que des CV. Sans ce controle, une lettre de motivation, une offre
     d'emploi, un cours ou un rapport en PDF recevaient des offres comme un vrai CV.
-    Teste le 30/10 sur 345 documents : 111 CV sur 113 acceptes ; 224 autres documents sur 232 refuses, dont
-    les 126 offres de mediacongo, les lettres, les cours et les rapports (passent : modeles de CV vides, biographies)."""
+    Cette regle ne regarde que la forme : un document qui ressemble a un CV (modele vide, biographie) passe.
+    C'est pourquoi un deuxieme controle lit ensuite le contenu (confirmer_cv dans ia.py)."""
     indices = len(rubriques_du_cv(texte))
     if CONTACT_REGEX.search(texte):
         indices += 1
