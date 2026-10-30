@@ -415,9 +415,18 @@ Retour des tests de l'apprenant (30/10), CORRIGE le jour meme :
    Le test de demarrage de deploy.yml envoie maintenant un petit CV avec rubriques. Tests : test_correctifs.py 41/41,
    navigateur_correctifs.js 14/14 (ordinateur + telephone), ancienne suite 119/122 (echecs attendus : CV jouet de 4 lignes
    refuse, lorem ipsum refuse avec le nouveau message, B2). Corpus dans le scratchpad, dossier cvtest/.
-   Commit d111a6e pousse, test GitHub vert. PAS ENCORE EN LIGNE : le Deploy Hook manque et le deploiement par l'API
-   Render a ete bloque par les permissions de la session (30/10). A publier quand l'apprenant le demande (ou bouton
-   Manual Deploy sur Render), puis lancer navigateur_correctifs.js enligne.
+   Insistance de l'apprenant (30/10) : le "Propulser votre CV" n'accepte QUE des CV (ex. jamais un PDF bancaire).
+   Ajoute donc un DEUXIEME CONTROLE : confirmer_cv() dans ia.py (gpt-4o-mini, QUESTION_CV, reponse JSON
+   {"nature", "cv"}, temperature 0, DELAI_CV = 4 s). Appele seulement si la regle a accepte ; None si OpenAI ne repond
+   pas (la regle decide seule). routes.py : `if not est_un_cv(texte) or confirmer_cv(texte) is False`. Mesure sur 389
+   documents (lot v4 : releves bancaires, RIB, M-Pesa, bulletins de paie, fiche KYC, biographies, modeles vides) :
+   263/263 non-CV refuses, 124/126 CV acceptes (regle seule : 247/263), environ 1 s. Tests : test_correctifs.py 69/69
+   (vraie API, sans cle, panne, document piege), navigateur 14/14, ancienne suite 119/122 (memes echecs attendus).
+   Commits d111a6e et 1959c6a pousses, tests GitHub verts. PAS ENCORE EN LIGNE : le Deploy Hook manque toujours
+   (etape sautee) et le deploiement par l'API Render a ete bloque par les permissions de la session. A publier quand
+   l'apprenant le demande (ou bouton Manual Deploy sur Render), puis lancer navigateur_correctifs.js enligne.
+   Documentation (19 pages) et Explain Code (36 pages) mis a jour le 30/10 avec ces deux problemes et leurs solutions
+   (sources doc6/ ; copies d'avant dans doc6/*.avant30.html et doc6/ancien30/) ; l'apprenant gere la suite des PDF.
 
 ## Architecture du projet (imposee par la formation, mise en place le 29/10)
 
