@@ -415,6 +415,9 @@ Retour des tests de l'apprenant (30/10), CORRIGE le jour meme :
    Le test de demarrage de deploy.yml envoie maintenant un petit CV avec rubriques. Tests : test_correctifs.py 41/41,
    navigateur_correctifs.js 14/14 (ordinateur + telephone), ancienne suite 119/122 (echecs attendus : CV jouet de 4 lignes
    refuse, lorem ipsum refuse avec le nouveau message, B2). Corpus dans le scratchpad, dossier cvtest/.
+   Commit d111a6e pousse, test GitHub vert. PAS ENCORE EN LIGNE : le Deploy Hook manque et le deploiement par l'API
+   Render a ete bloque par les permissions de la session (30/10). A publier quand l'apprenant le demande (ou bouton
+   Manual Deploy sur Render), puis lancer navigateur_correctifs.js enligne.
 
 ## Architecture du projet (imposee par la formation, mise en place le 29/10)
 
