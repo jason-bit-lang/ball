@@ -7,7 +7,10 @@ Principe : chaque texte (une offre, le CV) devient une liste de nombres, un par 
 On mesure ensuite l'angle entre le vecteur du CV et celui de chaque offre (similarite cosinus) :
 plus l'angle est petit, plus les deux textes parlent des memes choses. Pas de PyTorch : c'est rapide
 et leger, ce qui convient a l'offre gratuite de Render.
+
+A la fin du fichier, est_un_cv et cv_reconnu verifient a l'envoi que le document est bien un CV utilisable.
 """
+import re
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from data_pipeline.pandas_cleaning import normaliser, trouver_competences
@@ -21,6 +24,34 @@ POIDS_ENTETE = 3  # le titre et les competences comptent 3 fois plus que la desc
 SCORE_MIN = 5            # si la meilleure offre est sous 5 %, aucune n'est dite proche
 PART_TRES_PROCHE = 0.75  # au moins 75 % du meilleur score
 PART_PROCHE = 0.45       # au moins 45 % du meilleur score
+
+# Un CV se reconnait a ses rubriques : des titres courts comme "Experience professionnelle", "Formation",
+# "Competences" ou "Langues". Chaque famille compte une seule fois (le debut du titre suffit : "competence"
+# reconnait aussi "Competences techniques").
+RUBRIQUES_CV = {
+    'titre': ['curriculum vitae', 'curriculum vit'],  # "Curriculum Vitae" ou "Curriculum Vitæ" (le æ disparait)
+    'identite': ['etat civil', 'identite', 'informations personnelles', 'renseignements personnels'],
+    'experience': ['experience', 'parcours', 'emplois', 'stage', 'carriere', 'realisation', 'publications',
+                   'work experience', 'professional experience', 'employment'],
+    'formation': ['formation', 'etude', 'education', 'diplome', 'cursus', 'certification',
+                  'parcours academique', 'parcours scolaire', 'parcours universitaire'],
+    'competences': ['competence', 'skill', 'aptitude', 'savoir-faire', 'ce que je sais faire', 'informatique', 'logiciel'],
+    'langues': ['langue', 'language'],
+    'loisirs': ["centres d'interet", "centre d'interet", 'loisir', 'hobbies', 'interests', 'passe-temps'],
+    'references': ['reference', 'referee', 'referent'],
+    'profil': ['profil', 'profile', 'summary', 'a propos', 'about me', 'objectif professionnel', 'atouts', 'qualites'],
+}
+RUBRIQUE_MOTS_MAX = 5  # un titre de rubrique est court : une phrase plus longue n'en est pas un
+INDICES_MIN = 3        # par exemple : rubriques Experience et Formation + une adresse email
+# Formules propres aux offres d'emploi : un CV n'en contient pas, une offre en contient plusieurs
+FORMULES_OFFRE = ['date limite', 'date de cloture', 'dossier de candidature', 'comment postuler', 'nous recherchons',
+                  'nous cherchons', 'souhaite recruter', 'recrute un', 'les candidats', 'les candidatures',
+                  'poste a pourvoir', 'avis de recrutement', 'avis de vacance', "offre d'emploi", 'termes de reference',
+                  'description de poste', 'profil recherche', 'requis', 'devra', 'interesses', 'nous offrons']
+FORMULES_MAX = 1       # une seule peut arriver par hasard
+INDICES_DOSSIER = 6    # CV tres complet : accepte meme si une lettre jointe dans le meme PDF cite l'offre
+# Moyen de contact : une adresse email, ou un numero de telephone (+243 81..., 00243..., 081 234...)
+CONTACT_REGEX = re.compile(r'[\w.+-]+@[\w-]+\.[a-z]{2,}|(\+|00)\s?\d{3}[\s.]?\d{2}|\b0\d{2}[\s.]?\d{3}[\s.]?\d{2}')
 
 # Le calcul de l'index prend du temps : il est fait une seule fois puis garde en memoire
 _index = {}
@@ -110,6 +141,45 @@ def offres_recentes(texte_cv, nombre=NOMBRE_RESULTATS):
     offres = Offre.query.order_by(Offre.date_publication.desc()).all()
     ouvertes = [offre for offre in offres if not est_close(offre)]
     return [comparer(offre, competences_cv) for offre in ouvertes[:nombre]]
+
+
+def simplifier(texte):
+    """Comme normaliser, en gardant les apostrophes typographiques (’) des PDF sous la forme "'"."""
+    return normaliser(texte.replace('\u2019', "'"))
+
+
+def rubriques_du_cv(texte):
+    """Familles de rubriques de CV trouvees dans le texte, par exemple {'experience', 'formation'}.
+    Seules les lignes courtes comptent : dans un cours ou un rapport, "formation" apparait au milieu des
+    phrases ; dans un CV, c'est un titre sur sa propre ligne."""
+    trouvees = set()
+    for ligne in texte.splitlines():
+        # On retire ce qui entoure un titre : puces, numeros, deux-points ("2. Formation :" -> "formation"),
+        # numero en chiffres romains ("III. Experience" -> "experience") et possessif ("Mes competences" -> "competences")
+        ligne = simplifier(ligne).strip(' :-.*#>|0123456789')
+        ligne = re.sub(r'^[ivx]+[.)-] *', '', ligne)
+        ligne = re.sub(r'^(mon|ma|mes|my) ', '', ligne)
+        if len(ligne.split()) > RUBRIQUE_MOTS_MAX:
+            continue
+        for famille, debuts in RUBRIQUES_CV.items():
+            if any(ligne.startswith(debut) for debut in debuts):
+                trouvees.add(famille)
+    return trouvees
+
+
+def est_un_cv(texte):
+    """Vrai si le document a la forme d'un CV : au moins 3 indices (rubriques de CV, moyen de contact)
+    et au plus une formule d'offre d'emploi (sauf pour un CV tres complet, voir INDICES_DOSSIER).
+    Pourquoi : l'analyseur ne doit lire que des CV. Sans ce controle, une lettre de motivation, une offre
+    d'emploi, un cours ou un rapport en PDF recevaient des offres comme un vrai CV.
+    Teste le 30/10 sur 345 documents : 111 CV sur 113 acceptes ; 224 autres documents sur 232 refuses, dont
+    les 126 offres de mediacongo, les lettres, les cours et les rapports (passent : modeles de CV vides, biographies)."""
+    indices = len(rubriques_du_cv(texte))
+    if CONTACT_REGEX.search(texte):
+        indices += 1
+    texte_simple = simplifier(texte)
+    formules = [formule for formule in FORMULES_OFFRE if formule in texte_simple]
+    return indices >= INDICES_MIN and (len(formules) <= FORMULES_MAX or indices >= INDICES_DOSSIER)
 
 
 def cv_reconnu(texte_cv):

@@ -37,7 +37,7 @@ cvboost_enterprise/
 │   ├── ia.py                connecteur OpenAI : analyse du CV, entretien vocal, evaluation (sprint 3)
 │   ├── config.py            reglages du site (adresse de la base, de l'API)
 │   ├── __init__.py          cree le site Flask, la base, la connexion et la protection CSRF
-│   ├── matching.py          moteur de matching CV / offres (TF-IDF)
+│   ├── matching.py          moteur de matching CV / offres (TF-IDF) et controle "est-ce un CV ?"
 │   ├── affichage.py         dates en francais, echeances, annonce en sections, maniere de postuler
 │   ├── journal.py           journal des connexions et des envois de CV
 │   └── offres.py            copie des offres (data/) dans la base du site

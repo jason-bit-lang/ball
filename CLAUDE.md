@@ -237,7 +237,9 @@ SEULEMENT SI rien n'est reconnu dans le fichier (texte quasi vide comme un scan,
 caracteres, ou texte sans aucune competence ni aucun point commun avec les offres) : l'analyse
 s'arrete, la zone de depot revient et le message s'affiche : "Nous n'avons pas pu analyser
 correctement votre CV. Veuillez envoyer un autre CV, ou une autre version de votre CV, pour que nous
-puissions l'analyser correctement." Dans tous les autres cas, des offres sont proposees. Regle des 10 s maintenue : pas d'attente artificielle (la
+puissions l'analyser correctement." Dans tous les autres cas, des offres sont proposees.
+Complement (demande de l'apprenant, 30/10) : l'analyseur ne lit QUE des CV. Un document qui n'a pas la forme d'un CV
+(lettre, offre d'emploi, cours, rapport, facture...) est refuse avec "Ce document ne ressemble pas a un CV..." (voir partie 6). Regle des 10 s maintenue : pas d'attente artificielle (la
 lecture du CV et le matching prennent environ 1 a 3 s).
 Proposition pour la page des resultats (maquettes/resultats.html) : bandeau "Vos opportunites."
 (Analyse terminee, nom du CV, date, competences reperees dans le CV en pastilles) ; filtres Toutes /
@@ -400,6 +402,19 @@ test_ia_reelle.py, test_api.py, charge.py, serveur_p6.py + navigateur_p6.js [enl
 test dans /tmp/pg6 (port 5433). Comptes crees en ligne : 4 test.render.p6.*@example.com (+ 2 de la partie 5), a
 supprimer sur demande. Suite : l'apprenant teste lui-meme, puis discussion (ameliorer / laisser), puis peut-etre une
 maquette de design qu'il donnera "juste pour un test".
+Retour des tests de l'apprenant (30/10), CORRIGE le jour meme :
+1. Apres la connexion, l'utilisateur ne reste plus sur l'accueil : page "Propulser votre CV" (/upload) s'il n'a encore
+   aucun CV analyse (premiere fois), sinon son historique (/history) ; la page demandee avant la connexion (?next) reste
+   prioritaire. Fonction page_d_arrivee() dans routes.py (aussi pour /login et /register ouverts deja connecte).
+2. Seuls les CV sont acceptes : est_un_cv() dans matching.py. Indices = familles de rubriques trouvees en titre court
+   (<= 5 mots : experience, formation, competences, langues, loisirs, references, profil, "Curriculum vitae", etat civil)
+   + 1 si email ou telephone ; il en faut 3. Refus si 2 formules d'offre d'emploi ou plus ("date limite", "nous
+   recherchons", "requis"...), sauf CV tres complet (6 indices : dossier lettre + CV). Message PAS_UN_CV, evenement
+   PAS_UN_CV dans le journal. Mesure sur 345 documents (3 lots generes par gpt-4o-mini + 126 offres reelles + nos PDF) :
+   111 CV sur 113 acceptes, 224 autres sur 232 refuses (passent : modeles de CV vides, biographies, brochure de formation).
+   Le test de demarrage de deploy.yml envoie maintenant un petit CV avec rubriques. Tests : test_correctifs.py 41/41,
+   navigateur_correctifs.js 14/14 (ordinateur + telephone), ancienne suite 119/122 (echecs attendus : CV jouet de 4 lignes
+   refuse, lorem ipsum refuse avec le nouveau message, B2). Corpus dans le scratchpad, dossier cvtest/.
 
 ## Architecture du projet (imposee par la formation, mise en place le 29/10)
 
@@ -450,7 +465,7 @@ Avant la partie 6 (rapport de la partie 5, section 9, livre le 29/10) :
 
 ## Etat du projet et environnement de travail (mis a jour le 29/10)
 
-- Partie 6 en cours : documentation et Explain Code livres le 29/10 ; tests et liste des bugs a faire ensuite.
+- Partie 6 en cours : documentation, Explain Code et tests livres le 29/10 ; premiers retours de l'apprenant corriges le 30/10.
 - Partie 5 terminee le 29/10 : site en ligne, rapport PDF livre (13 pages).
 - Parties 1, 2, 3 et 4 terminees, rapports PDF livres (partie 2 : section 7 problemes/solutions ;
   partie 3 : sections 2 bis resultats LoRA, 3 assistante DRH, 4 bis problemes, 4 ter taille du code ;
@@ -500,5 +515,6 @@ Avant la partie 6 (rapport de la partie 5, section 9, livre le 29/10) :
    livre. L'apprenant fait les verifications de la section "Verifications en attente cote apprenant".
 3. Quand l'apprenant annonce que le Deploy Hook est dans le secret GitHub RENDER_DEPLOY_HOOK : verifier une
    execution du workflow deploy.yml (etape "Deploy Hook" non sautee) et le site en ligne apres le deploiement.
-4. Partie 6 : documentation, Explain Code et rapport de tests livres (voir la partie 6 ci-dessus). Attendre le retour
-   des tests de l'apprenant, puis decider avec lui des corrections (B1 a B6) et ameliorations (A1 a A9) ; maquette ensuite.
+4. Partie 6 : documentation, Explain Code et rapport de tests livres (voir la partie 6 ci-dessus). Premier retour de
+   l'apprenant corrige le 30/10 (page d'arrivee apres connexion, refus des documents qui ne sont pas des CV). Suite :
+   decider avec lui des corrections (B1 a B6) et ameliorations (A1 a A9) ; maquette ensuite.

@@ -22,7 +22,7 @@ from .affichage import decouper_description, echeance, maniere_de_postuler
 from .ia import (TEXTE_MIN, IAIndisponible, analyser_candidature, creer_entretien_vocal, evaluer_entretien,
                  extraire_texte)
 from .journal import log_event
-from .matching import comparer, cv_reconnu, offres_recentes, rechercher
+from .matching import comparer, cv_reconnu, est_un_cv, offres_recentes, rechercher
 from .models import Document, EntretienVocal, Favori, Offre, User, now_utc
 
 # Extensions acceptees et premiers octets attendus pour chacune
@@ -40,6 +40,8 @@ SDP_MAX = 20000           # taille maximale de l'offre WebRTC envoyee par le nav
 ROLES = {'recruteur', 'candidat'}  # les deux seules personnes qui parlent dans une transcription
 CV_ILLISIBLE = ("Nous n'avons pas pu analyser correctement votre CV. Veuillez envoyer un autre CV, "
                 "ou une autre version de votre CV, pour que nous puissions l'analyser correctement.")
+PAS_UN_CV = ("Ce document ne ressemble pas à un CV. Envoyez votre CV, avec vos expériences, votre formation "
+             "et vos compétences, en PDF ou en Word.")
 
 
 def form_value(name):
@@ -47,14 +49,21 @@ def form_value(name):
     return request.form.get(name, '').strip()
 
 
+def page_d_arrivee():
+    """Page ou arrive l'utilisateur connecte : l'envoi du CV s'il n'a encore aucun CV (premiere visite),
+    sinon son historique, pour voir ou il en est (offres favorites, CV envoyes, notes d'entretien)."""
+    a_un_cv = Document.query.filter_by(user_id=current_user.id, status=STATUT_ANALYSE).first()
+    return url_for('history') if a_un_cv else url_for('upload')
+
+
 def safe_next_page():
-    """Page demandee avant la connexion, seulement si elle est sur ce site.
+    """Page demandee avant la connexion, seulement si elle est sur ce site ; sinon la page d'arrivee.
     Un lien piege comme /login?next=//site-pirate.com renverrait sinon l'utilisateur vers un autre site
     juste apres sa connexion : on n'accepte qu'une adresse qui commence par un seul "/"."""
     next_page = request.args.get('next', '')
     if next_page.startswith('/') and not next_page.startswith('//'):
         return next_page
-    return url_for('index')
+    return page_d_arrivee()
 
 
 def file_extension(filename):
@@ -110,7 +119,7 @@ def index():
 def register():
     """Inscription. GET : affiche le formulaire. POST : verifie les champs puis cree le compte."""
     if current_user.is_authenticated:  # deja connecte : pas besoin de s'inscrire
-        return redirect(url_for('index'))
+        return redirect(page_d_arrivee())
 
     if request.method == 'POST':
         nom = form_value('nom')
@@ -155,7 +164,7 @@ def register():
 def login():
     """Connexion. Chaque essai (reussi ou non) est note dans le journal : l'audit y repere les attaques."""
     if current_user.is_authenticated:
-        return redirect(url_for('index'))
+        return redirect(page_d_arrivee())
 
     if request.method == 'POST':
         email = form_value('email').lower()
@@ -171,6 +180,7 @@ def login():
         login_user(user)  # Flask-Login retient l'utilisateur dans le cookie de session
         log_event('LOGIN_OK', email=email)
         flash(f'Bon retour, {user.prenom}.', 'succes')
+        # Page demandee avant la connexion ; sinon l'envoi du CV (premiere fois) ou l'historique
         return redirect(safe_next_page())
 
     return render_template('login.html', email='', erreur=None)
@@ -202,8 +212,8 @@ def upload():
             return reject_upload(error, 'Fichier invalide : seuls les vrais fichiers PDF ou DOCX sont acceptés.',
                                  original_filename)
 
-        # Le CV est lu tout de suite. Il est refuse seulement si rien n'y est reconnu
-        # (scan sans texte, ou texte sans aucune competence ni aucun mot en commun avec les offres).
+        # Le CV est lu tout de suite. Il est refuse si rien n'y est reconnu (scan sans texte, ou texte sans
+        # aucune competence ni aucun mot en commun avec les offres) ou si ce n'est pas un CV (lettre, offre, cours...).
         extension = file_extension(original_filename)
         contenu = file.read()  # les octets du fichier (5 Mo au plus, verifie par Flask avant d'arriver ici)
         texte = extraire_texte(contenu, extension)
@@ -211,6 +221,9 @@ def upload():
         if len(texte) < TEXTE_MIN or not cv_reconnu(texte):
             log_event('CV_ILLISIBLE', file=original_filename)
             return refuser_envoi(CV_ILLISIBLE)
+        if not est_un_cv(texte):
+            log_event('PAS_UN_CV', file=original_filename)
+            return refuser_envoi(PAS_UN_CV)
 
         # Le fichier et son texte sont enregistres dans la base. Le nom unique (UUID) evite toute
         # confusion entre deux CV qui portent le meme nom.

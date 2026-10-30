@@ -45,12 +45,17 @@ jobs:
                      'prenom': 'Robot', 'email': 'robot@test.cd', 'password': 'MotDePasse2026',
                      'confirmation_mot_secret': 'MotDePasse2026'})
           assert r.url.endswith('/upload'), r.url
-          # Petit CV au format Word : un DOCX est une archive zip qui contient word/document.xml
-          texte = 'Comptable a Kinshasa. Comptabilite generale, fiscalite, tresorerie, Excel et anglais. ' * 4
+          # Petit CV au format Word, un paragraphe par ligne, avec les rubriques d'un vrai CV (sinon il est refuse).
+          # Un DOCX est une archive zip qui contient word/document.xml
+          lignes = ['Grace Mbuyi', 'Comptable - Kinshasa - grace.mbuyi@test.cd', 'Experience professionnelle',
+                    'Comptable chez Rawbank (2019 - 2025) : comptabilite generale, fiscalite, tresorerie, clotures annuelles.',
+                    'Formation', 'Licence en sciences comptables, Universite de Kinshasa (2018)',
+                    'Competences', 'Comptabilite OHADA, Excel avance, SAGE', 'Langues', 'Francais, anglais, lingala']
+          paragraphes = ''.join('<w:p><w:r><w:t>' + ligne + '</w:t></w:r></w:p>' for ligne in lignes)
           fichier = io.BytesIO()
           with zipfile.ZipFile(fichier, 'w') as archive:
               archive.writestr('word/document.xml', '<w:document xmlns:w="http://schemas.openxmlformats.org/'
-                               'wordprocessingml/2006/main"><w:body><w:p><w:r><w:t>' + texte + '</w:t></w:r></w:p></w:body></w:document>')
+                               'wordprocessingml/2006/main"><w:body>' + paragraphes + '</w:body></w:document>')
           r = s.post(SITE + '/upload', data={'csrf_token': jeton(r.text)}, files={'cv': ('cv.docx', fichier.getvalue())},
                      headers={'X-Requested-With': 'fetch'})
           assert r.ok, r.text
