@@ -434,6 +434,21 @@ Retour des tests de l'apprenant (30/10), CORRIGE le jour meme :
 3. Entretien vocal de 7 minutes au lieu de 10 (demande de l'apprenant, 30/10) : voir partie 3. Teste avec une fausse
    recruteuse en WebRTC local (navigateur_duree.js + serveur_duree.py) : 11/11 (minuteur /07:00, "Environ 7 minutes",
    consigne de fin a 6:00 envoyee une seule fois, arret et evaluation a 7:00). Documentation et Explain Code mis a jour.
+4. Entretien qui "crashait" sur l'iPhone de l'apprenant (30/10, journal Render) : a 14 h 31, session vocale creee (201)
+   puis evaluation envoyee 1 s apres, VIDE -> 400 ; second essai sans suite. Cause exacte invisible depuis le serveur
+   (liaison WebRTC du telephone ; impossible a reproduire ici : pas d'UDP). La recruteuse elle-meme fonctionne :
+   entretien complet simule par WebSocket (scratchpad entretien/simulation.py, voix du candidat edge-tts) : salut,
+   5 questions qui rebondissent, conclusion. Corrections : (a) consigne de fin envoyee en session.instructions.append
+   (silencieuse ; en commentary la recruteuse disait "il nous reste une minute, finissez votre idee" et coupait la
+   parole) ; ajoutee aux allowed_client_events ; (b) arret avant la premiere reponse : plus d'evaluation vide, message
+   clair et relance sans recharger (recommencer() dans entretien.js) ; (c) chaque coupure est notee dans le journal :
+   etape "incident" de la route entretien -> ENTRETIEN_INCIDENT (raison : session fermee par OpenAI + reason, liaison
+   coupee ou impossible + etat, erreur OpenAI, erreur JavaScript, demarrage impossible) ; (d) AudioContext cree pendant
+   le clic (sur iPhone, cree apres une attente il reste en pause : onde figee). Tests : navigateur_entretien2.js 12/12
+   (iPhone 13 emule, fausse recruteuse WebRTC : coupure a 0,6 s, Terminer sans reponse, liaison impossible, entretien
+   complet), navigateur_duree.js 11/11, route incident (connexion, propriete du CV, injection) OK, ancienne suite 119/122.
+   A faire : quand l'apprenant refait un entretien sur iPhone, lire ENTRETIEN_INCIDENT dans le journal Render
+   (scratchpad logs_render.py <debut> <fin> ENTRETIEN).
 
 ## Architecture du projet (imposee par la formation, mise en place le 29/10)
 

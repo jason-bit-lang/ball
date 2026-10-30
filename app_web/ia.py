@@ -69,7 +69,9 @@ ACCUEIL = ("L'entretien commence maintenant. Parle en premier, en francais : sal
            "en une phrase, puis pose ta premiere question en faisant reference a son parcours. "
            "Ensuite, arrete-toi et ecoute sa reponse.")
 
-# Consigne envoyee par le navigateur une minute avant la fin, pour que l'entretien se termine proprement
+# Consigne envoyee par le navigateur une minute avant la fin, pour que l'entretien se termine proprement.
+# Elle part comme une instruction silencieuse : envoyee comme un texte a dire, la recruteuse l'annoncait
+# a voix haute ("il nous reste une minute") et coupait la parole au candidat (essai du 30/10).
 CONCLUSION = ("Il reste environ une minute. Laisse le candidat finir sa reponse, ne pose plus de nouvelle question, "
               "puis conclus : remercie-le et dis-lui que l'entretien est termine.")
 
@@ -229,8 +231,10 @@ def creer_entretien_vocal(texte_cv, offre, sdp):
                 'model': MODELE_VOCAL,
                 'instructions': f'{ROLE}\n\n{VOCAL}\n\n{donnees(texte_cv, offre)}',
                 'audio': {'output': {'voice': VOIX}},
-                # Le navigateur n'est pas une source de confiance : il peut seulement lancer l'accueil et raccrocher
-                'client': {'data_channel': {'allowed_client_events': ['session.commentary.append', 'session.close']}},
+                # Le navigateur n'est pas une source de confiance : il peut seulement lancer l'accueil, envoyer la
+                # consigne de fin et raccrocher
+                'client': {'data_channel': {'allowed_client_events': ['session.commentary.append',
+                                                                      'session.instructions.append', 'session.close']}},
             },
             transport={'type': 'webrtc', 'sdp': sdp})
     except OpenAIError as erreur:

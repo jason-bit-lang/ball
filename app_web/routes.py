@@ -398,14 +398,20 @@ def entretien(offre_id, id, etape):
     """Assistante DRH en trois etapes, appelees par static/entretien.js :
     analyse -> analyse ecrite du CV pour cette offre
     vocal -> cree la session vocale (le navigateur envoie son offre WebRTC "sdp")
-    evaluation -> note l'entretien a partir de sa transcription"""
-    if not ASSISTANTE_ACTIVE or etape not in ('analyse', 'vocal', 'evaluation'):
+    evaluation -> note l'entretien a partir de sa transcription
+    incident -> note dans le journal un entretien coupe ou une erreur vue par le navigateur"""
+    if not ASSISTANTE_ACTIVE or etape not in ('analyse', 'vocal', 'evaluation', 'incident'):
         return jsonify(erreur="L'assistante DRH n'est pas disponible."), 404
     offre = db.get_or_404(Offre, offre_id)
     texte = document_du_user(id).texte
     if not texte:
         return jsonify(erreur='Le texte de ce CV est illisible : envoyez une autre version.'), 400
     donnees = request.get_json(silent=True) or {}  # silent=True : un JSON abime donne {} au lieu d'une erreur
+    if etape == 'incident':
+        # Seulement note dans le journal : c'est le seul moyen de comprendre une panne survenue sur le
+        # telephone d'un utilisateur (liaison audio coupee, session fermee par OpenAI, erreur JavaScript)
+        log_event('ENTRETIEN_INCIDENT', cv=id, offre=offre_id, raison=str(donnees.get('raison', ''))[:200])
+        return jsonify(enregistre=True)
 
     try:
         if etape == 'analyse':

@@ -7,6 +7,8 @@ const RAPPEL_FIN = 60;        // secondes avant la fin : la recruteuse recoit la
 const CONNEXION_MAX = 7000;   // millisecondes pour etablir la liaison audio (total sous 10 s)
 const SEUIL_VOIX = 18;        // volume moyen (0 a 255) au-dessus duquel on considere que quelqu'un parle
 const ERREUR_AUDIO = "La liaison audio n'a pas pu s'établir (réseau ou pare-feu). Réessayez sur une autre connexion.";
+const COUPURE = "L'entretien s'est arrêté avant votre première réponse (liaison audio interrompue). Vous pouvez le relancer.";
+const SANS_REPONSE = "Entretien arrêté avant votre première réponse : il n'y a rien à évaluer. Vous pouvez le relancer.";
 
 const direct = {connexion: null, canal: null, micro: null, son: null, audio: null, analyseurs: {}, messages: [],
                 debut: 0, minuteur: null, dernierSon: {}, accueil: '', fini: false, attente: null,
@@ -94,8 +96,10 @@ async function demarrer() {
     $('demarrer').disabled = true;
     statut.textContent = '';
     try {
+        // Mesure le volume des deux voix pour dessiner l'onde. Cree tout de suite, pendant le clic : sur iPhone,
+        // un AudioContext cree apres une attente (ici, l'autorisation du micro) reste en pause
+        direct.audio = new AudioContext();
         direct.micro = await navigator.mediaDevices.getUserMedia({audio: true});
-        direct.audio = new AudioContext();  // mesure le volume des deux voix pour dessiner l'onde
         direct.analyseurs.candidat = analyseur(direct.micro);
         direct.connexion = new RTCPeerConnection();
         direct.son = new Audio();
@@ -125,10 +129,8 @@ async function demarrer() {
         $('etat-recruteuse').textContent = 'En entretien avec vous';
         requestAnimationFrame(dessinerOnde);
     } catch (erreur) {
-        fermerConnexion();
-        direct.connexion = null;
-        statut.textContent = messageErreur(erreur);
-        $('demarrer').disabled = false;
+        signaler('démarrage impossible : ' + erreur.name + ' ' + erreur.message);
+        recommencer(messageErreur(erreur));
     }
 }
 $('demarrer').addEventListener('click', demarrer);
@@ -152,7 +154,7 @@ function volume(noeud) {
 
 // L'onde suit la voix : bleue quand la recruteuse parle, mauve quand le candidat parle
 function dessinerOnde() {
-    if (direct.fini) return;
+    if (direct.fini || !direct.connexion) return;  // entretien fini ou a relancer : l'animation s'arrete
     let parle = null;
     let son = null;
     for (const qui of ['recruteur', 'candidat']) {
@@ -194,7 +196,9 @@ function recevoir(evenement) {
     } else if (evenement.type === 'session.input_transcript.delta') {
         ajouterTexte('candidat', evenement.delta);
     } else if (evenement.type === 'session.closed') {
-        terminer();  // session coupee ou expiree
+        terminer('session fermée par OpenAI (' + evenement.reason + ')');  // coupure, expiration, filtre...
+    } else if (evenement.type === 'error') {
+        signaler('erreur OpenAI : ' + JSON.stringify(evenement).slice(0, 150));
     }
 }
 
@@ -226,10 +230,11 @@ function chaqueSeconde() {
     } else if (direct.dernierSon.recruteur) {
         $('qui-parle').textContent = 'À vous de répondre';
     }
-    // Une minute avant la fin, la recruteuse est priee de conclure : l'entretien ne s'arrete pas en pleine phrase
+    // Une minute avant la fin, la recruteuse est priee de conclure : l'entretien ne s'arrete pas en pleine phrase.
+    // Instruction silencieuse (instructions.append) : elle ne l'annonce pas et ne coupe pas la parole au candidat
     if (secondes >= direct.duree - RAPPEL_FIN && !direct.rappel) {
         direct.rappel = true;
-        envoyer({type: 'session.commentary.append', delegation_id: null, content: direct.conclusion});
+        envoyer({type: 'session.instructions.append', delegation_id: null, content: direct.conclusion});
     }
     if (secondes >= direct.duree) terminer();  // l'entretien s'arrete tout seul (il est paye a la minute)
 }
@@ -241,17 +246,40 @@ $('micro').addEventListener('click', () => {
     $('micro').querySelector('use').setAttribute('href', piste.enabled ? '#i-micro' : '#i-micro-coupe');
 });
 
-// Liaison audio impossible avant le debut de l'entretien : on previent et on permet de reessayer
+// Liaison audio impossible, ou coupee pendant l'entretien
 function echecAudio() {
-    if (direct.debut) return terminer();  // coupure en cours d'entretien : on evalue ce qui a ete dit
+    if (direct.debut) return terminer('liaison audio coupée');  // on evalue ce qui a deja ete dit
+    signaler('liaison audio impossible (état : ' + direct.connexion.connectionState + ')');
+    recommencer(ERREUR_AUDIO);
+}
+
+// L'entretien n'a pas pu avoir lieu : on previent et on permet de le relancer sans recharger la page
+function recommencer(message) {
     fermerConnexion();
     direct.connexion = null;
+    direct.debut = 0;
+    direct.fini = false;
+    direct.rappel = false;
+    direct.messages = [];
+    direct.dernierSon = {};
+    $('conversation').textContent = '';
+    $('temps').textContent = '00:00';
+    $('duree').style.width = '0';
     $('direct').hidden = true;
     $('accueil-assistante').hidden = false;
     $('demarrer').disabled = false;
     $('etat-recruteuse').textContent = 'Disponible';
-    statut.textContent = ERREUR_AUDIO;
+    statut.textContent = message;
 }
+
+// Note un incident dans le journal du site (ENTRETIEN_INCIDENT) : c'est le seul moyen de comprendre une panne
+// survenue sur le telephone d'un utilisateur. On n'attend pas la reponse et un echec d'envoi est ignore.
+function signaler(raison) {
+    appeler('incident', {raison: raison}).catch(() => {});
+}
+window.addEventListener('error', e => {
+    if (direct.connexion) signaler('erreur JavaScript : ' + e.message);
+});
 
 function fermerConnexion() {
     clearInterval(direct.minuteur);
@@ -261,23 +289,28 @@ function fermerConnexion() {
     if (direct.micro) direct.micro.getTracks().forEach(piste => piste.stop());
     if (direct.son) direct.son.srcObject = null;
     if (direct.audio) direct.audio.close();
+    direct.audio = null;  // fermerConnexion peut etre appelee deux fois : un AudioContext ne se ferme qu'une fois
     direct.analyseurs = {};
 }
 
 // ---------- 3. Fin de l'entretien et evaluation ----------
-$('terminer').addEventListener('click', terminer);
+$('terminer').addEventListener('click', () => terminer());
 
-async function terminer() {
+// raison : seulement si l'entretien s'arrete tout seul (coupure) ; elle est alors notee dans le journal
+async function terminer(raison) {
     if (direct.fini) return;
     direct.fini = true;
+    if (raison) signaler(raison + ' après ' + Math.floor((Date.now() - direct.debut) / 1000) + ' s');
     envoyer({type: 'session.close'});
     fermerConnexion();
+    const transcription = direct.messages.map(m => ({role: m.role, texte: m.texte.trim()})).filter(m => m.texte);
+    // Arret avant la premiere reponse du candidat : rien a evaluer, on propose de relancer l'entretien
+    if (!transcription.some(m => m.role === 'candidat')) return recommencer(raison ? COUPURE : SANS_REPONSE);
     $('direct').hidden = true;
     $('evaluation').hidden = false;
     $('etat-recruteuse').textContent = 'Entretien terminé';
     $('attente-evaluation').querySelector('.bulle').classList.add('en-cours');
     try {
-        const transcription = direct.messages.map(m => ({role: m.role, texte: m.texte.trim()})).filter(m => m.texte);
         const evaluation = await appeler('evaluation', {transcription: transcription});
         afficherEvaluation(evaluation);
     } catch (erreur) {
