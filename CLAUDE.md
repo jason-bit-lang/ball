@@ -457,7 +457,10 @@ Retour des tests de l'apprenant (30/10), CORRIGE le jour meme :
    (b) apres le choix du fichier, "Analyser mon CV" restait sous la barre du bas sur petit telephone -> scrollIntoView
    dans envoi.js ; (c) boutons trop petits pour le doigt (Changer, Lire toute l'annonce, oeil, coeur) -> 44 px.
    Reste (mineur) : sur ecran etroit, la carte du fichier ecrit "Pret a etre analyse" sur 3 lignes.
-   Verifie en local (p6test/ecran_entretien.js : boutons a l'ecran et touchables, barre masquee).
+   Verifie en local (p6test/ecran_entretien.js : boutons a l'ecran et touchables, barre masquee) puis EN LIGNE (commit
+   2716ecb publie par le Deploy Hook) : telephone.js 168/172, les 4 echecs = attente trop courte du test (la descente vers
+   la recruteuse prend 1,3 s quand l'annonce est depliee ; verifie avec mobile/lancer2.js : elle s'arrete au bon endroit).
+   Comptes de test crees en ligne le 30/10 : test.render.p6.mobile.*, test.render.p6.entretien.* (a supprimer sur demande).
 
 ## Architecture du projet (imposee par la formation, mise en place le 29/10)
 
