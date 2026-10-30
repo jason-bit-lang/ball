@@ -3,13 +3,14 @@
 // Utilise envoyerAuServeur(), avecBulle() et attendre() de site.js.
 const panneau = document.getElementById('assistante');
 const statut = document.getElementById('statut');
-const DUREE_MAX = 10 * 60;    // secondes : l'entretien s'arrete tout seul (il est paye a la minute)
+const RAPPEL_FIN = 60;        // secondes avant la fin : la recruteuse recoit la consigne de conclure
 const CONNEXION_MAX = 7000;   // millisecondes pour etablir la liaison audio (total sous 10 s)
 const SEUIL_VOIX = 18;        // volume moyen (0 a 255) au-dessus duquel on considere que quelqu'un parle
 const ERREUR_AUDIO = "La liaison audio n'a pas pu s'établir (réseau ou pare-feu). Réessayez sur une autre connexion.";
 
 const direct = {connexion: null, canal: null, micro: null, son: null, audio: null, analyseurs: {}, messages: [],
-                debut: 0, minuteur: null, dernierSon: {}, accueil: '', fini: false, attente: null};
+                debut: 0, minuteur: null, dernierSon: {}, accueil: '', fini: false, attente: null,
+                conclusion: '', duree: 0, rappel: false};
 
 const $ = id => document.getElementById(id);
 
@@ -114,6 +115,8 @@ async function demarrer() {
         await direct.connexion.setLocalDescription(offre);
         const session = await appeler('vocal', {sdp: offre.sdp});
         direct.accueil = session.accueil;
+        direct.conclusion = session.conclusion;
+        direct.duree = session.duree;  // secondes, fixee par le serveur (DUREE_ENTRETIEN dans ia.py)
         await direct.connexion.setRemoteDescription({type: 'answer', sdp: session.sdp});
         // Sans session.started dans le delai, la liaison audio est consideree comme bloquee
         direct.attente = setTimeout(echecAudio, CONNEXION_MAX);
@@ -212,7 +215,7 @@ function ajouterTexte(role, fragment) {
 function chaqueSeconde() {
     const secondes = Math.floor((Date.now() - direct.debut) / 1000);
     $('temps').textContent = String(Math.floor(secondes / 60)).padStart(2, '0') + ':' + String(secondes % 60).padStart(2, '0');
-    $('duree').style.width = (secondes / DUREE_MAX * 100) + '%';
+    $('duree').style.width = (secondes / direct.duree * 100) + '%';
     const recent = qui => Date.now() - (direct.dernierSon[qui] || 0) < 1200;
     if (!direct.micro.getAudioTracks()[0].enabled) {
         $('qui-parle').textContent = 'Micro coupé';
@@ -223,7 +226,12 @@ function chaqueSeconde() {
     } else if (direct.dernierSon.recruteur) {
         $('qui-parle').textContent = 'À vous de répondre';
     }
-    if (secondes >= DUREE_MAX) terminer();
+    // Une minute avant la fin, la recruteuse est priee de conclure : l'entretien ne s'arrete pas en pleine phrase
+    if (secondes >= direct.duree - RAPPEL_FIN && !direct.rappel) {
+        direct.rappel = true;
+        envoyer({type: 'session.commentary.append', delegation_id: null, content: direct.conclusion});
+    }
+    if (secondes >= direct.duree) terminer();  // l'entretien s'arrete tout seul (il est paye a la minute)
 }
 
 $('micro').addEventListener('click', () => {

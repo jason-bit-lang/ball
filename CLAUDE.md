@@ -166,8 +166,9 @@ Choix faits pendant la partie 3 :
   environ 0,05 $ la minute hors modele de raisonnement, compte OpenAI payant ; l'apprenant paie).
   Le serveur cree seulement la session (le son passe directement entre le navigateur et OpenAI,
   Render n'est pas charge) ; le navigateur ne peut envoyer que l'accueil et le raccrochage.
-  Limites : 5 entretiens vocaux par utilisateur sur 24 h (table `EntretienVocal`), 10 minutes
-  par entretien. Voix : `sage` (VOIX dans `app_web/ia.py`), choisie par l'apprenant apres ecoute
+  Limites : 5 entretiens vocaux par utilisateur sur 24 h (table `EntretienVocal`), 7 minutes
+  par entretien (10 au depart ; 7 depuis le 30/10, choix de l'apprenant : DUREE_ENTRETIEN dans ia.py, consigne "environ
+  5 questions" ; a 6:00 le navigateur envoie CONCLUSION pour que la recruteuse conclue, arret a 7:00). Voix : `sage` (VOIX dans `app_web/ia.py`), choisie par l'apprenant apres ecoute
   d'extraits gpt-4o-mini-tts de sage, cedar et marin.
 - Deroulement : analyse ecrite du CV (gpt-4o-mini), entretien vocal, puis evaluation de la
   transcription (gpt-4o-mini). Paquet `openai==3.36.1` (version qui contient l'API Live).
@@ -430,6 +431,9 @@ Retour des tests de l'apprenant (30/10), CORRIGE le jour meme :
    test.render.p6.banque.* (x2, avec des documents de test), a supprimer sur demande.
    Documentation (19 pages) et Explain Code (36 pages) mis a jour le 30/10 avec ces deux problemes et leurs solutions
    (sources doc6/ ; copies d'avant dans doc6/*.avant30.html et doc6/ancien30/) ; l'apprenant gere la suite des PDF.
+3. Entretien vocal de 7 minutes au lieu de 10 (demande de l'apprenant, 30/10) : voir partie 3. Teste avec une fausse
+   recruteuse en WebRTC local (navigateur_duree.js + serveur_duree.py) : 11/11 (minuteur /07:00, "Environ 7 minutes",
+   consigne de fin a 6:00 envoyee une seule fois, arret et evaluation a 7:00). Documentation et Explain Code mis a jour.
 
 ## Architecture du projet (imposee par la formation, mise en place le 29/10)
 

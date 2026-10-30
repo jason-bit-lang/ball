@@ -109,12 +109,12 @@
                 </div>
                 <div class="resultat" id="analyse" hidden></div>
                 <button type="button" class="btn mauve" id="demarrer">{{ icone('micro') }} Démarrer l'entretien vocal</button>
-                <p class="limites">10 minutes maximum · 5 entretiens par jour</p>
+                <p class="limites">Environ {{ duree_entretien }} minutes · 5 entretiens par jour</p>
             </div>
 
             <!-- 2. Entretien en direct -->
             <div id="direct" hidden>
-                <div class="direct-tete"><span class="en-direct">En direct</span><span class="minuteur"><span id="temps">00:00</span> / 10:00</span></div>
+                <div class="direct-tete"><span class="en-direct">En direct</span><span class="minuteur"><span id="temps">00:00</span> / {{ '%02d' % duree_entretien }}:00</span></div>
                 <div class="duree"><i id="duree"></i></div>
                 <div class="onde-vocale" id="onde" aria-hidden="true">{% for i in range(28) %}<i></i>{% endfor %}</div>
                 <p class="qui-parle" id="qui-parle" aria-live="polite">Connexion...</p>

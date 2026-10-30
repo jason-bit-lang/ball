@@ -19,8 +19,8 @@ from .config import ADRESSE_API
 from data_pipeline.pandas_cleaning import trouver_competences
 from . import app, db
 from .affichage import decouper_description, echeance, maniere_de_postuler
-from .ia import (TEXTE_MIN, IAIndisponible, analyser_candidature, confirmer_cv, creer_entretien_vocal,
-                 evaluer_entretien, extraire_texte)
+from .ia import (DUREE_ENTRETIEN, TEXTE_MIN, IAIndisponible, analyser_candidature, confirmer_cv,
+                 creer_entretien_vocal, evaluer_entretien, extraire_texte)
 from .journal import log_event
 from .matching import comparer, cv_reconnu, est_un_cv, offres_recentes, rechercher
 from .models import Document, EntretienVocal, Favori, Offre, User, now_utc
@@ -341,7 +341,8 @@ def offre(offre_id, id):
     favori = Favori.query.filter_by(user_id=current_user.id, offre_id=offre.id).first() is not None
     return render_template('offre.html', offre=offre, document=document, resultat=resultat, sections=sections,
                            dossier=dossier, favori=favori, echeance=echeance(offre),
-                           postuler=maniere_de_postuler(offre), assistante=ASSISTANTE_ACTIVE)
+                           postuler=maniere_de_postuler(offre), assistante=ASSISTANTE_ACTIVE,
+                           duree_entretien=DUREE_ENTRETIEN)
 
 
 @app.route('/pitch/<int:id>', methods=['POST'])
