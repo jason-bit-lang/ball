@@ -422,14 +422,12 @@ Retour des tests de l'apprenant (30/10), CORRIGE le jour meme :
    documents (lot v4 : releves bancaires, RIB, M-Pesa, bulletins de paie, fiche KYC, biographies, modeles vides) :
    263/263 non-CV refuses, 124/126 CV acceptes (regle seule : 247/263), environ 1 s. Tests : test_correctifs.py 69/69
    (vraie API, sans cle, panne, document piege), navigateur 14/14, ancienne suite 119/122 (memes echecs attendus).
-   Commits d111a6e et 1959c6a pousses, tests GitHub verts. Le Deploy Hook manque toujours (etape sautee) ; le
-   deploiement par l'API Render est bloque par les permissions de la session. L'apprenant a publie lui-meme fc4e559
-   (Manual Deploy, 30/10 13 h 49) : EN LIGNE = regle seule (page d'arrivee + est_un_cv). Test en ligne :
-   navigateur_correctifs.js enligne 14/14 ; enligne_banque.py : releve, RIB, attestation, M-Pesa, bulletin de paie
-   refuses, mais demande de pret, fiche KYC, biographie et modele vide ACCEPTES tant que 1959c6a (confirmer_cv) n'est
-   pas publie. A faire apres la prochaine publication : relancer enligne_banque.py (attendu : seul le vrai CV accepte).
-   Comptes de test ajoutes en ligne : test.render.p6.correctif.ordinateur/telephone.* et test.render.p6.banque.*
-   (avec 5 documents de test), a supprimer sur demande.
+   EN LIGNE depuis le 30/10 14 h 08 (commit c8d710c, publie par le DEPLOY HOOK, ajoute par l'apprenant vers 14 h 05 :
+   chaque push sur la branche publie maintenant le site tout seul, apres le test de demarrage). Tests en ligne sur cette
+   version : navigateur_correctifs.js enligne 14/14 ; enligne_banque.py : releve, RIB, attestation, M-Pesa, bulletin de
+   paie, demande de pret, fiche KYC, biographie, modele de CV vide tous refuses, vrai CV accepte (1 s).
+   Comptes de test ajoutes en ligne : test.render.p6.correctif.ordinateur/telephone.* (x2 passages) et
+   test.render.p6.banque.* (x2, avec des documents de test), a supprimer sur demande.
    Documentation (19 pages) et Explain Code (36 pages) mis a jour le 30/10 avec ces deux problemes et leurs solutions
    (sources doc6/ ; copies d'avant dans doc6/*.avant30.html et doc6/ancien30/) ; l'apprenant gere la suite des PDF.
 
@@ -464,7 +462,7 @@ Depot GitHub renomme `cvboost_enterprise` le 29/10 (ancien nom `ball` : les anci
 ## Verifications en attente cote apprenant (rappelees dans les rapports des parties 3, 4 et 5)
 
 Avant la partie 6 (rapport de la partie 5, section 9, livre le 29/10) :
-- Deploy Hook de Render dans le secret GitHub RENDER_DEPLOY_HOOK (puis prevenir Claude, qui verifie un deploiement).
+- FAIT le 30/10 : Deploy Hook de Render dans le secret GitHub RENDER_DEPLOY_HOOK (deploiement c8d710c verifie).
 - Surveillance UptimeRobot de https://cvboost-kfyi.onrender.com/health toutes les 5 ou 10 minutes.
 - Supprimer la cle d'API Render (Render et reglages de l'environnement) apres le Deploy Hook.
 - Base Postgres gratuite : expire le 28/11/2026 (comptes et CV en ligne perdus ensuite).
@@ -530,8 +528,7 @@ Avant la partie 6 (rapport de la partie 5, section 9, livre le 29/10) :
 1. Relire ce fichier en entier avant de repondre, pour etre de nouveau a la page.
 2. Etat : parties 1 a 5 terminees, site en ligne (https://cvboost-kfyi.onrender.com), rapport de la partie 5
    livre. L'apprenant fait les verifications de la section "Verifications en attente cote apprenant".
-3. Quand l'apprenant annonce que le Deploy Hook est dans le secret GitHub RENDER_DEPLOY_HOOK : verifier une
-   execution du workflow deploy.yml (etape "Deploy Hook" non sautee) et le site en ligne apres le deploiement.
+3. Deploy Hook en place depuis le 30/10 : chaque push publie le site (verifier le deploiement sur Render apres un push).
 4. Partie 6 : documentation, Explain Code et rapport de tests livres (voir la partie 6 ci-dessus). Premier retour de
    l'apprenant corrige le 30/10 (page d'arrivee apres connexion, refus des documents qui ne sont pas des CV). Suite :
    decider avec lui des corrections (B1 a B6) et ameliorations (A1 a A9) ; maquette ensuite.
