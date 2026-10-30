@@ -45,6 +45,8 @@ function afficherFichier() {
     type.className = 'type-fichier ' + extension;
     zone.hidden = true;
     carte.hidden = false;
+    // Sur un petit telephone, le bouton "Analyser mon CV" finissait sous la barre du bas : on l'amene a l'ecran
+    document.getElementById('envoyer').scrollIntoView({behavior: 'smooth', block: 'center'});
 }
 
 champ.addEventListener('change', afficherFichier);

@@ -126,6 +126,8 @@ async function demarrer() {
         direct.attente = setTimeout(echecAudio, CONNEXION_MAX);
         $('accueil-assistante').hidden = true;
         $('direct').hidden = false;
+        // Pendant l'entretien, la barre du bas du telephone disparait (voir style.css)
+        document.body.classList.add('entretien-en-cours');
         $('etat-recruteuse').textContent = 'En entretien avec vous';
         requestAnimationFrame(dessinerOnde);
     } catch (erreur) {
@@ -282,6 +284,7 @@ window.addEventListener('error', e => {
 });
 
 function fermerConnexion() {
+    document.body.classList.remove('entretien-en-cours');
     clearInterval(direct.minuteur);
     clearTimeout(direct.attente);
     if (direct.canal) direct.canal.close();

@@ -449,6 +449,15 @@ Retour des tests de l'apprenant (30/10), CORRIGE le jour meme :
    complet), navigateur_duree.js 11/11, route incident (connexion, propriete du CV, injection) OK, ancienne suite 119/122.
    A faire : quand l'apprenant refait un entretien sur iPhone, lire ENTRETIEN_INCIDENT dans le journal Render
    (scratchpad logs_render.py <debut> <fin> ENTRETIEN).
+5. Test telephone du site en ligne (30/10, scratchpad mobile/telephone.js : iPhone 13 clair + sombre, iPhone SE, Galaxy S8,
+   toutes les pages, debordements, boutons, barre du bas) : aucun debordement ni element hors ecran ; defauts trouves et
+   corriges : (a) PENDANT L'ENTRETIEN, Micro et Terminer etaient caches sous la barre du bas (un appui tombait sur
+   Historique / Quitter) -> classe body.entretien-en-cours qui masque la barre du bas, .commandes en position sticky en bas
+   de l'ecran (pastille de verre), onde et conversation plus compactes, .assistante plus sticky sous 880 px ;
+   (b) apres le choix du fichier, "Analyser mon CV" restait sous la barre du bas sur petit telephone -> scrollIntoView
+   dans envoi.js ; (c) boutons trop petits pour le doigt (Changer, Lire toute l'annonce, oeil, coeur) -> 44 px.
+   Reste (mineur) : sur ecran etroit, la carte du fichier ecrit "Pret a etre analyse" sur 3 lignes.
+   Verifie en local (p6test/ecran_entretien.js : boutons a l'ecran et touchables, barre masquee).
 
 ## Architecture du projet (imposee par la formation, mise en place le 29/10)
 

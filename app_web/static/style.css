@@ -126,7 +126,7 @@ h2 { font-size: clamp(1.8rem, 4vw, 2.6rem); }
 .champ input:focus { border-color: var(--accent); background: var(--surface); box-shadow: 0 0 0 4px rgba(10,108,255,.12); }
 .champ input:focus + label, .champ input:not(:placeholder-shown) + label { top: 6px; font-size: .75rem; font-weight: 600; color: var(--accent); }
 /* Oeil pour afficher ou masquer le mot de passe */
-.voir { position: absolute; right: 8px; top: 9px; width: 38px; height: 38px; border: none; border-radius: 50%; background: none;
+.voir { position: absolute; right: 6px; top: 6px; width: 44px; height: 44px; border: none; border-radius: 50%; background: none;
   color: var(--doux); cursor: pointer; display: grid; place-items: center; }
 .voir:hover { background: rgba(10,108,255,.08); color: var(--accent); }
 /* Indicateurs sous le mot de passe : solidite et confirmation */
@@ -344,7 +344,7 @@ h2 { font-size: clamp(1.8rem, 4vw, 2.6rem); }
 .fichier { display: flex; align-items: center; gap: 14px; padding: 16px; border-radius: 18px; background: var(--surface); box-shadow: var(--ombre); animation: arrive .35s ease-out; }
 .fichier .nom { font-weight: 700; word-break: break-all; }
 .fichier .pret { display: flex; align-items: center; gap: 4px; color: var(--vert); font-size: .85rem; font-weight: 600; }
-.changer { margin-left: auto; border: none; background: none; color: var(--accent); font: inherit; font-weight: 600; cursor: pointer; }
+.changer { margin-left: auto; min-height: 44px; padding: 0 6px; border: none; background: none; color: var(--accent); font: inherit; font-weight: 600; cursor: pointer; }
 
 /* ========== 9. Opportunites ========== */
 /* Bandeau du haut, facon page d'artiste : teinte de couleur et resume de l'analyse */
@@ -408,7 +408,7 @@ h2 { font-size: clamp(1.8rem, 4vw, 2.6rem); }
 .carte-favori { display: grid; grid-template-columns: 1fr auto; gap: 18px; align-items: center; }
 .carte-favori > div { min-width: 0; }   /* le contenu ne deborde jamais de la carte */
 .titre-favori { display: flex; align-items: flex-start; gap: 12px; }
-.coeur { flex: none; width: 38px; height: 38px; border-radius: 50%; border: none; cursor: pointer; display: grid; place-items: center;
+.coeur { flex: none; width: 44px; height: 44px; border-radius: 50%; border: none; cursor: pointer; display: grid; place-items: center;
   background: rgba(122,92,255,.12); color: var(--mauve); transition: transform .2s; }
 .coeur .icone { fill: currentColor; }
 .coeur:active { transform: scale(.85); }
@@ -488,7 +488,7 @@ h2 { font-size: clamp(1.8rem, 4vw, 2.6rem); }
 .annonce li { position: relative; padding: 5px 0 5px 22px; line-height: 1.55; }
 .annonce li::before { content: ""; position: absolute; left: 4px; top: 14px; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
 .annonce.repliee { max-height: 520px; overflow: hidden; -webkit-mask-image: linear-gradient(#000 75%, transparent); mask-image: linear-gradient(#000 75%, transparent); }
-.deplier { margin-top: 10px; border: none; background: none; font: inherit; font-weight: 700; color: var(--accent); cursor: pointer; }
+.deplier { margin-top: 4px; min-height: 44px; border: none; background: none; font: inherit; font-weight: 700; color: var(--accent); cursor: pointer; }
 .origine { display: inline-flex; align-items: center; gap: 6px; margin-top: 16px; color: var(--doux); font-size: .9rem; }
 /* Assistante DRH */
 .assistante { padding: 24px; position: sticky; top: 90px; scroll-margin-top: 90px; }
@@ -545,6 +545,18 @@ details p { margin: 8px 0 0; color: var(--doux); }
 .commandes span { width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; background: var(--surface); color: var(--texte); box-shadow: var(--ombre); }
 .commandes .raccrocher span { background: #e5484d; color: #fff; }
 .commandes .coupe span { background: var(--texte); color: var(--fond); }
+/* Sur telephone, pendant l'entretien : la barre du bas disparait (un appui de travers ferait quitter la page et
+   couperait l'entretien) et les boutons Micro / Terminer restent visibles en bas de l'ecran (essai du 30/10 :
+   ils etaient caches sous la barre du bas) */
+.entretien-en-cours .barre-bas { display: none; }
+@media (max-width: 880px) { .assistante { position: static; } }  /* une seule colonne : le panneau n'a plus a suivre */
+@media (max-width: 700px) {
+  .onde-vocale { height: 64px; margin: 10px 0 4px; }
+  .conversation { max-height: 150px; }
+  .commandes { position: sticky; bottom: 10px; z-index: 5; width: fit-content; margin-inline: auto; padding: 8px 24px;
+    border-radius: 999px; border: 1px solid var(--bord); background: var(--verre);
+    -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); }
+}
 /* Bulle de confirmation (favori ajoute, adresse copiee...) */
 .toast { position: fixed; left: 50%; bottom: 28px; z-index: 30; transform: translate(-50%, 20px); opacity: 0; pointer-events: none;
   display: flex; align-items: center; gap: 12px; padding: 12px 18px; border-radius: 999px; font-weight: 600; transition: all .35s; white-space: nowrap; }
