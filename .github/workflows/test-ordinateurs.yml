@@ -1,0 +1,56 @@
+# TEST TEMPORAIRE (branche test-ordinateurs, supprimee apres le test) : CVBoost se lance-t-il sur de vrais
+# ordinateurs Windows, Mac et Linux, en suivant le README ? Deux essais par machine : les versions actuelles
+# des bibliotheques (requirements.txt) et les nouvelles versions proposees (requirements-neuf.txt).
+name: Test sur plusieurs ordinateurs
+
+on:
+  push:
+    branches: [test-ordinateurs]
+
+jobs:
+  lancer:
+    name: ${{ matrix.machine.nom }} - Python ${{ matrix.machine.python }} - versions ${{ matrix.versions }}
+    runs-on: ${{ matrix.machine.os }}
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        versions: [actuelles, nouvelles]
+        machine:
+          - { nom: 'Windows', os: windows-latest, python: '3.15' }
+          - { nom: 'Windows', os: windows-latest, python: '3.12' }
+          - { nom: 'Mac Apple M1', os: macos-latest, python: '3.15' }
+          - { nom: 'Mac Intel', os: macos-15-intel, python: '3.13' }
+          - { nom: 'Ubuntu Linux', os: ubuntu-latest, python: '3.14' }
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.machine.python }}
+          allow-prereleases: true
+
+      - name: Installer comme dans le README (venv + pip install -r requirements.txt)
+        shell: bash
+        run: |
+          if [ "${{ matrix.versions }}" = nouvelles ]; then cp .github/test-ordinateurs/requirements-neuf.txt requirements.txt; fi
+          python --version
+          python -m venv venv
+          if [ -f venv/Scripts/activate ]; then . venv/Scripts/activate; else . venv/bin/activate; fi
+          debut=$(date +%s)
+          pip install --disable-pip-version-check -r requirements.txt
+          echo "INSTALLATION REUSSIE en $(( $(date +%s) - debut )) s"
+
+      - name: Lancer python run.py et l'API, puis parcours d'un nouvel utilisateur
+        shell: bash
+        run: |
+          if [ -f venv/Scripts/activate ]; then . venv/Scripts/activate; else . venv/bin/activate; fi
+          python run.py > site.log 2>&1 &
+          uvicorn api_service.main:app --port 8000 > api.log 2>&1 &
+          python .github/test-ordinateurs/parcours.py
+
+      - name: Journaux du site et de l'API
+        if: always()
+        shell: bash
+        run: |
+          echo '--- site.log'; cat site.log 2>/dev/null | tail -40
+          echo '--- api.log'; cat api.log 2>/dev/null | tail -20
